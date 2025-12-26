@@ -35,7 +35,13 @@ Makefile text eol=lf
 *.arrow filter=lfs diff=lfs merge=lfs -text
 
 # Images (if needed for reports)
+# Note: docs/ images must NOT use LFS for GitHub Pages to work
 *.png filter=lfs diff=lfs merge=lfs -text
 *.jpg filter=lfs diff=lfs merge=lfs -text
 *.jpeg filter=lfs diff=lfs merge=lfs -text
 *.pdf filter=lfs diff=lfs merge=lfs -text
+
+# Override: docs folder images as regular files (GitHub Pages requirement)
+docs/**/*.png !filter !diff !merge text=false
+docs/**/*.jpg !filter !diff !merge text=false
+docs/**/*.jpeg !filter !diff !merge text=false

@@ -24,6 +24,7 @@ analyses/_site/
 *_cache/
 *_files/
 !docs/
+!docs/*_files/
 
 # Reports (generated)
 reports/**/*.html
