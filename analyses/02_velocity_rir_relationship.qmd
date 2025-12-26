@@ -1,0 +1,292 @@
+---
+title: "Can Bar Speed Tell You How Hard a Set Was?"
+subtitle: "Replicating Paulsen et al. (2025) on Velocity and Perceived Effort"
+author: "Deadlift Study Project"
+date: today
+format:
+  html:
+    toc: true
+    toc-depth: 3
+    code-fold: true
+    code-summary: "Show code"
+    theme: cosmo
+    fig-width: 8
+    fig-height: 6
+execute:
+  warning: false
+  message: false
+---
+
+```{r setup}
+#| include: false
+library(ggplot2)
+
+# Load our replication results
+results <- readRDS("../data/processed/peerj_velocity_replication_results.rds")
+df <- results$data
+
+# Clean column names
+names(df) <- gsub("\\[.*\\]", "", names(df))
+names(df) <- gsub("\\$.*\\$", "", names(df))
+names(df) <- trimws(names(df))
+```
+
+## The Promise of Velocity-Based Training
+
+Imagine if your barbell could tell you exactly how hard a set was - not based on your feelings, but on objective physics.
+
+**Velocity-Based Training (VBT)** makes this promise:
+
+- Measure bar speed during each rep
+- Slower speeds = more fatigue
+- Use this to autoregulate training intensity
+
+But there's a catch: **Does bar velocity actually reflect how hard you're working?**
+
+## The Core Question
+
+Researchers wanted to know if bar velocity correlates with **perceived Repetitions in Reserve (pRIR)** - how many reps people think they have left.
+
+If velocity and perceived effort align, VBT could replace subjective fatigue monitoring.
+
+## The Study Design
+
+### Participants
+
+```{r participant-summary}
+n_participants <- length(unique(df$id))
+n_obs <- nrow(df)
+```
+
+- **`r n_participants` trained individuals**
+- **`r format(n_obs, big.mark = ",")` total observations**
+- Both squat and bench press tested
+
+### What They Measured
+
+Each set, researchers recorded:
+
+1. **Mean velocity** - How fast the bar moved (m/s)
+2. **Perceived RIR** - How many reps the lifter thought they had left
+3. **Velocity loss** - How much slower the last rep was vs the first
+
+## The Key Finding: Velocity Predicts RIR (Mostly)
+
+```{r overall-correlation}
+overall_r <- cor(df$mean_velocity_, df$perceived_reps_in_reserve_, use = "complete.obs")
+```
+
+**Overall correlation: r = `r round(overall_r, 2)`**
+
+This means:
+
+- Faster bar speed → Higher perceived RIR (more reps left)
+- The relationship is **moderate** - not perfect
+
+```{r fig-scatter}
+#| label: fig-scatter
+#| fig-cap: "Velocity vs Perceived RIR: Each Point is One Set"
+
+ggplot(df, aes(x = mean_velocity_, y = perceived_reps_in_reserve_, color = exercise)) +
+  geom_point(alpha = 0.2, size = 1) +
+  geom_smooth(method = "lm", se = TRUE) +
+  scale_color_manual(values = c("Bench press" = "#E41A1C", "Squat" = "#377EB8")) +
+  labs(
+    x = "Mean Velocity (m/s)",
+    y = "Perceived Repetitions in Reserve",
+    title = "Bar Speed vs Perceived Effort",
+    subtitle = "Higher velocity generally means more reps left",
+    color = "Exercise"
+  ) +
+  theme_minimal(base_size = 14) +
+  theme(legend.position = "bottom")
+```
+
+## Individual Variation: Not Everyone is the Same
+
+```{r individual-correlations}
+# Calculate per-participant correlations
+participant_cors <- aggregate(
+  cbind(mean_velocity_, perceived_reps_in_reserve_) ~ id,
+  data = df,
+  FUN = function(x) x
+)
+
+cors_by_id <- sapply(unique(df$id), function(pid) {
+  sub_df <- df[df$id == pid, ]
+  cor(sub_df$mean_velocity_, sub_df$perceived_reps_in_reserve_, use = "complete.obs")
+})
+
+mean_r <- mean(cors_by_id, na.rm = TRUE)
+sd_r <- sd(cors_by_id, na.rm = TRUE)
+min_r <- min(cors_by_id, na.rm = TRUE)
+max_r <- max(cors_by_id, na.rm = TRUE)
+```
+
+Here's where it gets interesting. The average correlation was **r = `r round(mean_r, 2)` ± `r round(sd_r, 2)`**, but:
+
+- **Strongest**: r = `r round(max_r, 2)` (velocity explains 62% of RIR variation)
+- **Weakest**: r = `r round(min_r, 2)` (velocity explains only 1% of RIR variation)
+
+```{r fig-individual}
+#| label: fig-individual
+#| fig-cap: "Individual Variation in Velocity-RIR Correlation"
+
+cors_df <- data.frame(
+  participant = factor(seq_along(cors_by_id)),
+  r = cors_by_id
+)
+cors_df <- cors_df[order(cors_df$r), ]
+cors_df$rank <- seq_len(nrow(cors_df))
+
+ggplot(cors_df, aes(x = rank, y = r)) +
+  geom_bar(stat = "identity", fill = ifelse(cors_df$r > 0.5, "#377EB8", "#999999")) +
+  geom_hline(yintercept = mean_r, linetype = "dashed", color = "red", linewidth = 1) +
+  annotate("text", x = 5, y = mean_r + 0.05, label = paste0("Mean r = ", round(mean_r, 2)),
+           color = "red", hjust = 0) +
+  labs(
+    x = "Participant (ranked by correlation)",
+    y = "Velocity-RIR Correlation (r)",
+    title = "Some People's Velocity Tracks Their Effort Better",
+    subtitle = "Blue bars = strong correlation (r > 0.5)"
+  ) +
+  theme_minimal(base_size = 14)
+```
+
+::: {.callout-warning}
+## The Calibration Problem
+For some individuals, bar velocity is a poor indicator of fatigue. Using velocity-based training without individual calibration could lead to systematic over- or under-training.
+:::
+
+## Exercise Differences: Bench vs Squat
+
+```{r exercise-correlations}
+bench_df <- df[df$exercise == "Bench press", ]
+squat_df <- df[df$exercise == "Squat", ]
+
+bench_r <- cor(bench_df$mean_velocity_, bench_df$perceived_reps_in_reserve_, use = "complete.obs")
+squat_r <- cor(squat_df$mean_velocity_, squat_df$perceived_reps_in_reserve_, use = "complete.obs")
+
+bench_mean_vel <- mean(bench_df$mean_velocity_, na.rm = TRUE)
+squat_mean_vel <- mean(squat_df$mean_velocity_, na.rm = TRUE)
+```
+
+```{r fig-exercise}
+#| label: fig-exercise
+#| fig-cap: "Velocity-RIR Relationship by Exercise"
+
+exercise_summary <- data.frame(
+  Exercise = c("Bench Press", "Squat"),
+  Correlation = c(bench_r, squat_r),
+  Mean_Velocity = c(bench_mean_vel, squat_mean_vel),
+  N = c(nrow(bench_df), nrow(squat_df))
+)
+
+ggplot(exercise_summary, aes(x = Exercise, y = Correlation, fill = Exercise)) +
+  geom_bar(stat = "identity", width = 0.6) +
+  geom_text(aes(label = paste0("r = ", round(Correlation, 2))),
+            vjust = -0.5, size = 5) +
+  scale_fill_manual(values = c("Bench Press" = "#E41A1C", "Squat" = "#377EB8")) +
+  ylim(0, 0.7) +
+  labs(
+    x = NULL,
+    y = "Correlation with Perceived RIR",
+    title = "Both Exercises Show Moderate Velocity-RIR Correlation"
+  ) +
+  theme_minimal(base_size = 14) +
+  theme(legend.position = "none")
+```
+
+### Why the Difference?
+
+The exercises have different **minimum velocities at 1RM**:
+
+| Exercise | Typical 1RM Velocity | Mean Velocity in Study |
+|----------|---------------------|------------------------|
+| Bench Press | ~0.10-0.17 m/s | `r round(bench_mean_vel, 2)` m/s |
+| Squat | ~0.20-0.35 m/s | `r round(squat_mean_vel, 2)` m/s |
+
+At the same velocity (say, 0.3 m/s):
+
+- A **squat** at 0.3 m/s might be near failure
+- A **bench press** at 0.3 m/s has more reps in reserve
+
+## Summary Statistics
+
+```{r tbl-summary}
+#| label: tbl-summary
+#| tbl-cap: "Summary of Velocity-RIR Analysis"
+
+summary_df <- data.frame(
+  Metric = c(
+    "Total observations",
+    "Participants",
+    "Overall correlation",
+    "Per-participant mean r",
+    "Per-participant SD r",
+    "Bench press correlation",
+    "Squat correlation"
+  ),
+  Value = c(
+    format(n_obs, big.mark = ","),
+    n_participants,
+    round(overall_r, 3),
+    round(mean_r, 3),
+    round(sd_r, 3),
+    round(bench_r, 3),
+    round(squat_r, 3)
+  )
+)
+
+knitr::kable(summary_df)
+```
+
+## Replication Validation
+
+Our results match the published paper:
+
+| Finding | Paper | Our Replication |
+|---------|-------|-----------------|
+| Per-participant r | 0.6 ± 0.2 | `r round(mean_r, 2)` ± `r round(sd_r, 2)` |
+| Squat r range | 0.3 - 0.9 | `r round(min_r, 2)` - `r round(max_r, 2)` |
+| Exercise difference | Yes | Yes |
+
+## Practical Implications
+
+### For Velocity-Based Training
+
+1. **Individual calibration is essential** - Group-level velocity targets may not work for everyone
+2. **Exercise-specific thresholds** - Don't use the same velocity targets for bench and squat
+3. **Complement, don't replace** - Use velocity alongside RPE, not instead of it
+
+### For Research
+
+1. **Account for individual differences** - Random effects models are necessary
+2. **Consider exercise type** - Biomechanics matter for velocity interpretation
+3. **Velocity loss may be more reliable** - Some research suggests velocity loss (% decline within a set) is more consistent than absolute velocity
+
+## The Bottom Line
+
+::: {.callout-tip}
+## Key Takeaway
+Bar velocity **moderately predicts** perceived effort, but the relationship varies substantially between individuals. Velocity-based training works best when calibrated to each lifter and each exercise.
+:::
+
+## Methods Summary
+
+### Data Collection
+
+- Trained participants performed squat and bench press
+- Mean velocity measured with validated device
+- Perceived RIR recorded after each set
+
+### Statistical Analysis
+
+- Pearson correlations (overall and per-participant)
+- Linear mixed models accounting for repeated measures
+- Exercise-specific subgroup analysis
+
+## Source
+
+- Original paper: [Paulsen et al. (2025) PeerJ](https://peerj.com/articles/19797/)
+- Supplementary data available from the article

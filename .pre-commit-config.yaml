@@ -1,0 +1,100 @@
+# .pre-commit-config.yaml
+# Pre-commit hooks for R project quality assurance
+# Install: pip install pre-commit && pre-commit install
+
+repos:
+  # R-specific hooks
+  - repo: https://github.com/lorenzwalthert/precommit
+    rev: v0.4.3
+    hooks:
+      # Style R code with styler
+      - id: style-files
+        args: [--style_pkg=styler, --style_fun=tidyverse_style]
+        exclude: renv/
+
+      # Lint R code with lintr
+      - id: lintr
+        exclude: renv/
+
+      # Check parsable R code
+      - id: parsable-R
+        exclude: renv/
+
+      # No browser() statements
+      - id: no-browser-statement
+        exclude: renv/
+
+      # No debug() statements
+      - id: no-debug-statement
+        exclude: renv/
+
+      # Check package dependencies
+      - id: deps-in-desc
+        exclude: renv/
+
+      # Render README.Rmd if it exists
+      - id: readme-rmd-rendered
+        exclude: renv/
+
+      # Spell check
+      - id: spell-check
+        exclude: |
+          (?x)^(
+            renv/|
+            data/|
+            .*\.csv$|
+            .*\.xlsx$|
+            .*\.parquet$
+          )
+
+  # General hooks
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.6.0
+    hooks:
+      # Trailing whitespace
+      - id: trailing-whitespace
+        exclude: |
+          (?x)^(
+            renv/|
+            .*\.Rd$
+          )
+
+      # End of file fixer
+      - id: end-of-file-fixer
+        exclude: renv/
+
+      # Check YAML syntax
+      - id: check-yaml
+        args: [--allow-multiple-documents]
+
+      # Check JSON syntax
+      - id: check-json
+
+      # Check for large files
+      - id: check-added-large-files
+        args: [--maxkb=500]
+        exclude: |
+          (?x)^(
+            data/|
+            .*\.xlsx$|
+            .*\.parquet$
+          )
+
+      # Prevent committing to main
+      - id: no-commit-to-branch
+        args: [--branch, main, --branch, master]
+
+      # Check merge conflicts
+      - id: check-merge-conflict
+
+  # YAML formatting
+  - repo: https://github.com/macisamuele/language-formatters-pre-commit-hooks
+    rev: v2.14.0
+    hooks:
+      - id: pretty-format-yaml
+        args: [--autofix, --indent, '2']
+        exclude: |
+          (?x)^(
+            renv/|
+            _quarto.yml$
+          )

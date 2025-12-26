@@ -1,0 +1,70 @@
+# config/studies/hypertrophy_rir.yml
+# Configuration for Hypertrophy RIR Meta-Analysis
+
+hypertrophy_rir:
+  inherits: default
+
+  # Study-specific settings
+  study:
+    name: "Hypertrophy Outcomes by RIR"
+    hypothesis: "Lower RIR (closer to failure) produces greater muscle hypertrophy"
+    outcome_type: "hypertrophy"
+
+  # Filter data to hypertrophy outcomes only
+  data:
+    filter:
+      outcome_type: "hypertrophy"
+
+  # Primary analysis uses all data
+  primary_analysis:
+    rir_range:
+      min: 0
+      max: null
+
+  # Secondary analysis restricts to RIR <= 10
+  secondary_analysis:
+    rir_range:
+      min: 0
+      max: 10
+
+  # Hypertrophy-specific measurement considerations
+  measurement:
+    types:
+      - muscle_thickness
+      - cross_sectional_area
+      - lean_body_mass
+      - fiber_area
+    standardization: "baseline_sd"
+
+  # Model selection criteria
+  model_selection:
+    criterion: "BIC"
+    compare_random_structures: true
+    candidate_random:
+      - "~1|study"
+      - "~1|study/group"
+      - "~1|study/group/obs"
+
+  # Publication bias settings
+  publication_bias:
+    methods:
+      - funnel_plot
+      - egger_test
+      - pet_peese
+      - selection_model
+      - robma
+    trim_and_fill: true
+
+  # Sensitivity analyses
+  sensitivity:
+    leave_one_out: true
+    influence_diagnostics: true
+    measurement_type_moderator: true
+    correlation_sensitivity:
+      values: [0.3, 0.5, 0.7, 0.9]
+
+  # Reporting overrides
+  reporting:
+    forest_plot:
+      title: "Forest Plot: Hypertrophy Outcomes by RIR"
+      x_label: "Standardized Mean Difference (Hedge's g)"

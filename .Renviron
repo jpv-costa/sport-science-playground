@@ -1,0 +1,29 @@
+# .Renviron
+# Environment variables for Deadlift Study Meta-Analysis
+# IMPORTANT: Do not commit sensitive values to version control
+
+# Configuration environment (default, development, production)
+R_CONFIG_ACTIVE=default
+
+# Logging level (TRACE, DEBUG, INFO, WARN, ERROR, FATAL)
+DEADLIFT_LOG_LEVEL=INFO
+
+# Number of parallel workers for targets
+DEADLIFT_WORKERS=4
+
+# Memory limit for targets (in MB)
+DEADLIFT_MEMORY_LIMIT=4096
+
+# Random seed (can be overridden per analysis)
+DEADLIFT_SEED=42
+
+# Data paths (relative to project root)
+DEADLIFT_DATA_RAW=data/raw
+DEADLIFT_DATA_PROCESSED=data/processed
+DEADLIFT_REPORTS=reports
+
+# Optional: MLflow tracking URI (uncomment if using MLflow)
+# MLFLOW_TRACKING_URI=http://localhost:5000
+
+# Optional: DVC remote storage (uncomment if using DVC)
+# DVC_REMOTE=s3://your-bucket/deadlift-study

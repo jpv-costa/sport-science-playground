@@ -1,0 +1,37 @@
+project:
+  type: website
+  output-dir: ../docs
+
+website:
+  title: "RIR & Training Outcomes"
+  navbar:
+    left:
+      - href: index.qmd
+        text: Home
+      - text: "Replications"
+        menu:
+          - href: 01_pelland_meta_regression.qmd
+            text: "Pelland Meta-Regression"
+          - href: 02_velocity_rir_relationship.qmd
+            text: "Velocity-RIR Relationship"
+          - href: 03_rir_velocity_modeling.qmd
+            text: "RIR-Velocity Modeling (Squat)"
+          - href: 04_deadlift_rir_velocity.qmd
+            text: "Deadlift RIR-Velocity"
+          - href: 05_deadlift_lmm_analysis.qmd
+            text: "LMM & Velocity Tables"
+
+format:
+  html:
+    theme: cosmo
+    toc: true
+    toc-depth: 3
+    code-fold: true
+    code-summary: "Show code"
+
+execute:
+  freeze: auto
+  warning: false
+  message: false
+
+bibliography: references.bib

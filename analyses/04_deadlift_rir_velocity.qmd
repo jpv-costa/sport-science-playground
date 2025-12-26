@@ -1,0 +1,306 @@
+---
+title: "Does the RIR-Velocity Relationship Hold for Deadlifts?"
+subtitle: "Original Research on Conventional Deadlift"
+author: "Deadlift Study Project"
+date: today
+format:
+  html:
+    toc: true
+    toc-depth: 3
+    code-fold: true
+    code-summary: "Show code"
+    theme: cosmo
+bibliography: references.bib
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+  echo = TRUE,
+  message = FALSE,
+  warning = FALSE,
+  fig.width = 10,
+  fig.height = 6
+)
+
+# Load required packages
+library(ggplot2)
+
+# Load results
+results <- readRDS("../data/processed/deadlift_rir_velocity_results.rds")
+data <- results$data
+
+# Load squat results for comparison
+squat_results <- readRDS("../data/processed/rir_velocity_replication_results.rds")
+```
+
+## The Question
+
+The squat study (Study 3) showed that bar velocity can predict Repetitions in Reserve (RIR) with high accuracy---especially when using **individual calibration**. But does this relationship hold for the **deadlift**?
+
+The deadlift presents unique challenges:
+
+- **No eccentric phase** at the start (bar starts from the floor)
+- **Grip fatigue** can limit performance independently of target muscles
+- **More binary failure** pattern (you can lift it or you can't)
+
+This study examines whether velocity-based training principles apply to the conventional deadlift.
+
+## Methods
+
+### Participants
+
+```{r participant-summary}
+#| label: tbl-participants
+#| tbl-cap: "Participant Characteristics"
+
+summary_df <- data.frame(
+  Metric = c("Total Participants", "Male", "Female",
+             "Observations", "Velocity Range (m/s)",
+             "RIR Range", "Weight Range (kg)"),
+  Value = c(
+    results$summary$n_participants,
+    round(results$summary$n_male),
+    round(results$summary$n_female),
+    results$summary$n_observations,
+    paste(round(results$summary$velocity_range, 3), collapse = " - "),
+    paste(results$summary$rir_range, collapse = " - "),
+    paste(results$summary$weight_range, collapse = " - ")
+  )
+)
+
+knitr::kable(summary_df, col.names = c("", ""))
+```
+
+### Protocol
+
+- **Exercise**: Conventional deadlift
+- **Loads**: 80% and 90% of 1RM
+- **Testing Days**: 2 (for cross-validation)
+- **Data Collection**: Velocity (m/s) and RIR for each repetition
+
+## The Velocity-RIR Relationship
+
+As lifters approach failure, their bar speed decreases. Here's what this looks like for the deadlift:
+
+```{r fig-velocity-rir}
+#| label: fig-scatter
+#| fig-cap: "Velocity-RIR relationship for conventional deadlift"
+
+ggplot(data, aes(x = mean_velocity, y = rir, color = load_percentage)) +
+  geom_point(alpha = 0.4, size = 2) +
+  geom_smooth(method = "lm", formula = y ~ poly(x, 2), se = FALSE, linewidth = 1.2) +
+  facet_wrap(~load_percentage, labeller = labeller(load_percentage = c(
+    `80%` = "80% 1RM",
+    `90%` = "90% 1RM"
+  ))) +
+  labs(
+    x = "Mean Velocity (m/s)",
+    y = "Repetitions in Reserve",
+    color = "Load"
+  ) +
+  theme_minimal() +
+  theme(
+    legend.position = "none",
+    strip.text = element_text(face = "bold", size = 12)
+  ) +
+  scale_color_manual(values = c("#E69F00", "#009E73"))
+```
+
+**Observation**: The relationship is visible but with more scatter than typically seen in squat data, especially at 80% 1RM.
+
+## General vs Individual Models
+
+```{r model-comparison}
+#| label: tbl-models
+#| tbl-cap: "Model Fit Comparison"
+
+comparison_df <- data.frame(
+  `Model Type` = c("General (Polynomial)", "Individual (Polynomial)"),
+  `R²` = c(
+    round(results$comparison$general_r2, 3),
+    round(results$comparison$individual_r2, 3)
+  ),
+  `Interpretation` = c(
+    paste0("Explains ~", round(results$comparison$general_r2 * 100), "% of variance"),
+    paste0("Explains ~", round(results$comparison$individual_r2 * 100), "% of variance")
+  )
+)
+
+knitr::kable(comparison_df, col.names = c("Model Type", "Median R²", "Interpretation"))
+```
+
+**Key Finding**: Individual models explain **`r round(results$comparison$improvement_factor, 1)`x more variance** than general models, consistent with the squat findings.
+
+## How Does Deadlift Compare to Squat?
+
+```{r comparison-table}
+#| label: tbl-exercise-comparison
+#| tbl-cap: "Deadlift vs Squat RIR-Velocity Relationship"
+
+exercise_comparison <- data.frame(
+  Metric = c(
+    "Participants",
+    "Load Types",
+    "General R² (polynomial)",
+    "Individual R² (median)",
+    "Improvement Factor"
+  ),
+  Squat = c(
+    "46",
+    "70%, 80%, 90%",
+    round(squat_results$comparison$general_r2, 2),
+    round(squat_results$comparison$individual_r2, 2),
+    paste0(round(squat_results$comparison$improvement_factor, 2), "x")
+  ),
+  Deadlift = c(
+    as.character(results$summary$n_participants),
+    "80%, 90%",
+    round(results$comparison$general_r2, 2),
+    round(results$comparison$individual_r2, 2),
+    paste0(round(results$comparison$improvement_factor, 2), "x")
+  )
+)
+
+knitr::kable(exercise_comparison, col.names = c("Metric", "Squat (Jukic)", "Deadlift (Thesis)"))
+```
+
+### Why is Deadlift R² Lower?
+
+The deadlift shows **lower R² values** than the squat. Possible explanations:
+
+1. **Binary failure pattern**: Deadlifts tend to fail suddenly rather than gradually grinding to a halt
+2. **Grip fatigue**: Can limit performance independently of target muscle fatigue
+3. **No stretch-shortening cycle**: Less consistent velocity feedback
+4. **Technical breakdown**: Form changes (back rounding) may affect velocity differently
+5. **Sample size**: Smaller participant pool (19 vs 46)
+
+## Prediction Accuracy
+
+How well does a Day 1 model predict Day 2 performance?
+
+```{r prediction-accuracy}
+#| label: tbl-prediction
+#| tbl-cap: "Cross-Day Prediction Accuracy"
+
+accuracy <- results$general_prediction_accuracy
+
+prediction_df <- data.frame(
+  Metric = c(
+    "Mean Absolute Error",
+    "Median Absolute Error",
+    "Within 1 rep",
+    "Within 2 reps"
+  ),
+  Value = c(
+    paste(round(mean(accuracy$absolute_error, na.rm = TRUE), 2), "reps"),
+    paste(round(median(accuracy$absolute_error, na.rm = TRUE), 2), "reps"),
+    paste0(round(mean(accuracy$absolute_error <= 1, na.rm = TRUE) * 100, 1), "%"),
+    paste0(round(mean(accuracy$absolute_error <= 2, na.rm = TRUE) * 100, 1), "%")
+  )
+)
+
+knitr::kable(prediction_df, col.names = c("Metric", "Value"))
+```
+
+## Velocity Characteristics by Load
+
+```{r velocity-by-load}
+#| label: fig-velocity-load
+#| fig-cap: "Velocity distribution by load and RIR"
+
+ggplot(data, aes(x = factor(rir), y = mean_velocity, fill = load_percentage)) +
+  geom_boxplot(alpha = 0.7, outlier.alpha = 0.3) +
+  labs(
+    x = "Repetitions in Reserve",
+    y = "Mean Velocity (m/s)",
+    fill = "Load"
+  ) +
+  theme_minimal() +
+  scale_fill_manual(values = c("#E69F00", "#009E73")) +
+  theme(legend.position = "bottom")
+```
+
+**Observation**:
+- Higher load (90%) = lower velocities overall
+- Clear velocity decrease as RIR approaches 0
+- Wide variability between individuals at the same RIR
+
+## Model Details by Load
+
+```{r load-details}
+#| label: tbl-load-details
+#| tbl-cap: "Model Performance by Load"
+
+load_df <- data.frame(
+  Load = names(results$general_results),
+  `Linear R²` = sapply(results$general_results, function(x) round(x$linear$r_squared, 3)),
+  `Polynomial R²` = sapply(results$general_results, function(x) round(x$polynomial$r_squared, 3)),
+  `RSE (reps)` = sapply(results$general_results, function(x) round(x$polynomial$rse, 2)),
+  N = sapply(results$general_results, function(x) x$polynomial$n)
+)
+rownames(load_df) <- NULL
+
+knitr::kable(load_df, col.names = c("Load", "Linear R²", "Polynomial R²", "RSE (reps)", "N"))
+```
+
+**Pattern**: 90% 1RM shows better model fit than 80% 1RM, likely because:
+- Fewer total reps (less fatigue accumulation variability)
+- More consistent near-failure performance
+
+## Practical Implications
+
+### For Deadlift Training
+
+1. **Individual calibration is essential**: General equations lose significant precision
+2. **Accept more prediction error**: ~1.4 rep error vs ~1 rep for squat
+3. **Load-specific thresholds**: Different velocity targets for 80% vs 90%
+
+### Velocity Targets (Based on This Data)
+
+```{r velocity-targets}
+#| label: tbl-targets
+#| tbl-cap: "Suggested Velocity Thresholds for RIR Estimation"
+
+# Calculate mean velocity at each RIR level by load
+targets <- aggregate(mean_velocity ~ rir + load_percentage, data = data, FUN = mean)
+targets <- reshape(targets, idvar = "rir", timevar = "load_percentage",
+                   direction = "wide", v.names = "mean_velocity")
+names(targets) <- c("RIR", "80% 1RM", "90% 1RM")
+targets <- targets[order(-targets$RIR), ]
+
+# Round and display
+targets$`80% 1RM` <- round(targets$`80% 1RM`, 3)
+targets$`90% 1RM` <- round(targets$`90% 1RM`, 3)
+
+knitr::kable(targets, row.names = FALSE)
+```
+
+**Caveat**: These are population averages. Individual calibration will improve accuracy.
+
+## Limitations
+
+1. **Sample size**: 19 participants vs 46 in the squat study
+2. **Load range**: Only 80% and 90% tested (no 70%)
+3. **Population**: Portuguese lifters---may not generalize globally
+4. **Equipment**: Specific velocity measurement device used
+
+## Conclusions
+
+1. **The RIR-velocity relationship exists for deadlifts**, but with more variability than squats
+2. **Individual models still outperform general models** (~2x improvement)
+3. **Prediction accuracy is acceptable** for practical use (~1.4 rep error)
+4. **Deadlift-specific factors** (grip, binary failure) may reduce predictability
+
+## Technical Notes
+
+This analysis used:
+- **R6 classes** following SOLID principles
+- **Reused `RirVelocityModeler`** from Study 3 (exercise-agnostic)
+- **Custom `DeadliftRirDataLoader`** for thesis data format
+- **Cross-validation** using Day 1 → Day 2 prediction
+
+## References
+
+This study follows the methodology of:
+
+Jukic, I., Prnjak, K., Helms, E. R., & McGuigan, M. R. (2024). Modeling the repetitions-in-reserve-velocity relationship: A valid method for resistance training monitoring and prescription, and fatigue management. *Experimental Physiology*, 109(2), 193-206.

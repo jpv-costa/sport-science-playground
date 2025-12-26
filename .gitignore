@@ -1,0 +1,74 @@
+# R specific
+.Rproj.user/
+.Rhistory
+.RData
+.Ruserdata
+*.Rproj
+
+# renv
+renv/library/
+renv/local/
+renv/cellar/
+renv/lock/
+renv/python/
+renv/sandbox/
+renv/staging/
+
+# targets
+_targets/
+_targets_packages.R
+
+# Quarto
+/.quarto/
+analyses/_site/
+*_cache/
+*_files/
+!docs/
+
+# Reports (generated)
+reports/**/*.html
+reports/**/*.pdf
+reports/**/*.docx
+!reports/.gitkeep
+
+# Data (large files - use DVC)
+data/raw/*.xlsx
+data/raw/*.csv
+data/processed/*.parquet
+data/processed/*.rds
+data/external/
+!data/**/.gitkeep
+
+# Logs
+logs/
+*.log
+
+# Environment
+.Renviron.local
+.env
+.env.local
+
+# IDE
+.vscode/
+.idea/
+*.sublime-*
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Temporary files
+*.tmp
+*.temp
+*~
+
+# Test artifacts
+tests/testthat/_snaps/
+
+# Coverage
+covr.html
+coverage.json
+
+# DVC
+/dvc.lock
+*.dvc

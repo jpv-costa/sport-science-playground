@@ -1,0 +1,142 @@
+# config/default.yml
+# Deadlift Study Meta-Analysis Configuration
+
+default:
+  # Project metadata
+  project:
+    name: "Deadlift Study Meta-Analysis"
+    version: "1.0.0"
+    description: "Meta-analysis of RIR proximity to failure and resistance training outcomes"
+
+  # Data settings
+  data:
+    raw_path: "data/raw"
+    processed_path: "data/processed"
+    primary_dataset: "pelland_dataset.xlsx"
+    output_format: "parquet"
+
+  # Effect size calculation
+  effect_size:
+    type: "smcr"                    # smcr (Hedge's g) or romc (log response ratio)
+    correlation_method: "fisher_z"   # Method for pre-post correlation imputation
+    default_correlation: 0.5         # Default r when not reported
+    hedges_correction: true          # Apply small sample bias correction
+
+  # Model configuration
+  models:
+    frequentist:
+      method: "REML"                 # Estimation method
+      test_type: "knha"              # Knapp-Hartung adjustment
+      random_structure: "~1|study/group/obs"
+      robust_variance: true          # Use robust variance estimation
+      sparse: true                   # Use sparse matrices for efficiency
+
+    bayesian:
+      backend: "brms"                # brms or bayesmeta
+      chains: 4
+      iterations: 4000
+      warmup: 1000
+      thin: 1
+      adapt_delta: 0.95
+      max_treedepth: 15
+
+  # Functional forms for dose-response (RIR)
+  dose_response:
+    forms:
+      - name: "linear"
+        formula: "~ rir"
+      - name: "quadratic"
+        formula: "~ rir + I(rir^2)"
+      - name: "log"
+        formula: "~ log(rir + 1)"
+      - name: "sqrt"
+        formula: "~ sqrt(rir)"
+      - name: "inverse"
+        formula: "~ I(1/(rir + 1))"
+      - name: "exponential"
+        formula: "~ I(exp(-rir/5))"
+
+  # Data validation rules
+  validation:
+    required_columns:
+      - study_id
+      - author
+      - year
+      - rir
+      - outcome_type
+      - mean_pre
+      - mean_post
+      - sd_pre
+      - n
+    value_ranges:
+      rir:
+        min: 0
+        max: 20
+      year:
+        min: 1980
+        max: 2025
+      n:
+        min: 5
+        max: 1000
+    outlier_detection:
+      method: "z_score"
+      threshold: 3.0
+
+  # Moderator variables
+  moderators:
+    primary:
+      - rir
+    secondary:
+      - training_status
+      - exercise_type
+      - measurement_method
+      - sex
+      - age_group
+
+  # Reporting settings
+  reporting:
+    confidence_level: 0.95
+    prediction_interval: true
+    decimal_places: 3
+    forest_plot:
+      theme: "minimal"
+      show_weights: true
+      show_heterogeneity: true
+
+  # Logging configuration
+  logging:
+    level: "info"
+    file: "logs/analysis.log"
+
+  # Reproducibility
+  random:
+    seed: 42
+
+# Debug mode - more verbose output, fewer iterations
+debug:
+  inherits: default
+  logging:
+    level: "debug"
+  models:
+    bayesian:
+      chains: 2
+      iterations: 500
+      warmup: 200
+
+# Quick mode - fast iterations for development/testing
+quick:
+  inherits: default
+  models:
+    bayesian:
+      chains: 2
+      iterations: 1000
+      warmup: 500
+
+# Full mode - thorough analysis for final results
+full:
+  inherits: default
+  models:
+    bayesian:
+      chains: 8
+      iterations: 10000
+      warmup: 2500

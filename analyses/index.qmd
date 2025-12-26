@@ -1,0 +1,228 @@
+---
+title: "RIR & Training Outcomes: A Research Compendium"
+subtitle: "Understanding how training intensity affects strength and muscle growth"
+author: "Deadlift Study Project"
+date: today
+format:
+  html:
+    toc: true
+    toc-depth: 2
+    theme: cosmo
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, message = FALSE, warning = FALSE)
+
+# Load results for inline reporting
+pelland_results <- readRDS("../data/processed/pelland_replication_results_refactored.rds")
+velocity_results <- readRDS("../data/processed/peerj_velocity_replication_results_refactored.rds")
+rir_velocity_results <- readRDS("../data/processed/rir_velocity_replication_results.rds")
+deadlift_results <- readRDS("../data/processed/deadlift_rir_velocity_results.rds")
+lmm_results <- tryCatch(readRDS("../data/processed/deadlift_lmm_results.rds"), error = function(e) NULL)
+```
+
+## What This Project Investigates
+
+This research compendium explores a fundamental question in resistance training:
+
+> **How close to failure should you train for optimal results?**
+
+We address this through:
+
+1. **Replications** of key published studies
+2. **Meta-analysis** of existing literature
+3. **Practical guidance** for training decisions
+
+## Key Concepts
+
+### Repetitions in Reserve (RIR)
+
+RIR measures how close you are to muscular failure:
+
+| RIR | Description | Example |
+|-----|-------------|---------|
+| 0 | Complete failure | Couldn't complete another rep |
+| 1-2 | Near failure | 1-2 reps left before failure |
+| 3-4 | Moderate intensity | Noticeable fatigue but not close to failure |
+| 5+ | Low intensity | Could do many more reps |
+
+### Velocity-Based Training (VBT)
+
+An objective approach to measuring effort using bar speed:
+
+- **Faster velocity** = More reps remaining
+- **Slower velocity** = Closer to failure
+- **Velocity loss** = Fatigue accumulation within a set
+
+## Completed Analyses
+
+### 1. Does Training to Failure Matter?
+
+**[Pelland et al. (2024) Replication](01_pelland_meta_regression.qmd)**
+
+A meta-regression examining RIR and training outcomes across strength and hypertrophy studies.
+
+**Key Finding**: Training closer to failure benefits **hypertrophy** but not **strength**.
+
+| Outcome | RIR Effect | Significant? |
+|---------|-----------|--------------|
+| Strength | ~0 | No |
+| Hypertrophy | Negative | Yes |
+
+---
+
+### 2. Can Bar Speed Predict Effort?
+
+**[Paulsen et al. (2025) Replication](02_velocity_rir_relationship.qmd)**
+
+Analysis of `r format(nrow(velocity_results$data), big.mark = ",")` observations examining velocity-RIR relationships.
+
+**Key Finding**: Velocity **moderately predicts** perceived effort (r ≈ 0.5), but varies substantially between individuals.
+
+| Metric | Value |
+|--------|-------|
+| Overall correlation | r = 0.45 |
+| Individual range | r = 0.09 to 0.79 |
+
+---
+
+### 3. Can We Model the RIR-Velocity Relationship?
+
+**[Jukic et al. (2024) Replication](03_rir_velocity_modeling.qmd)**
+
+Analysis of `r format(nrow(rir_velocity_results$data), big.mark = ",")` observations examining whether individual RIR-velocity models outperform general equations.
+
+**Key Finding**: Individual models explain **~2x more variance** than general models (R² = 0.88 vs 0.50).
+
+| Model Type | Median R² | Implication |
+|------------|-----------|-------------|
+| General | 0.50 | One-size-fits-all loses precision |
+| Individual | 0.88 | Personalization is essential |
+
+---
+
+### 4. Does This Work for Deadlifts?
+
+**[Deadlift RIR-Velocity Study](04_deadlift_rir_velocity.qmd)**
+
+Original thesis research applying the same methodology to **conventional deadlift** with `r format(nrow(deadlift_results$data), big.mark = ",")` observations from `r deadlift_results$summary$n_participants` participants.
+
+**Key Finding**: The RIR-velocity relationship holds for deadlifts, but with **lower predictability** than squats.
+
+| Exercise | General R² | Individual R² | Improvement |
+|----------|-----------|--------------|-------------|
+| Squat (Study 3) | 0.50 | 0.88 | 1.8x |
+| Deadlift (Study 4) | `r round(deadlift_results$comparison$general_r2, 2)` | `r round(deadlift_results$comparison$individual_r2, 2)` | `r round(deadlift_results$comparison$improvement_factor, 1)`x |
+
+**Why lower for deadlifts?** Binary failure patterns, grip fatigue, and lack of stretch-shortening cycle.
+
+---
+
+### 5. Practical Velocity Tables for Deadlift Training
+
+**[LMM Analysis & Velocity Stop Tables](05_deadlift_lmm_analysis.qmd)**
+
+Linear Mixed Effects analysis extending Study 4 with practical velocity thresholds for training.
+
+```{r lmm-summary, results='asis'}
+if (!is.null(lmm_results)) {
+  cat("**Key Finding**: ")
+  if (lmm_results$load_importance_result$recommendation == "global") {
+    cat("Load percentage does NOT significantly affect the velocity-RIR relationship. A **single global velocity table** is sufficient.\n\n")
+  } else {
+    cat("Load percentage significantly affects the velocity-RIR relationship. **Load-specific tables** are recommended.\n\n")
+  }
+
+  cat("| Table Type | MAE | Use Case |\n")
+  cat("|------------|-----|----------|\n")
+  cat(sprintf("| General | %.4f m/s | Quick reference, new athletes |\n",
+              lmm_results$individual_comparison$global_mae))
+  cat(sprintf("| Individual | %.4f m/s | Established athletes with calibration |\n",
+              lmm_results$individual_comparison$individual_mae))
+  cat(sprintf("\n**Improvement from individualization**: %.1f%%\n",
+              lmm_results$individual_comparison$mae_improvement_pct))
+} else {
+  cat("*Results will be available after running `make analyze-lmm`*\n")
+}
+```
+
+---
+
+## Practical Implications
+
+### For Strength Training
+
+Based on the Pelland meta-regression:
+
+- **Stop 2-3 reps short** of failure on most sets
+- Failure training is not necessary for strength gains
+- This allows higher training frequency and volume
+
+### For Muscle Building
+
+Based on the Pelland meta-regression:
+
+- **Train closer to failure** (0-2 RIR) for optimal hypertrophy
+- The relationship is statistically significant but effect size is modest
+- Balance against recovery demands
+
+### For Velocity-Based Training
+
+Based on the Paulsen analysis:
+
+- **Individual calibration is essential** - Group averages don't work for everyone
+- **Exercise-specific targets** - Bench press and squat need different thresholds
+- **Use as complement** - Velocity + RPE together is better than either alone
+
+### For Deadlift Training
+
+Based on Study 4:
+
+- **VBT works, but with caveats** - Expect ~1.4 rep prediction error (vs ~1 rep for squat)
+- **Individual calibration still essential** - 2x improvement over general equations
+- **Load-specific thresholds** - Different velocity targets for 80% vs 90% 1RM
+- **Consider grip fatigue** - May affect velocity independently of target muscle fatigue
+
+## Data Sources
+
+| Study | Data | Code |
+|-------|------|------|
+| Pelland et al. (2024) | [OSF Repository](https://osf.io/7knsj/) | Replicated |
+| Paulsen et al. (2025) | [PeerJ Supplement](https://peerj.com/articles/19797/) | Replicated |
+| Jukic et al. (2024) | [OSF Repository](https://osf.io/5ejcp/) | Replicated |
+| Deadlift Thesis (2024) | Original Data | Original Research |
+
+## Methodology
+
+All analyses use:
+
+- **R** for statistical computing
+- **metafor** for meta-analysis models
+- **Quarto** for reproducible reports
+- **renv** for dependency management
+
+### Code Architecture
+
+The project follows SOLID principles with:
+
+- `R/domain/` - Domain objects (EffectSize, TreatmentGroup)
+- `R/calculators/` - Effect size calculation services
+- `scripts/` - Replication scripts
+- `analyses/` - Quarto reports
+
+## Planned Analyses
+
+| Analysis | Description | Status |
+|----------|-------------|--------|
+| Sensitivity Analysis | Robustness checks | Planned |
+| Publication Bias | Bias assessment | Planned |
+| ~~Deadlift-Specific~~ | ~~Application to deadlift training~~ | **Completed** (Study 4) |
+| ~~LMM & Velocity Tables~~ | ~~Practical velocity thresholds~~ | **Completed** (Study 5) |
+
+## References
+
+- Robinson ZH, Pelland JC, Zourdos MC, et al. (2024). Exploring the Dose-Response Relationship Between Estimated Resistance Training Proximity to Failure, Strength Gain, and Muscle Hypertrophy. *Sports Medicine*, 54, 2209-2231.
+
+- Paulsen K, Seynnes O, van den Tillaar R. (2025). Exercise type, training load, velocity loss threshold, and sets affect the relationship between lifting velocity and perceived repetitions in reserve. *PeerJ*, 13:e19797.
+
+- Jukic I, Prnjak K, Helms ER, McGuigan MR. (2024). Modeling the repetitions-in-reserve-velocity relationship: A valid method for resistance training monitoring and prescription, and fatigue management. *Experimental Physiology*, 109(2), 193-206.

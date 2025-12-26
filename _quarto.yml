@@ -1,0 +1,77 @@
+project:
+  type: website
+  output-dir: reports
+  render:
+    - analyses/*.qmd
+
+website:
+  title: "Deadlift Study: RIR & Training Outcomes Meta-Analysis"
+  description: "Meta-analysis examining the relationship between Repetitions in Reserve (RIR) and strength/hypertrophy outcomes"
+  navbar:
+    background: primary
+    left:
+      - text: "Home"
+        file: analyses/index.qmd
+      - text: "Primary Analysis"
+        file: analyses/01_primary_analysis.qmd
+      - text: "Sensitivity"
+        file: analyses/02_sensitivity_analysis.qmd
+      - text: "Publication Bias"
+        file: analyses/03_publication_bias.qmd
+      - text: "Bayesian"
+        file: analyses/04_bayesian_analysis.qmd
+    right:
+      - icon: github
+        href: https://github.com/your-repo/deadlift-study
+
+format:
+  html:
+    theme:
+      light: flatly
+      dark: darkly
+    toc: true
+    toc-depth: 3
+    toc-location: right
+    code-fold: true
+    code-summary: "Show code"
+    code-tools: true
+    code-line-numbers: true
+    fig-width: 10
+    fig-height: 7
+    fig-dpi: 300
+    fig-format: svg
+    df-print: paged
+    smooth-scroll: true
+    link-external-icon: true
+    link-external-newwindow: true
+
+execute:
+  freeze: auto
+  cache: true
+  warning: false
+  message: false
+  echo: true
+
+# Default parameters for parameterized reports
+params:
+  outcome: "strength"
+  seed: 42
+  confidence_level: 0.95
+  config_file: "config/default.yml"
+
+# Bibliography and citations
+bibliography: references.bib
+csl: apa.csl
+
+# Crossref for figures and tables
+crossref:
+  fig-prefix: "Figure"
+  tbl-prefix: "Table"
+  eq-prefix: "Equation"
+
+# Code annotation
+code-annotations: hover
+
+# Callout appearance
+callout-appearance: simple
+callout-icon: true

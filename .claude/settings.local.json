@@ -1,0 +1,27 @@
+{
+  "permissions": {
+    "allow": [
+      "WebSearch",
+      "Bash(find:*)",
+      "Bash(Rscript:*)",
+      "Bash(rig default:*)",
+      "Bash(R --version:*)",
+      "Bash(make r-version:*)",
+      "Bash(rig run:*)",
+      "Bash(make:*)",
+      "WebFetch(domain:osf.io)",
+      "WebFetch(domain:pubmed.ncbi.nlm.nih.gov)",
+      "WebFetch(domain:peerj.com)",
+      "WebFetch(domain:www.frontiersin.org)",
+      "WebFetch(domain:pmc.ncbi.nlm.nih.gov)",
+      "Bash(quarto render:*)",
+      "Bash(curl -sL \"https://osf.io/5ejcp/files/\")",
+      "Bash(curl:*)",
+      "Bash(python3:*)",
+      "Bash(/usr/lib/rstudio/resources/app/bin/quarto/bin/quarto render:*)",
+      "Bash(ls:*)",
+      "Bash(wc:*)",
+      "Bash(cat:*)"
+    ]
+  }
+}
