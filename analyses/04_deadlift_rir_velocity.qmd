@@ -206,18 +206,27 @@ knitr::kable(prediction_df, col.names = c("Metric", "Value"))
 
 ```{r velocity-by-load}
 #| label: fig-velocity-load
-#| fig-cap: "Velocity distribution by load and RIR"
+#| fig-cap: "Velocity distribution by load and RIR with individual observations"
 
 ggplot(data, aes(x = factor(rir), y = mean_velocity, fill = load_percentage)) +
-  geom_boxplot(alpha = 0.7, outlier.alpha = 0.3) +
+  geom_boxplot(alpha = 0.5, outlier.shape = NA, width = 0.7) +
+  geom_point(
+    aes(color = load_percentage),
+    position = position_jitterdodge(jitter.width = 0.15, dodge.width = 0.7),
+    alpha = 0.6, size = 1.5
+  ) +
   labs(
     x = "Repetitions in Reserve",
     y = "Mean Velocity (m/s)",
-    fill = "Load"
+    fill = "Load",
+    color = "Load"
   ) +
   theme_minimal() +
   scale_fill_manual(values = c("#E69F00", "#009E73")) +
-  theme(legend.position = "bottom")
+  scale_color_manual(values = c("#CC7A00", "#007A5E")) +
+  theme(legend.position = "bottom") +
+  guides(fill = guide_legend(override.aes = list(alpha = 0.7)),
+         color = "none")
 ```
 
 **Observation**:
