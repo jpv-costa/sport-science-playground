@@ -19,6 +19,7 @@ velocity_results <- readRDS("../data/processed/peerj_velocity_replication_result
 rir_velocity_results <- readRDS("../data/processed/rir_velocity_replication_results.rds")
 deadlift_results <- readRDS("../data/processed/deadlift_rir_velocity_results.rds")
 lmm_results <- tryCatch(readRDS("../data/processed/deadlift_lmm_results.rds"), error = function(e) NULL)
+advanced_results <- tryCatch(readRDS("../data/processed/advanced_velocity_results.rds"), error = function(e) NULL)
 ```
 
 ## What This Project Investigates
@@ -148,6 +149,39 @@ if (!is.null(lmm_results)) {
 
 ---
 
+### 6. Advanced Velocity-RIR Analyses
+
+**[Advanced Velocity Analyses (H2-H6)](06_advanced_velocity_analyses.qmd)**
+
+Five novel analyses extending the deadlift velocity-RIR research with practical insights.
+
+```{r advanced-summary, results='asis'}
+if (!is.null(advanced_results)) {
+  mvt <- advanced_results$mvt
+  rel <- advanced_results$reliability
+  pred <- advanced_results$failure_prediction
+  decay <- advanced_results$velocity_decay
+
+  cat("| Analysis | Finding | Practical Implication |\n")
+  cat("|----------|---------|----------------------|\n")
+  cat(sprintf("| MVT Variability | CV = %.1f%% | Individual calibration essential |\n",
+              mvt$population_stats$cv_percent))
+  cat(sprintf("| Day-to-Day Reliability | Slope ICC = %.2f | Periodic recalibration needed |\n",
+              rel$slope_icc$icc))
+  cat(sprintf("| Model Comparison | %.1f%% prefer quadratic | Linear model adequate |\n",
+              advanced_results$polynomial_comparison$best_model_summary$pct_quad_best))
+  cat(sprintf("| Velocity Decay | %s | %s |\n",
+              ifelse(decay$decay_acceleration$accelerating, "Accelerates", "Constant"),
+              decay$decay_acceleration$interpretation))
+  cat(sprintf("| Failure Prediction | MAE = %.2f reps | First rep velocity useful |\n",
+              pred$cv_results$mae))
+} else {
+  cat("*Results will be available after running `make analyze-advanced`*\n")
+}
+```
+
+---
+
 ## Practical Implications
 
 ### For Strength Training
@@ -218,6 +252,7 @@ The project follows SOLID principles with:
 | Publication Bias | Bias assessment | Planned |
 | ~~Deadlift-Specific~~ | ~~Application to deadlift training~~ | **Completed** (Study 4) |
 | ~~LMM & Velocity Tables~~ | ~~Practical velocity thresholds~~ | **Completed** (Study 5) |
+| ~~Advanced Velocity~~ | ~~MVT, reliability, decay, prediction~~ | **Completed** (Study 6) |
 
 ## References
 

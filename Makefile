@@ -261,7 +261,16 @@ analyze-lmm:  ## Run LMM analysis with velocity stop tables (Study 5)
 	$(RSCRIPT) "source('scripts/analyze_deadlift_lmm.R')"
 	@echo "$(GREEN)LMM analysis complete!$(NC)"
 
-analyze-all: replicate-all analyze-lmm  ## Run all analyses (replications + LMM)
+#------------------------------------------------------------------------------
+# Advanced Velocity Analysis (Study 6)
+#------------------------------------------------------------------------------
+analyze-advanced:  ## Run advanced velocity analyses H2-H6 (Study 6)
+	@echo "$(BLUE)Running advanced velocity analyses...$(NC)"
+	$(RSCRIPT) "box::purge_cache()"
+	$(RSCRIPT) "source('scripts/analyze_advanced_velocity.R')"
+	@echo "$(GREEN)Advanced analyses complete!$(NC)"
+
+analyze-all: replicate-all analyze-lmm analyze-advanced  ## Run all analyses
 	@echo "$(GREEN)All analyses complete!$(NC)"
 
 #------------------------------------------------------------------------------
@@ -288,6 +297,9 @@ report-deadlift:  ## Render deadlift RIR-velocity report (Study 4)
 
 report-lmm:  ## Render LMM analysis report (Study 5)
 	$(QUARTO) render analyses/05_deadlift_lmm_analysis.qmd
+
+report-advanced:  ## Render advanced velocity analysis report (Study 6)
+	$(QUARTO) render analyses/06_advanced_velocity_analyses.qmd
 
 reports-all: reports  ## Render all reports (alias for reports)
 	@echo "$(GREEN)All reports rendered!$(NC)"

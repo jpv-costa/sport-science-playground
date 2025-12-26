@@ -20,6 +20,8 @@ website:
             text: "Deadlift RIR-Velocity"
           - href: 05_deadlift_lmm_analysis.qmd
             text: "LMM & Velocity Tables"
+          - href: 06_advanced_velocity_analyses.qmd
+            text: "Advanced Velocity Analyses"
 
 format:
   html:

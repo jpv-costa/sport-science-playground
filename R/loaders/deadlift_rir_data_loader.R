@@ -3,6 +3,18 @@
 #
 # SOLID Principles Applied:
 # - SRP: Single responsibility - load and preprocess deadlift RIR-velocity data
+#
+# Output columns:
+# - id: Participant identifier (string)
+# - sex: "male" or "female"
+# - day: "Day 1" or "Day 2"
+# - load_percentage: "80%" or "90%"
+# - weight_kg: Absolute load in kg
+# - rir: Repetitions in Reserve (0 at failure, higher = further from failure)
+# - mean_velocity: Mean concentric velocity (m/s)
+# - set_id: Unique set identifier (e.g., "Alexia_Day1_90pct_S1")
+# - rep_number: Position in set (1, 2, 3, ... n)
+# - reps_to_failure: Total reps completed in that set
 
 box::use(
   R6[R6Class]
@@ -40,6 +52,9 @@ DeadliftRirDataLoader <- R6Class(
       # Clean up row names
       rownames(combined) <- NULL
 
+      # Add reps_to_failure (total reps per set)
+      combined <- private$.add_reps_to_failure(combined)
+
       combined
     },
 
@@ -66,13 +81,19 @@ DeadliftRirDataLoader <- R6Class(
       list(
         n_observations = nrow(data),
         n_participants = length(unique(data$id)),
+        n_sets = length(unique(data$set_id)),
         n_male = sum(data$sex == "male") / nrow(data) * length(unique(data$id)),
         n_female = sum(data$sex == "female") / nrow(data) * length(unique(data$id)),
         load_types = unique(data$load_percentage),
         days = unique(data$day),
         velocity_range = range(data$mean_velocity, na.rm = TRUE),
         rir_range = range(data$rir, na.rm = TRUE),
-        weight_range = range(data$weight_kg, na.rm = TRUE)
+        weight_range = range(data$weight_kg, na.rm = TRUE),
+        reps_per_set_range = range(data$reps_to_failure, na.rm = TRUE),
+        mean_reps_per_set = mean(
+          tapply(data$reps_to_failure, data$set_id, function(x) x[1]),
+          na.rm = TRUE
+        )
       )
     }
   ),
@@ -124,10 +145,21 @@ DeadliftRirDataLoader <- R6Class(
 
         # Filter to rows with actual data
         valid_rows <- !is.na(rir_values) & !is.na(mcv_values)
+        n_valid <- sum(valid_rows)
 
-        if (sum(valid_rows) == 0) {
+        if (n_valid == 0) {
           next
         }
+
+        # Create unique set_id: "id_DayX_YYpct_SZ"
+        day_code <- gsub("Day ", "Day", condition$day)
+        load_code <- gsub("%", "pct", condition$load_pct)
+        series_code <- paste0("S", condition$series_num)
+        set_id <- paste(id, day_code, load_code, series_code, sep = "_")
+
+        # Rep numbers are 1, 2, 3, ... within the set
+        # The first row in the data corresponds to the first rep
+        rep_numbers <- seq_len(n_valid)
 
         condition_data <- data.frame(
           id = id,
@@ -137,6 +169,8 @@ DeadliftRirDataLoader <- R6Class(
           weight_kg = condition$weight_kg,
           rir = rir_values[valid_rows],
           mean_velocity = mcv_values[valid_rows],
+          set_id = set_id,
+          rep_number = rep_numbers,
           stringsAsFactors = FALSE
         )
 
@@ -174,15 +208,22 @@ DeadliftRirDataLoader <- R6Class(
       conditions
     },
 
-    #' Extract load, weight, and day from header string
+    #' Extract series number, load, weight, and day from header string
     .extract_condition_from_header = function(header) {
       # Pattern: "Série X - YY% (ZZZ kg) - Dia N"
+      series_match <- regmatches(header, regexpr("Série\\s*\\d+", header))
       load_match <- regmatches(header, regexpr("\\d+%", header))
       weight_match <- regmatches(header, regexpr("\\d+\\.?\\d*\\s*kg", header))
       day_match <- regmatches(header, regexpr("Dia\\s*\\d+", header))
 
       if (length(load_match) == 0 || length(day_match) == 0) {
         return(NULL)
+      }
+
+      # Extract series number (default to 1 if not found)
+      series_num <- 1
+      if (length(series_match) > 0) {
+        series_num <- as.integer(gsub("Série\\s*", "", series_match))
       }
 
       # Extract weight value
@@ -196,10 +237,22 @@ DeadliftRirDataLoader <- R6Class(
       day <- paste("Day", day_num)
 
       list(
+        series_num = series_num,
         load_pct = load_match,
         weight_kg = weight_kg,
         day = day
       )
+    },
+
+    #' Add reps_to_failure column (total reps per set)
+    .add_reps_to_failure = function(data) {
+      # Calculate max rep_number per set_id
+      reps_per_set <- tapply(data$rep_number, data$set_id, max)
+
+      # Map back to each observation
+      data$reps_to_failure <- reps_per_set[data$set_id]
+
+      data
     }
   )
 )

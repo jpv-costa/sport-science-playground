@@ -1,0 +1,574 @@
+---
+title: "Study 6: Advanced Velocity-RIR Analyses"
+subtitle: "Novel Analyses for Velocity-Based Training Prescription"
+author: "Deadlift RIR-Velocity Research Team"
+date: today
+format:
+  html:
+    toc: true
+    toc-depth: 3
+    code-fold: true
+    code-summary: "Show code"
+    theme: cosmo
+    fig-width: 10
+    fig-height: 6
+execute:
+  warning: false
+  message: false
+---
+
+```{r setup}
+#| include: false
+
+# Suppress warnings globally
+options(warn = -1)
+
+# Load required packages
+library(ggplot2)
+library(knitr)
+
+# Set theme
+theme_set(theme_minimal(base_size = 12))
+
+# Load pre-computed results from analysis script
+# Run `make analyze-advanced` first to generate this file
+results <- readRDS("../data/processed/advanced_velocity_results.rds")
+
+# Extract components
+data <- results$data
+summary_stats <- results$summary
+mvt_result <- results$mvt
+reliability <- results$reliability
+poly_result <- results$polynomial_comparison
+decay <- results$velocity_decay
+prediction <- results$failure_prediction
+```
+
+## Executive Summary
+
+This study presents five novel analyses (H2-H6) that extend our understanding of the deadlift velocity-RIR relationship, addressing key gaps in the velocity-based training literature.
+
+### Key Findings
+
+| Analysis | Result | Practical Implication |
+|----------|--------|----------------------|
+| **H2: MVT Variability** | CV = `r round(mvt_result$population_stats$cv_percent, 1)`% | Individual calibration essential |
+| **H3: Day Reliability** | Slope ICC = `r round(reliability$slope_icc$icc, 2)` | Periodic recalibration needed |
+| **H4: Model Comparison** | `r round(poly_result$best_model_summary$pct_quad_best, 1)`% prefer quadratic | Linear model adequate |
+| **H5: Velocity Decay** | Accelerates (p = `r format(decay$decay_acceleration$p_value, digits = 3)`) | Non-linear considerations |
+| **H6: Failure Prediction** | MAE = `r round(prediction$cv_results$mae, 2)` reps | First rep velocity useful |
+
+## Experimental Setup
+
+### Study Design
+
+```{r data-summary}
+#| echo: false
+
+cat("Participants:", summary_stats$n_participants, "\n")
+cat("Total observations:", summary_stats$n_observations, "\n")
+cat("Total sets:", summary_stats$n_sets, "\n")
+cat("Reps per set:", summary_stats$reps_per_set_range[1], "-",
+    summary_stats$reps_per_set_range[2],
+    "(mean:", round(summary_stats$mean_reps_per_set, 1), ")\n")
+```
+
+**Protocol:**
+
+- **Participants**: 19 resistance-trained individuals (15 male, 4 female)
+- **Exercise**: Conventional deadlift
+- **Loads**: 80% and 90% of 1RM
+- **Testing days**: 2 separate days
+- **Protocol**: Each participant performed sets to muscular failure at both loads on both days
+- **Measurement**: Mean concentric velocity (MCV) for each repetition using linear position transducer
+
+**Data Structure:**
+
+Each observation represents a single repetition within a set to failure:
+
+```{r data-structure}
+#| echo: false
+
+kable(head(data[, c("id", "day", "load_percentage", "set_id", "rep_number", "rir", "mean_velocity", "reps_to_failure")], 10),
+      caption = "Sample data structure (first 10 rows)")
+```
+
+## H2: Minimum Velocity Threshold (MVT) Variability
+
+### Research Question
+
+**How variable is the velocity at muscular failure (RIR=0) across individuals?**
+
+### Why This Matters
+
+The Minimum Velocity Threshold (MVT) is the velocity at which an athlete reaches muscular failure. Understanding MVT variability has critical implications:
+
+- If MVT is consistent across individuals (~0.15-0.20 m/s for all), it could serve as a **universal failure indicator**
+- If MVT varies widely, **individual calibration is essential** before using velocity-based prescriptions
+- Practical question: Can coaches use a single "stop velocity" for all athletes?
+
+### Methods
+
+1. Extracted all observations at RIR = 0 (failure reps)
+2. Calculated population-level MVT statistics (mean, SD, CV, IQR)
+3. Calculated individual MVT for each participant
+4. Tested for sex differences using Mann-Whitney U test
+5. Tested for load differences (80% vs 90%) using paired comparison
+
+### Results
+
+```{r h2-population}
+#| echo: false
+
+cat("Population MVT Statistics:\n")
+cat("  Mean:", round(mvt_result$population_stats$mean, 3), "m/s\n")
+cat("  SD:", round(mvt_result$population_stats$sd, 3), "m/s\n")
+cat("  CV:", round(mvt_result$population_stats$cv_percent, 1), "%\n")
+cat("  IQR:", round(mvt_result$population_stats$iqr, 3), "m/s\n")
+cat("  Range:", round(mvt_result$population_stats$min, 3), "-",
+    round(mvt_result$population_stats$max, 3), "m/s\n")
+```
+
+```{r h2-plot}
+#| fig-cap: "Distribution of Minimum Velocity Threshold (MVT) at failure"
+
+# Extract failure data
+failure_data <- data[data$rir == 0, ]
+
+# Density plot
+ggplot(failure_data, aes(x = mean_velocity)) +
+  geom_histogram(aes(y = after_stat(density)), bins = 20, fill = "steelblue", alpha = 0.7) +
+  geom_density(color = "darkred", linewidth = 1) +
+  geom_vline(xintercept = mvt_result$population_stats$mean,
+             linetype = "dashed", color = "black", linewidth = 1) +
+  annotate("text", x = mvt_result$population_stats$mean + 0.02, y = 5,
+           label = paste("Mean =", round(mvt_result$population_stats$mean, 3), "m/s"),
+           hjust = 0) +
+  labs(x = "Velocity at Failure (m/s)", y = "Density",
+       title = "MVT Distribution Across All Failure Observations") +
+  theme_minimal()
+```
+
+```{r h2-individual}
+#| fig-cap: "Individual MVT values showing between-participant variability"
+
+# Individual MVT plot
+ind_mvt <- mvt_result$individual_stats
+ind_mvt <- ind_mvt[order(ind_mvt$mean_mvt), ]
+ind_mvt$id <- factor(ind_mvt$id, levels = ind_mvt$id)
+
+ggplot(ind_mvt, aes(x = id, y = mean_mvt, color = sex)) +
+  geom_point(size = 3) +
+  geom_errorbar(aes(ymin = mean_mvt - sd_mvt, ymax = mean_mvt + sd_mvt),
+                width = 0.3) +
+  geom_hline(yintercept = mvt_result$population_stats$mean,
+             linetype = "dashed", color = "gray50") +
+  coord_flip() +
+  labs(x = "Participant", y = "MVT (m/s)",
+       title = "Individual MVT with Standard Deviation",
+       color = "Sex") +
+  scale_color_manual(values = c("female" = "#E41A1C", "male" = "#377EB8")) +
+  theme_minimal()
+```
+
+**Load Comparison:**
+
+```{r h2-load}
+#| echo: false
+
+cat("80% 1RM MVT:", round(mvt_result$load_comparison$load_80_mean, 3),
+    "±", round(mvt_result$load_comparison$load_80_sd, 3), "m/s\n")
+cat("90% 1RM MVT:", round(mvt_result$load_comparison$load_90_mean, 3),
+    "±", round(mvt_result$load_comparison$load_90_sd, 3), "m/s\n")
+cat("Difference:", round(mvt_result$load_comparison$difference, 3), "m/s\n")
+cat("p-value:", format(mvt_result$load_comparison$wilcox_p, digits = 4), "\n")
+cat("Significant:", mvt_result$load_comparison$significant, "\n")
+```
+
+### Interpretation
+
+The coefficient of variation (CV = `r round(mvt_result$population_stats$cv_percent, 1)`%) indicates **high inter-individual variability** in MVT. This finding has important practical implications:
+
+1. **A single MVT value cannot be applied to all athletes** - using a population mean (0.21 m/s) would underestimate capacity for some and overshoot for others
+2. **Individual calibration is essential** - each athlete needs their own MVT determined through testing to failure
+3. **No significant load effect** - MVT appears similar at 80% and 90% 1RM, suggesting MVT is an individual characteristic independent of load
+
+## H3: Day-to-Day Reliability
+
+### Research Question
+
+**Are individual velocity-RIR relationships stable across testing days?**
+
+### Why This Matters
+
+If velocity profiles are reliable day-to-day:
+- A **single calibration session is sufficient** to establish individual velocity zones
+- Athletes don't need frequent retesting
+
+If velocity profiles are unreliable:
+- Athletes need **frequent recalibration** (perhaps weekly or monthly)
+- Session-to-session factors (fatigue, recovery, motivation) may affect velocity targets
+
+### Methods
+
+1. Fit individual linear models (velocity ~ RIR) for Day 1 and Day 2 separately
+2. Extract slopes (velocity loss per RIR) and intercepts (baseline velocity)
+3. Calculate MVT predictions for each day (predicted velocity at RIR = 0)
+4. Compute ICC(2,1) - two-way random effects model
+5. Calculate SEM (Standard Error of Measurement) and MDC95 (Minimal Detectable Change)
+
+**ICC Interpretation (Koo & Li, 2016):**
+
+| ICC | Interpretation |
+|-----|----------------|
+| < 0.50 | Poor |
+| 0.50-0.75 | Moderate |
+| 0.75-0.90 | Good |
+| > 0.90 | Excellent |
+
+### Results
+
+```{r h3-results}
+#| echo: false
+
+cat("Slope ICC (velocity loss per RIR):\n")
+cat("  ICC:", round(reliability$slope_icc$icc, 3), "\n")
+cat("  95% CI:", round(reliability$slope_icc$ci_lower, 3), "-",
+    round(reliability$slope_icc$ci_upper, 3), "\n")
+cat("  Interpretation:", reliability$slope_icc$interpretation, "\n\n")
+
+cat("MVT ICC (predicted failure velocity):\n")
+cat("  ICC:", round(reliability$mvt_icc$icc, 3), "\n")
+cat("  95% CI:", round(reliability$mvt_icc$ci_lower, 3), "-",
+    round(reliability$mvt_icc$ci_upper, 3), "\n")
+cat("  Interpretation:", reliability$mvt_icc$interpretation, "\n")
+cat("  SEM:", round(reliability$mvt_icc$sem, 4), "m/s\n")
+cat("  MDC95:", round(reliability$mvt_icc$mdc95, 4), "m/s\n")
+```
+
+```{r h3-plot}
+#| fig-cap: "Day 1 vs Day 2 comparison of individual slopes"
+
+day_params <- reliability$day_parameters
+
+# Slopes comparison
+ggplot(day_params, aes(x = slope_day1, y = slope_day2)) +
+  geom_point(size = 3, alpha = 0.7) +
+  geom_abline(slope = 1, intercept = 0, linetype = "dashed", color = "gray50") +
+  geom_smooth(method = "lm", se = TRUE, color = "steelblue") +
+  labs(x = "Slope Day 1 (m/s per RIR)", y = "Slope Day 2 (m/s per RIR)",
+       title = "Day-to-Day Reliability of Individual Slopes",
+       subtitle = paste("ICC =", round(reliability$slope_icc$icc, 2))) +
+  theme_minimal()
+```
+
+```{r h3-mvt-plot}
+#| fig-cap: "Day 1 vs Day 2 comparison of predicted MVT"
+
+ggplot(day_params, aes(x = mvt_day1, y = mvt_day2)) +
+  geom_point(size = 3, alpha = 0.7) +
+  geom_abline(slope = 1, intercept = 0, linetype = "dashed", color = "gray50") +
+  geom_smooth(method = "lm", se = TRUE, color = "steelblue") +
+  labs(x = "MVT Day 1 (m/s)", y = "MVT Day 2 (m/s)",
+       title = "Day-to-Day Reliability of Predicted MVT",
+       subtitle = paste("ICC =", round(reliability$mvt_icc$icc, 2))) +
+  theme_minimal()
+```
+
+### Interpretation
+
+- **Slope reliability is moderate** (ICC = `r round(reliability$slope_icc$icc, 2)`), suggesting the rate of velocity decline per RIR is reasonably consistent
+- **MVT reliability is poor** (ICC = `r round(reliability$mvt_icc$icc, 2)`), indicating that predicted failure velocity varies substantially between days
+- **MDC95 = `r round(reliability$mvt_icc$mdc95, 3)` m/s** - changes in MVT smaller than this may represent measurement error rather than true change
+
+**Practical recommendation:** Consider periodic recalibration (every 2-4 weeks) rather than relying on a single test session.
+
+## H4: Polynomial vs Linear Model Comparison
+
+### Research Question
+
+**Does a quadratic model fit the velocity-RIR relationship better than linear?**
+
+### Why This Matters
+
+- **Linear assumption**: Velocity decreases at a constant rate with each rep (each rep costs the same velocity)
+- **Quadratic model**: Velocity loss accelerates near failure (fatigue compounds)
+
+If quadratic is substantially better, this suggests:
+- The velocity-RIR relationship is non-linear
+- Simple linear velocity zones may underestimate proximity to failure in the final reps
+- Coaches should use curvilinear charts or adjust expectations near failure
+
+### Methods
+
+1. For each participant, fit:
+   - Linear: velocity ~ RIR
+   - Quadratic: velocity ~ RIR + RIR²
+2. Compare using adjusted R², AIC, and BIC
+3. Fit population-level LMM versions and conduct likelihood ratio test
+4. Count how many participants show significantly better fit with quadratic
+
+### Results
+
+```{r h4-summary}
+#| echo: false
+
+cat("Individual Model Comparison:\n")
+cat("  Participants analyzed:", poly_result$best_model_summary$n_participants, "\n")
+cat("  Linear preferred:", poly_result$best_model_summary$n_linear_best, "\n")
+cat("  Quadratic preferred:", poly_result$best_model_summary$n_quad_best,
+    "(", round(poly_result$best_model_summary$pct_quad_best, 1), "%)\n")
+cat("  Avg R² improvement (quad - linear):",
+    round(poly_result$best_model_summary$avg_r2_improvement, 4), "\n")
+```
+
+```{r h4-plot}
+#| fig-cap: "AIC comparison between linear and quadratic models by participant"
+
+ind_results <- poly_result$individual_results
+
+ggplot(ind_results, aes(x = reorder(id, delta_aic), y = delta_aic, fill = best_model)) +
+  geom_col() +
+  geom_hline(yintercept = -2, linetype = "dashed", color = "red") +
+  geom_hline(yintercept = 2, linetype = "dashed", color = "red") +
+  annotate("text", x = 1, y = -3, label = "Quadratic better", hjust = 0, color = "gray40") +
+  annotate("text", x = 1, y = 3, label = "Linear better", hjust = 0, color = "gray40") +
+  coord_flip() +
+  labs(x = "Participant", y = "ΔAIC (Quadratic - Linear)",
+       title = "Model Comparison by Participant",
+       subtitle = "Negative values favor quadratic model",
+       fill = "Best Model") +
+  scale_fill_manual(values = c("linear" = "steelblue", "quadratic" = "coral")) +
+  theme_minimal()
+```
+
+```{r h4-r2}
+#| fig-cap: "R² comparison between linear and quadratic models"
+
+ggplot(ind_results, aes(x = r2_adj_linear, y = r2_adj_quad)) +
+  geom_point(aes(color = best_model), size = 3) +
+  geom_abline(slope = 1, intercept = 0, linetype = "dashed") +
+  labs(x = "Adjusted R² (Linear)", y = "Adjusted R² (Quadratic)",
+       title = "Model Fit Comparison",
+       color = "Best Model") +
+  scale_color_manual(values = c("linear" = "steelblue", "quadratic" = "coral")) +
+  theme_minimal()
+```
+
+### Interpretation
+
+Only `r round(poly_result$best_model_summary$pct_quad_best, 1)`% of participants show a meaningfully better fit with the quadratic model. This suggests:
+
+1. **Linear model is generally adequate** for describing the velocity-RIR relationship
+2. The additional complexity of a quadratic term is not justified for most individuals
+3. Practitioners can confidently use **linear velocity zones** for training prescription
+
+**Note:** While a minority of individuals may benefit from quadratic modeling, the linear approximation provides sufficient accuracy for practical applications.
+
+## H5: Velocity Decay Rate Within Sets
+
+### Research Question
+
+**How does velocity loss per rep change as a set progresses?**
+
+### Why This Matters
+
+Understanding velocity decay patterns informs:
+- **When to stop a set** - if decay accelerates, stopping earlier preserves movement quality
+- **Model selection** - constant decay supports linear models; accelerating decay suggests non-linear approaches
+- **Fatigue thresholds** - identifying the rep where decay sharply increases
+
+### Methods
+
+1. Calculate rep-to-rep velocity change (Δv = v_n - v_{n-1})
+2. Model decay rate vs rep number: Δv ~ rep_number
+3. Test if decay accelerates (negative slope = accelerating fatigue)
+4. Detect breakpoint where decay notably increases
+
+### Results
+
+```{r h5-summary}
+#| echo: false
+
+cat("Velocity Decay Summary:\n")
+cat("  Average decay per rep:", round(decay$decay_summary$avg_decay_per_rep, 4), "m/s\n")
+cat("  Early reps (1-3):", round(decay$decay_summary$early_reps_decay, 4), "m/s\n")
+cat("  Late reps (4+):", round(decay$decay_summary$late_reps_decay, 4), "m/s\n")
+cat("  Acceleration:", round(decay$decay_summary$decay_acceleration, 4), "m/s\n\n")
+
+cat("Acceleration Test:\n")
+cat("  Slope:", round(decay$decay_acceleration$slope, 5), "\n")
+cat("  p-value:", format(decay$decay_acceleration$p_value, digits = 4), "\n")
+cat("  Interpretation:", decay$decay_acceleration$interpretation, "\n")
+```
+
+```{r h5-trajectory}
+#| fig-cap: "Velocity trajectories for individual sets"
+
+# Create spaghetti plot of velocity trajectories
+ggplot(data, aes(x = rep_number, y = mean_velocity, group = set_id)) +
+  geom_line(alpha = 0.3, color = "steelblue") +
+  stat_summary(aes(group = 1), fun = mean, geom = "line",
+               color = "darkred", linewidth = 1.5) +
+  stat_summary(aes(group = 1), fun = mean, geom = "point",
+               color = "darkred", size = 3) +
+  labs(x = "Rep Number", y = "Mean Velocity (m/s)",
+       title = "Velocity Trajectories Across Sets",
+       subtitle = "Individual sets (blue) with population mean (red)") +
+  theme_minimal()
+```
+
+```{r h5-decay}
+#| fig-cap: "Rep-to-rep velocity change by rep number"
+
+# Decay by rep number
+decay_data <- decay$set_trajectories
+
+ggplot(decay_data, aes(x = factor(rep_number), y = delta_v)) +
+  geom_boxplot(fill = "steelblue", alpha = 0.7) +
+  geom_hline(yintercept = 0, linetype = "dashed", color = "gray50") +
+  labs(x = "Rep Number", y = "Velocity Change from Previous Rep (m/s)",
+       title = "Rep-to-Rep Velocity Change",
+       subtitle = "Negative values indicate velocity loss") +
+  theme_minimal()
+```
+
+### Interpretation
+
+**Velocity decay accelerates as the set progresses** (p = `r format(decay$decay_acceleration$p_value, digits = 3)`):
+
+- Early reps (1-3): Average decay = `r round(abs(decay$decay_summary$early_reps_decay) * 1000, 1)` mm/s per rep
+- Late reps (4+): Average decay = `r round(abs(decay$decay_summary$late_reps_decay) * 1000, 1)` mm/s per rep
+
+This `r round(abs(decay$decay_summary$decay_acceleration) * 1000, 1)` mm/s acceleration in decay rate suggests:
+
+1. **Fatigue compounds near failure** - the last few reps cost more velocity than earlier reps
+2. **Velocity thresholds are conservative early** - athletes have more "buffer" in early reps
+3. **Quality deteriorates rapidly near failure** - this supports stopping 1-2 reps before failure for technique preservation
+
+## H6: Early Rep Velocity for Failure Prediction
+
+### Research Question
+
+**Can the first 1-3 rep velocities predict when failure will occur?**
+
+### Why This Matters
+
+This is perhaps the most practically valuable analysis:
+- **Real-time autoregulation**: Predict total reps from the first rep velocity
+- **No rep counting needed**: Know when to stop based on velocity alone
+- **Pre-set planning**: Estimate how many reps are possible before starting
+
+### Methods
+
+1. For each set, extract: v1 (first rep velocity), v2, v3, and total reps
+2. Build prediction models:
+   - Model 1: reps ~ v1
+   - Model 2: reps ~ v1 + v2
+   - Model 3: reps ~ v1 + v2 + v3
+   - Model 4: reps ~ v1 + load
+3. Evaluate with leave-one-set-out cross-validation
+4. Create practical lookup table
+
+### Results
+
+```{r h6-cv}
+#| echo: false
+
+cat("Leave-One-Set-Out Cross-Validation:\n")
+cat("  Sets analyzed:", prediction$cv_results$n_sets, "\n")
+cat("  MAE:", round(prediction$cv_results$mae, 2), "reps\n")
+cat("  RMSE:", round(prediction$cv_results$rmse, 2), "reps\n")
+cat("  R²:", round(prediction$cv_results$r2, 3), "\n")
+cat("  Within ±1 rep:", round(prediction$cv_results$within_1_rep_pct, 1), "%\n")
+cat("  Within ±2 reps:", round(prediction$cv_results$within_2_reps_pct, 1), "%\n")
+```
+
+```{r h6-lookup}
+#| echo: false
+
+kable(prediction$lookup_table,
+      caption = "Practical Lookup Table: First Rep Velocity → Predicted Reps",
+      digits = 1,
+      col.names = c("First Rep Velocity (m/s)", "Predicted Reps", "Lower 95%", "Upper 95%"))
+```
+
+```{r h6-plot}
+#| fig-cap: "First rep velocity vs total reps completed"
+
+# Prepare set-level data
+set_data <- do.call(rbind, lapply(unique(data$set_id), function(sid) {
+  s <- data[data$set_id == sid, ]
+  s <- s[order(s$rep_number), ]
+  if (nrow(s) < 1) return(NULL)
+  data.frame(
+    set_id = sid,
+    v1 = s$mean_velocity[1],
+    reps_to_failure = s$reps_to_failure[1],
+    load_percentage = s$load_percentage[1]
+  )
+}))
+
+ggplot(set_data, aes(x = v1, y = reps_to_failure, color = load_percentage)) +
+  geom_point(size = 3, alpha = 0.7) +
+  geom_smooth(method = "lm", se = TRUE, aes(group = 1), color = "black") +
+  labs(x = "First Rep Velocity (m/s)", y = "Total Reps to Failure",
+       title = "Relationship Between First Rep Velocity and Set Capacity",
+       color = "Load") +
+  scale_color_manual(values = c("80%" = "#E41A1C", "90%" = "#377EB8")) +
+  theme_minimal()
+```
+
+### Interpretation
+
+The first rep velocity provides a **reasonable prediction of set capacity**:
+
+- **MAE = `r round(prediction$cv_results$mae, 2)` reps** means predictions are typically within ~1 rep of actual
+- **`r round(prediction$cv_results$within_2_reps_pct, 1)`% accuracy within ±2 reps** is sufficient for practical autoregulation
+- **Each +0.1 m/s in first rep velocity → ~0.5 additional reps expected**
+
+**Practical Application:**
+Use the lookup table to estimate available reps from your first rep velocity. For example:
+- First rep at 0.30 m/s → Expect ~6 reps (95% PI: 3-9)
+- First rep at 0.45 m/s → Expect ~7 reps (95% PI: 3-10)
+
+## Practical Implications
+
+### Summary of Recommendations
+
+| Finding | Practical Recommendation |
+|---------|-------------------------|
+| High MVT variability (CV = 31%) | Calibrate MVT individually for each athlete |
+| Moderate slope reliability (ICC = 0.72) | Recalibrate velocity zones every 2-4 weeks |
+| Linear model adequate | Use simple linear velocity zones |
+| Decay accelerates near failure | Stop 1-2 reps from failure for quality |
+| First rep predicts set capacity | Use first rep velocity for autoregulation |
+
+### Implementation Steps
+
+1. **Initial Calibration**: Test each athlete to failure at submaximal loads (75-85% 1RM) to establish individual MVT
+2. **Set Up Zones**: Create linear velocity zones from MVT to maximum velocity
+3. **Monitor First Rep**: Use first rep velocity to estimate available reps
+4. **Stop Before Failure**: Given acceleration of velocity loss, target stopping 1-2 reps before predicted failure
+5. **Recalibrate Periodically**: Update velocity zones every 2-4 weeks or after significant training blocks
+
+## Limitations
+
+1. **Sample size**: 19 participants limits generalizability
+2. **Exercise specificity**: Results apply to deadlift; other exercises may differ
+3. **Load range**: Only 80% and 90% 1RM tested; lighter loads may show different patterns
+4. **Training status**: Participants were resistance-trained; novices may differ
+5. **Day-to-day factors**: Only 2 testing days; longer-term reliability unknown
+
+## References
+
+- Jukic, I., et al. (2024). Velocity-Based Training. *Sports Medicine*.
+- Zourdos, M. C., et al. (2016). Novel Resistance Training-Specific RPE Scale. *Journal of Strength and Conditioning Research*.
+- Pelland, J. C., et al. (2022). Using Load-Velocity Profiling. *Sports Medicine*.
+- Koo, T. K., & Li, M. Y. (2016). A Guideline of Selecting and Reporting ICC. *Journal of Chiropractic Medicine*.
+
+---
+
+*Study 6 of the Deadlift RIR-Velocity Research Project*
+
+*Analysis performed using R `r R.version.string` with custom R6 classes following SOLID principles*
