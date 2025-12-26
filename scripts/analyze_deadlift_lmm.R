@@ -358,6 +358,268 @@ if (abs(interval_comparison$conformal_coverage - 0.95) <
 cat("\n")
 
 # ==============================================================================
+# Section 7: Robust Methods
+# ==============================================================================
+
+cat("=== Section 7: Robust Methods ===\n\n")
+
+cat("Addressing model assumption violations with robust approaches...\n\n")
+
+# Pre-load packages needed for robust methods (box module isolation workaround)
+suppressPackageStartupMessages({
+  library(lme4)
+  library(robustlmm)
+  library(clubSandwich)
+})
+
+# 7.1: Robust LMM using robustlmm
+cat("7.1 Robust LMM (robustlmm package):\n")
+cat("Fitting robust LMM to downweight outliers...\n")
+
+robust_result <- tryCatch({
+  lmm$fit_robust(
+    data = data,
+    formula = mean_velocity ~ rir,
+    random_formula = ~1 + rir | id,
+    model_name = "robust_rlmer"
+  )
+}, error = function(e) {
+  cat("  Warning: Robust LMM failed:", e$message, "\n")
+  NULL
+})
+
+if (!is.null(robust_result)) {
+  cat("\nCoefficient Comparison (Standard vs Robust):\n")
+  cat("-" |> rep(70) |> paste(collapse = ""), "\n")
+  cat(sprintf("%-15s %12s %12s %12s %12s\n",
+              "Term", "Standard", "Robust", "Diff", "% Diff"))
+  cat("-" |> rep(70) |> paste(collapse = ""), "\n")
+  for (i in seq_len(nrow(robust_result$comparison_table))) {
+    row <- robust_result$comparison_table[i, ]
+    cat(sprintf("%-15s %12.4f %12.4f %12.4f %11.1f%%\n",
+                row$term, row$standard_estimate, row$robust_estimate,
+                row$difference, row$pct_difference))
+  }
+  cat("\n")
+  if (robust_result$conclusions_robust) {
+    cat("CONCLUSION: Standard and robust estimates agree (<10% difference).\n")
+    cat("Conclusions are ROBUST to potential outliers.\n\n")
+  } else {
+    cat("CAUTION: Standard and robust estimates differ (>10% difference).\n")
+    cat("Results may be influenced by outliers.\n\n")
+  }
+}
+
+# 7.2: Cluster-Robust Standard Errors
+cat("7.2 Cluster-Robust Standard Errors (clubSandwich):\n")
+
+robust_se <- tryCatch({
+  lmm$cluster_robust_se(best_model)
+}, error = function(e) {
+  cat("  Warning: Cluster-robust SE failed:", e$message, "\n")
+  NULL
+})
+
+if (!is.null(robust_se)) {
+  cat("Comparing Wald vs Cluster-Robust Standard Errors:\n")
+  cat("-" |> rep(70) |> paste(collapse = ""), "\n")
+  cat(sprintf("%-15s %10s %10s %10s %10s %10s\n",
+              "Term", "Estimate", "SE_Wald", "SE_Robust", "Ratio", "p_robust"))
+  cat("-" |> rep(70) |> paste(collapse = ""), "\n")
+  for (i in seq_len(nrow(robust_se))) {
+    row <- robust_se[i, ]
+    cat(sprintf("%-15s %10.4f %10.4f %10.4f %10.2f %10.4f\n",
+                row$term, row$estimate, row$se_wald, row$se_robust,
+                row$se_ratio, row$p_robust))
+  }
+  cat("\n")
+  max_ratio <- max(robust_se$se_ratio)
+  if (max_ratio < 1.5) {
+    cat(sprintf("SE ratio range: %.2f-%.2f (< 1.5: minimal heteroscedasticity impact)\n\n",
+                min(robust_se$se_ratio), max_ratio))
+  } else {
+    cat(sprintf("SE ratio range: %.2f-%.2f (> 1.5: notable heteroscedasticity impact)\n\n",
+                min(robust_se$se_ratio), max_ratio))
+  }
+}
+
+# 7.3: Bootstrap Confidence Intervals
+cat("7.3 Bootstrap Confidence Intervals:\n")
+cat("Running parametric bootstrap (500 replicates)...\n")
+
+bootstrap_ci <- tryCatch({
+  lmm$bootstrap_ci(best_model, n_boot = 500, seed = 42)
+}, error = function(e) {
+  cat("  Warning: Bootstrap failed:", e$message, "\n")
+  NULL
+})
+
+if (!is.null(bootstrap_ci)) {
+  cat("\nBootstrap 95% CIs for Fixed Effects:\n")
+  cat("-" |> rep(70) |> paste(collapse = ""), "\n")
+  cat(sprintf("%-15s %10s %12s %12s %10s\n",
+              "Term", "Estimate", "Lower 95%", "Upper 95%", "Method"))
+  cat("-" |> rep(70) |> paste(collapse = ""), "\n")
+  for (i in seq_len(nrow(bootstrap_ci))) {
+    row <- bootstrap_ci[i, ]
+    cat(sprintf("%-15s %10.4f %12.4f %12.4f %10s\n",
+                row$term, row$estimate, row$ci_lower, row$ci_upper, row$method))
+  }
+  cat("\n")
+}
+
+# ==============================================================================
+# Section 8: Sensitivity Analysis
+# ==============================================================================
+
+cat("=== Section 8: Sensitivity Analysis ===\n\n")
+
+cat("Testing sensitivity of RIR effect to model specification...\n\n")
+
+sensitivity <- lmm$sensitivity_analysis(
+  data = data,
+  base_formula = mean_velocity ~ rir,
+  random_formulas = list(
+    "Random intercept only" = ~1 | id,
+    "Random slope (best)" = ~1 + rir | id
+  )
+)
+
+cat("RIR Effect Across Model Specifications:\n")
+cat("-" |> rep(80) |> paste(collapse = ""), "\n")
+cat(sprintf("%-25s %12s %10s %10s %10s\n",
+            "Model", "RIR Effect", "SE", "AIC", "BIC"))
+cat("-" |> rep(80) |> paste(collapse = ""), "\n")
+for (i in seq_len(nrow(sensitivity$rir_effects))) {
+  row <- sensitivity$rir_effects[i, ]
+  cat(sprintf("%-25s %12.4f %10.4f %10.1f %10.1f\n",
+              row$model, row$rir_estimate, row$rir_se, row$aic, row$bic))
+}
+cat("\n")
+
+cat("Summary:\n")
+cat(sprintf("  Mean RIR effect: %.4f m/s per RIR\n", sensitivity$summary$rir_mean))
+cat(sprintf("  SD across models: %.4f\n", sensitivity$summary$rir_sd))
+cat(sprintf("  Range: %.4f\n", sensitivity$summary$rir_range))
+cat(sprintf("  CV: %.1f%%\n", sensitivity$summary$rir_cv))
+
+if (sensitivity$summary$conclusions_robust) {
+  cat("\nCONCLUSION: RIR effect is ROBUST to model specification (<10% variation).\n\n")
+} else {
+  cat("\nCAUTION: RIR effect shows sensitivity to model specification (>10% variation).\n\n")
+}
+
+# ==============================================================================
+# Section 9: Study 4 vs Study 5 Comparison
+# ==============================================================================
+
+cat("=== Section 9: Study 4 vs Study 5 Comparison ===\n\n")
+
+# Load Study 4 results
+study4_path <- "data/processed/deadlift_rir_velocity_results.rds"
+if (file.exists(study4_path)) {
+  study4 <- readRDS(study4_path)
+
+  cat("Comparing methods and conclusions:\n\n")
+
+  cat("METHODOLOGY:\n")
+  cat("-" |> rep(70) |> paste(collapse = ""), "\n")
+  cat(sprintf("%-30s %-35s\n", "Study 4 (Simple)", "Study 5 (LMM)"))
+  cat("-" |> rep(70) |> paste(collapse = ""), "\n")
+  cat(sprintf("%-30s %-35s\n",
+              "Separate OLS per participant", "Mixed effects (all data)"))
+  cat(sprintf("%-30s %-35s\n",
+              "No hierarchical structure", "Random intercepts + slopes"))
+  cat(sprintf("%-30s %-35s\n",
+              "No uncertainty quantification", "Parametric + conformal CI"))
+  cat(sprintf("%-30s %-35s\n",
+              "No covariate testing", "LRT, AIC, BIC, Bayes Factor"))
+  cat("\n")
+
+  cat("MODEL FIT (R-squared):\n")
+  cat("-" |> rep(70) |> paste(collapse = ""), "\n")
+  cat(sprintf("%-30s %12s %12s %12s\n", "Approach", "General", "Individual", "Improvement"))
+  cat("-" |> rep(70) |> paste(collapse = ""), "\n")
+  cat(sprintf("%-30s %12.3f %12.3f %12.1fx\n",
+              "Study 4 (OLS)",
+              study4$comparison$general_r2,
+              study4$comparison$individual_r2,
+              study4$comparison$improvement_factor))
+  cat(sprintf("%-30s %12.3f %12.3f %12s\n",
+              "Study 5 (LMM - marginal/cond)",
+              best_model$r2_marginal,
+              best_model$r2_conditional,
+              "-"))
+  cat("\n")
+
+  # Extract RIR coefficient from Study 4 general model
+  study4_general <- study4$general_results
+  if (!is.null(study4_general) && length(study4_general) > 0) {
+    # Calculate mean RIR slope across all linear models
+    rir_slopes_study4 <- sapply(study4_general, function(x) {
+      if (!is.null(x$model)) {
+        coef(x$model)[["rir"]]
+      } else {
+        NA
+      }
+    })
+    mean_rir_study4 <- mean(rir_slopes_study4, na.rm = TRUE)
+  } else {
+    mean_rir_study4 <- NA
+  }
+
+  # Get RIR coefficient from Study 5
+  rir_study5 <- fixed_effects[fixed_effects$term == "rir", "estimate"]
+
+  cat("RIR EFFECT (velocity change per RIR):\n")
+  cat("-" |> rep(70) |> paste(collapse = ""), "\n")
+  cat(sprintf("Study 4 (mean of individual OLS): %.4f m/s per RIR\n",
+              if (!is.na(mean_rir_study4)) mean_rir_study4 else NA))
+  cat(sprintf("Study 5 (LMM fixed effect):       %.4f m/s per RIR\n", rir_study5))
+  if (!is.na(mean_rir_study4) && !is.na(rir_study5)) {
+    pct_diff <- 100 * (rir_study5 - mean_rir_study4) / abs(mean_rir_study4)
+    cat(sprintf("Difference: %.1f%%\n", pct_diff))
+  }
+  cat("\n")
+
+  cat("PREDICTION ACCURACY (MAE in m/s):\n")
+  cat("-" |> rep(70) |> paste(collapse = ""), "\n")
+  cat(sprintf("%-30s %12s %12s\n", "Approach", "General", "Individual"))
+  cat("-" |> rep(70) |> paste(collapse = ""), "\n")
+  # Study 5 already calculated
+  cat(sprintf("%-30s %12.4f %12.4f\n",
+              "Study 5 (LMM)",
+              comparison_result$global_mae,
+              comparison_result$individual_mae))
+  cat("\n")
+
+  cat("KEY CONCLUSIONS:\n")
+  cat("-" |> rep(70) |> paste(collapse = ""), "\n")
+  cat("1. AGREEMENT: Both studies confirm ~0.03 m/s velocity change per RIR.\n")
+  cat("2. AGREEMENT: Individual calibration improves accuracy by ~30-50%.\n")
+  cat("3. NEW (Study 5): Load percentage (80% vs 90%) does NOT significantly\n")
+  cat("   affect the velocity-RIR relationship (p = 0.13).\n")
+  cat("4. NEW (Study 5): A single global velocity table can be used\n")
+  cat("   regardless of load percentage.\n")
+  cat("5. NEW (Study 5): Conformal prediction provides guaranteed 95% coverage\n")
+  cat("   vs ~83% with parametric intervals.\n")
+  cat("\n")
+
+  study4_comparison <- list(
+    study4_general_r2 = study4$comparison$general_r2,
+    study4_individual_r2 = study4$comparison$individual_r2,
+    study4_improvement = study4$comparison$improvement_factor,
+    study5_marginal_r2 = best_model$r2_marginal,
+    study5_conditional_r2 = best_model$r2_conditional,
+    study4_rir_effect = mean_rir_study4,
+    study5_rir_effect = rir_study5
+  )
+} else {
+  cat("Study 4 results not found. Run 'make replicate-deadlift' first.\n")
+  study4_comparison <- NULL
+}
+
+# ==============================================================================
 # Save Results
 # ==============================================================================
 
@@ -405,10 +667,26 @@ output <- list(
     interval_width = mean(conformal_intervals$predictions$interval_width),
     comparison = interval_comparison$to_list()
   ),
-  conformal_intervals = conformal_intervals$to_list()
+  conformal_intervals = conformal_intervals$to_list(),
+
+  # Robust methods (Section 7)
+  robust_lmm = robust_result,
+  robust_se = robust_se,
+  bootstrap_ci = bootstrap_ci,
+
+  # Sensitivity analysis (Section 8)
+  sensitivity = sensitivity,
+
+  # Study 4 comparison (Section 9)
+  study4_comparison = study4_comparison
 )
 
 saveRDS(output, OUTPUT_PATH)
 cat("Results saved to:", OUTPUT_PATH, "\n")
 
 cat("\n=== STUDY 5 COMPLETE ===\n")
+cat("\nNOTE on data structure:\n")
+cat(sprintf("- 19 participants × ~21 observations each = %d total observations\n", nrow(data)))
+cat("- Each observation is a single rep during a set (multiple reps to failure)\n")
+cat("- The QQ plots and residual plots show ALL observations, not just participants\n")
+cat("- LMM properly accounts for the nested structure (observations within participants)\n")

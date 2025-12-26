@@ -526,6 +526,213 @@ LmmAnalyzer <- R6Class(
       } else {
         stats::predict(model, newdata = newdata, re.form = NA)
       }
+    },
+
+    #' @description Fit robust LMM using robustlmm package
+    #' @param data Data frame with observations
+    #' @param formula Formula for fixed effects
+    #' @param random_formula Random effects formula
+    #' @param model_name Optional name for the model
+    #' @return List with robust model and comparison to standard LMM
+    fit_robust = function(data, formula, random_formula = ~1 | id, model_name = "robust") {
+      # Check package availability using direct namespace call
+      if (!requireNamespace("robustlmm", quietly = TRUE)) {
+        stop("Package 'robustlmm' is required. Install with: renv::install('robustlmm')")
+      }
+
+      # Build full formula
+      full_formula <- private$.build_full_formula(formula, random_formula)
+      formula_string <- deparse(full_formula, width.cutoff = 500)
+
+      # Fit standard LMM for comparison using explicit namespace
+      standard_model <- lme4::lmer(full_formula, data = data, REML = TRUE)
+
+      # Fit robust LMM using explicit namespace
+      robust_model <- robustlmm::rlmer(full_formula, data = data, REML = TRUE)
+
+      # Extract coefficients
+      standard_coefs <- lme4::fixef(standard_model)
+      robust_coefs <- lme4::fixef(robust_model)
+
+      # Calculate differences
+      coef_diff <- robust_coefs - standard_coefs
+      pct_diff <- 100 * coef_diff / abs(standard_coefs)
+
+      # Summary table
+      comparison_table <- data.frame(
+        term = names(standard_coefs),
+        standard_estimate = standard_coefs,
+        robust_estimate = robust_coefs,
+        difference = coef_diff,
+        pct_difference = pct_diff,
+        row.names = NULL
+      )
+
+      list(
+        model_name = model_name,
+        formula = formula_string,
+        standard_model = standard_model,
+        robust_model = robust_model,
+        comparison_table = comparison_table,
+        conclusions_robust = max(abs(pct_diff)) < 10  # TRUE if <10% difference
+      )
+    },
+
+    #' @description Bootstrap confidence intervals for fixed effects
+    #' @param model_result LmmModelResult object
+    #' @param n_boot Number of bootstrap replicates
+    #' @param conf_level Confidence level
+    #' @param seed Random seed for reproducibility
+    #' @return Data frame with bootstrap CIs
+    bootstrap_ci = function(model_result, n_boot = 1000, conf_level = 0.95, seed = 42) {
+      model <- model_result$model
+
+      # Use lme4's parametric bootstrap
+      set.seed(seed)
+
+      boot_result <- tryCatch({
+        lme4::confint.merMod(
+          model,
+          method = "boot",
+          nsim = n_boot,
+          quiet = TRUE,
+          boot.type = "perc"
+        )
+      }, error = function(e) {
+        warning("Bootstrap failed, using Wald CI: ", e$message)
+        stats::confint(model, method = "Wald")
+      })
+
+      # Extract fixed effects rows
+      fixed_names <- names(lme4::fixef(model))
+      boot_ci <- as.data.frame(boot_result)
+
+      # Find fixed effect rows
+      fixed_rows <- rownames(boot_ci) %in% fixed_names
+      fixed_ci <- boot_ci[fixed_rows, , drop = FALSE]
+
+      data.frame(
+        term = rownames(fixed_ci),
+        estimate = lme4::fixef(model),
+        ci_lower = fixed_ci[, 1],
+        ci_upper = fixed_ci[, 2],
+        ci_width = fixed_ci[, 2] - fixed_ci[, 1],
+        method = if (inherits(boot_result, "try-error")) "Wald" else "Bootstrap",
+        row.names = NULL
+      )
+    },
+
+    #' @description Cluster-robust standard errors
+    #' @param model_result LmmModelResult object
+    #' @param cluster_var Name of clustering variable (default: from random effects)
+    #' @return Data frame with robust standard errors
+    cluster_robust_se = function(model_result, cluster_var = NULL) {
+      # Check package availability
+      if (!requireNamespace("clubSandwich", quietly = TRUE)) {
+        stop("Package 'clubSandwich' is required. Install with: renv::install('clubSandwich')")
+      }
+
+      model <- model_result$model
+
+      # Get CR2 covariance matrix (bias-reduced) using explicit namespace
+      vcov_cr2 <- clubSandwich::vcovCR(model, type = "CR2")
+
+      # Get standard Wald covariance
+      vcov_wald <- as.matrix(stats::vcov(model))
+
+      # Calculate SEs
+      se_wald <- sqrt(diag(vcov_wald))
+      se_robust <- sqrt(diag(vcov_cr2))
+
+      # Get estimates
+      estimates <- lme4::fixef(model)
+
+      # Use coef_test for robust inference with Satterthwaite degrees of freedom
+      coef_result <- clubSandwich::coef_test(model, vcov = vcov_cr2, test = "Satterthwaite")
+
+      data.frame(
+        term = names(estimates),
+        estimate = estimates,
+        se_wald = se_wald,
+        se_robust = se_robust,
+        se_ratio = se_robust / se_wald,
+        t_robust = coef_result$tstat,
+        p_robust = coef_result$p_Satt,
+        row.names = NULL
+      )
+    },
+
+    #' @description Sensitivity analysis: compare results across model specifications
+    #' @param data Data frame with observations
+    #' @param base_formula Base formula to test
+    #' @param random_formulas List of random effect specifications to try
+    #' @return Data frame summarizing sensitivity of results
+    sensitivity_analysis = function(data, base_formula,
+                                    random_formulas = list(
+                                      "random_intercept" = ~1 | id,
+                                      "random_slope" = ~1 + rir | id
+                                    )) {
+      results <- list()
+
+      for (name in names(random_formulas)) {
+        rf <- random_formulas[[name]]
+        result <- tryCatch({
+          self$fit(data, base_formula, rf, name, REML = TRUE)
+        }, error = function(e) {
+          warning("Model ", name, " failed: ", e$message)
+          NULL
+        })
+
+        if (!is.null(result)) {
+          results[[name]] <- result
+        }
+      }
+
+      # Extract key coefficient (RIR effect)
+      rir_effects <- data.frame(
+        model = character(),
+        rir_estimate = numeric(),
+        rir_se = numeric(),
+        aic = numeric(),
+        bic = numeric(),
+        r2_marginal = numeric(),
+        r2_conditional = numeric(),
+        stringsAsFactors = FALSE
+      )
+
+      for (name in names(results)) {
+        r <- results[[name]]
+        coefs <- self$get_fixed_effects(r)
+        rir_row <- coefs[coefs$term == "rir", ]
+
+        rir_effects <- rbind(rir_effects, data.frame(
+          model = name,
+          rir_estimate = rir_row$estimate,
+          rir_se = rir_row$std_error,
+          aic = r$aic,
+          bic = r$bic,
+          r2_marginal = r$r2_marginal,
+          r2_conditional = r$r2_conditional,
+          stringsAsFactors = FALSE
+        ))
+      }
+
+      # Calculate summary statistics
+      rir_mean <- mean(rir_effects$rir_estimate)
+      rir_sd <- stats::sd(rir_effects$rir_estimate)
+      rir_range <- diff(range(rir_effects$rir_estimate))
+
+      list(
+        model_results = results,
+        rir_effects = rir_effects,
+        summary = list(
+          rir_mean = rir_mean,
+          rir_sd = rir_sd,
+          rir_range = rir_range,
+          rir_cv = 100 * rir_sd / abs(rir_mean),
+          conclusions_robust = rir_range / abs(rir_mean) < 0.1  # <10% variation
+        )
+      )
     }
   ),
 

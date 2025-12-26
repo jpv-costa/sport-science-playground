@@ -21,7 +21,9 @@
       "Bash(/usr/lib/rstudio/resources/app/bin/quarto/bin/quarto render:*)",
       "Bash(ls:*)",
       "Bash(wc:*)",
-      "Bash(cat:*)"
+      "Bash(cat:*)",
+      "Bash(head:*)",
+      "Bash(grep:*)"
     ]
   }
 }
