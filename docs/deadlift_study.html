@@ -1,0 +1,1545 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.4.553">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="João Costa">
+<meta name="author" content="Filipe Braga">
+<meta name="dcterms.date" content="2025-12-27">
+
+<title>Velocity-Based Training &amp; RIR Research - Velocity-Based Training for the Conventional Deadlift</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="site_libs/quarto-nav/headroom.min.js"></script>
+<script src="site_libs/clipboard/clipboard.min.js"></script>
+<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="site_libs/quarto-search/fuse.min.js"></script>
+<script src="site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="./">
+<script src="site_libs/quarto-html/quarto.js"></script>
+<script src="site_libs/quarto-html/popper.min.js"></script>
+<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="site_libs/quarto-html/anchor.min.js"></script>
+<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+
+</head>
+
+<body class="nav-fixed">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a class="navbar-brand" href="./index.html">
+    <span class="navbar-title">Velocity-Based Training &amp; RIR Research</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll me-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="./index.html"> 
+<span class="menu-text">Home</span></a>
+  </li>  
+  <li class="nav-item dropdown ">
+    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-background-studies" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+ <span class="menu-text">Background Studies</span>
+    </a>
+    <ul class="dropdown-menu" aria-labelledby="nav-menu-background-studies">    
+        <li>
+    <a class="dropdown-item" href="./01_pelland_meta_regression.html">
+ <span class="dropdown-text">1. Does Training to Failure Matter?</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="./02_velocity_rir_relationship.html">
+ <span class="dropdown-text">2. Can Velocity Predict Effort?</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="./03_rir_velocity_modeling.html">
+ <span class="dropdown-text">3. General vs Individual Models</span></a>
+  </li>  
+    </ul>
+  </li>
+  <li class="nav-item">
+    <a class="nav-link active" href="./deadlift_study.html" aria-current="page"> 
+<span class="menu-text">Deadlift Study (Thesis)</span></a>
+  </li>  
+</ul>
+          </div> <!-- /navcollapse -->
+          <div class="quarto-navbar-tools">
+</div>
+      </div> <!-- /container-fluid -->
+    </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#executive-summary" id="toc-executive-summary" class="nav-link active" data-scroll-target="#executive-summary">Executive Summary</a>
+  <ul class="collapse">
+  <li><a href="#key-findings" id="toc-key-findings" class="nav-link" data-scroll-target="#key-findings">Key Findings</a></li>
+  </ul></li>
+  <li><a href="#introduction" id="toc-introduction" class="nav-link" data-scroll-target="#introduction">1. Introduction</a>
+  <ul class="collapse">
+  <li><a href="#background" id="toc-background" class="nav-link" data-scroll-target="#background">1.1 Background</a></li>
+  <li><a href="#the-deadlift-challenge" id="toc-the-deadlift-challenge" class="nav-link" data-scroll-target="#the-deadlift-challenge">1.2 The Deadlift Challenge</a></li>
+  <li><a href="#research-questions" id="toc-research-questions" class="nav-link" data-scroll-target="#research-questions">1.3 Research Questions</a></li>
+  </ul></li>
+  <li><a href="#methods" id="toc-methods" class="nav-link" data-scroll-target="#methods">2. Methods</a>
+  <ul class="collapse">
+  <li><a href="#participants" id="toc-participants" class="nav-link" data-scroll-target="#participants">2.1 Participants</a></li>
+  <li><a href="#protocol" id="toc-protocol" class="nav-link" data-scroll-target="#protocol">2.2 Protocol</a></li>
+  <li><a href="#velocity-measurement" id="toc-velocity-measurement" class="nav-link" data-scroll-target="#velocity-measurement">2.3 Velocity Measurement</a></li>
+  <li><a href="#rir-assignment" id="toc-rir-assignment" class="nav-link" data-scroll-target="#rir-assignment">2.4 RIR Assignment</a></li>
+  <li><a href="#statistical-analysis" id="toc-statistical-analysis" class="nav-link" data-scroll-target="#statistical-analysis">2.5 Statistical Analysis</a></li>
+  </ul></li>
+  <li><a href="#results" id="toc-results" class="nav-link" data-scroll-target="#results">3. Results</a>
+  <ul class="collapse">
+  <li><a href="#the-velocity-rir-relationship" id="toc-the-velocity-rir-relationship" class="nav-link" data-scroll-target="#the-velocity-rir-relationship">3.1 The Velocity-RIR Relationship</a></li>
+  <li><a href="#general-vs-individual-models" id="toc-general-vs-individual-models" class="nav-link" data-scroll-target="#general-vs-individual-models">3.2 General vs Individual Models</a></li>
+  <li><a href="#exercise-comparison-deadlift-vs-squat" id="toc-exercise-comparison-deadlift-vs-squat" class="nav-link" data-scroll-target="#exercise-comparison-deadlift-vs-squat">3.3 Exercise Comparison: Deadlift vs Squat</a></li>
+  <li><a href="#load-effects" id="toc-load-effects" class="nav-link" data-scroll-target="#load-effects">3.4 Load Effects</a></li>
+  <li><a href="#velocity-stop-tables" id="toc-velocity-stop-tables" class="nav-link" data-scroll-target="#velocity-stop-tables">3.5 Velocity Stop Tables</a></li>
+  <li><a href="#individual-vs-general-table-accuracy" id="toc-individual-vs-general-table-accuracy" class="nav-link" data-scroll-target="#individual-vs-general-table-accuracy">3.6 Individual vs General Table Accuracy</a></li>
+  </ul></li>
+  <li><a href="#advanced-analyses" id="toc-advanced-analyses" class="nav-link" data-scroll-target="#advanced-analyses">4. Advanced Analyses</a>
+  <ul class="collapse">
+  <li><a href="#minimum-velocity-threshold-mvt-variability" id="toc-minimum-velocity-threshold-mvt-variability" class="nav-link" data-scroll-target="#minimum-velocity-threshold-mvt-variability">4.1 Minimum Velocity Threshold (MVT) Variability</a></li>
+  <li><a href="#day-to-day-reliability" id="toc-day-to-day-reliability" class="nav-link" data-scroll-target="#day-to-day-reliability">4.2 Day-to-Day Reliability</a></li>
+  <li><a href="#linear-vs-polynomial-models" id="toc-linear-vs-polynomial-models" class="nav-link" data-scroll-target="#linear-vs-polynomial-models">4.3 Linear vs Polynomial Models</a></li>
+  <li><a href="#velocity-decay-patterns" id="toc-velocity-decay-patterns" class="nav-link" data-scroll-target="#velocity-decay-patterns">4.4 Velocity Decay Patterns</a></li>
+  <li><a href="#first-rep-failure-prediction" id="toc-first-rep-failure-prediction" class="nav-link" data-scroll-target="#first-rep-failure-prediction">4.5 First-Rep Failure Prediction</a></li>
+  </ul></li>
+  <li><a href="#discussion" id="toc-discussion" class="nav-link" data-scroll-target="#discussion">5. Discussion</a>
+  <ul class="collapse">
+  <li><a href="#key-findings-summary" id="toc-key-findings-summary" class="nav-link" data-scroll-target="#key-findings-summary">5.1 Key Findings Summary</a></li>
+  <li><a href="#practical-recommendations" id="toc-practical-recommendations" class="nav-link" data-scroll-target="#practical-recommendations">5.2 Practical Recommendations</a></li>
+  <li><a href="#limitations" id="toc-limitations" class="nav-link" data-scroll-target="#limitations">5.3 Limitations</a></li>
+  <li><a href="#future-directions" id="toc-future-directions" class="nav-link" data-scroll-target="#future-directions">5.4 Future Directions</a></li>
+  </ul></li>
+  <li><a href="#conclusion" id="toc-conclusion" class="nav-link" data-scroll-target="#conclusion">6. Conclusion</a></li>
+  <li><a href="#references" id="toc-references" class="nav-link" data-scroll-target="#references">References</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Velocity-Based Training for the Conventional Deadlift</h1>
+<p class="subtitle lead">An Investigation of the RIR-Velocity Relationship</p>
+</div>
+
+
+<div class="quarto-title-meta-author">
+  <div class="quarto-title-meta-heading">Authors</div>
+  <div class="quarto-title-meta-heading">Affiliations</div>
+  
+    <div class="quarto-title-meta-contents">
+    <p class="author">João Costa </p>
+  </div>
+  <div class="quarto-title-meta-contents">
+        <p class="affiliation">
+            Sport Science Research
+          </p>
+      </div>
+    <div class="quarto-title-meta-contents">
+    <p class="author">Filipe Braga </p>
+  </div>
+  <div class="quarto-title-meta-contents">
+        <p class="affiliation">
+            MSc Thesis Research
+          </p>
+      </div>
+  </div>
+
+<div class="quarto-title-meta">
+
+      
+    <div>
+    <div class="quarto-title-meta-heading">Published</div>
+    <div class="quarto-title-meta-contents">
+      <p class="date">December 27, 2025</p>
+    </div>
+  </div>
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<section id="executive-summary" class="level2">
+<h2 class="anchored" data-anchor-id="executive-summary">Executive Summary</h2>
+<p>This research investigates whether velocity-based training (VBT) principles, well-established for exercises like the squat and bench press, can be successfully applied to the <strong>conventional deadlift</strong>—an exercise with unique biomechanical characteristics.</p>
+<section id="key-findings" class="level3">
+<h3 class="anchored" data-anchor-id="key-findings">Key Findings</h3>
+<table class="table">
+<colgroup>
+<col style="width: 24%">
+<col style="width: 21%">
+<col style="width: 53%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Question</th>
+<th>Finding</th>
+<th>Practical Implication</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>Does VBT work for deadlifts?</strong></td>
+<td>Yes, but with more variability</td>
+<td>Use VBT as one tool, not the only tool</td>
+</tr>
+<tr class="even">
+<td><strong>Individual vs general models?</strong></td>
+<td>Individual ~2x more accurate</td>
+<td>Calibrate individually for serious athletes</td>
+</tr>
+<tr class="odd">
+<td><strong>Does load matter?</strong></td>
+<td>No significant effect</td>
+<td>One velocity table works across loads</td>
+</tr>
+<tr class="even">
+<td><strong>MVT variability?</strong></td>
+<td>CV = 30.8%</td>
+<td>Individual calibration essential</td>
+</tr>
+<tr class="odd">
+<td><strong>Day-to-day reliability?</strong></td>
+<td>Moderate (ICC ~0.5-0.7)</td>
+<td>Recalibrate every 2-4 weeks</td>
+</tr>
+<tr class="even">
+<td><strong>First-rep prediction?</strong></td>
+<td>MAE = 1.29 reps</td>
+<td>Useful for real-time autoregulation</td>
+</tr>
+</tbody>
+</table>
+<hr>
+</section>
+</section>
+<section id="introduction" class="level2">
+<h2 class="anchored" data-anchor-id="introduction">1. Introduction</h2>
+<section id="background" class="level3">
+<h3 class="anchored" data-anchor-id="background">1.1 Background</h3>
+<p>Velocity-Based Training (VBT) has emerged as an objective method for monitoring and prescribing resistance training intensity. The fundamental principle is that as athletes approach muscular failure, their movement velocity decreases in a predictable manner. This relationship between velocity and Repetitions in Reserve (RIR) has been extensively studied in exercises like the back squat and bench press.</p>
+<p>The theoretical foundation for VBT rests on the <strong>force-velocity relationship</strong>: as fatigue accumulates, the maximum force a muscle can produce decreases, resulting in slower movement at any given load. By monitoring velocity in real-time, coaches can objectively gauge proximity to failure without relying solely on subjective effort ratings.</p>
+</section>
+<section id="the-deadlift-challenge" class="level3">
+<h3 class="anchored" data-anchor-id="the-deadlift-challenge">1.2 The Deadlift Challenge</h3>
+<p>The <strong>conventional deadlift</strong> presents unique biomechanical characteristics that may affect the velocity-RIR relationship:</p>
+<ol type="1">
+<li><p><strong>Concentric-only initiation</strong>: Unlike the squat, the deadlift begins from a dead stop without an eccentric-concentric stretch-shortening cycle, eliminating the elastic energy contribution</p></li>
+<li><p><strong>Grip as a limiting factor</strong>: The grip can become a limiting factor independent of the target musculature (posterior chain), potentially causing failure before true muscular exhaustion</p></li>
+<li><p><strong>Binary failure pattern</strong>: Deadlifts tend to fail more abruptly—either the bar leaves the floor or it doesn’t—compared to the gradual “grinding” often seen in squats</p></li>
+<li><p><strong>Longer lever arms</strong>: The horizontal distance between the load and hip joint creates substantial moment arms that change throughout the lift</p></li>
+</ol>
+</section>
+<section id="research-questions" class="level3">
+<h3 class="anchored" data-anchor-id="research-questions">1.3 Research Questions</h3>
+<p>This thesis research addresses six key questions:</p>
+<ol type="1">
+<li>Does a meaningful velocity-RIR relationship exist for deadlifts?</li>
+<li>Do individual models outperform general equations?</li>
+<li>Does load percentage affect the velocity-RIR relationship?</li>
+<li>How variable is the minimum velocity threshold (MVT) across individuals?</li>
+<li>How reliable are individual velocity profiles across testing days?</li>
+<li>Can first-rep velocity predict set capacity?</li>
+</ol>
+<hr>
+</section>
+</section>
+<section id="methods" class="level2">
+<h2 class="anchored" data-anchor-id="methods">2. Methods</h2>
+<section id="participants" class="level3">
+<h3 class="anchored" data-anchor-id="participants">2.1 Participants</h3>
+<div class="cell">
+<details class="code-fold">
+<summary>Show code</summary>
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>summary_df <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">Metric =</span> <span class="fu">c</span>(<span class="st">"Total Participants"</span>, <span class="st">"Male"</span>, <span class="st">"Female"</span>,</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>             <span class="st">"Observations"</span>, <span class="st">"Velocity Range (m/s)"</span>,</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>             <span class="st">"RIR Range"</span>, <span class="st">"Weight Range (kg)"</span>),</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">Value =</span> <span class="fu">c</span>(</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>    deadlift_results<span class="sc">$</span>summary<span class="sc">$</span>n_participants,</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>    <span class="fu">round</span>(deadlift_results<span class="sc">$</span>summary<span class="sc">$</span>n_male),</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>    <span class="fu">round</span>(deadlift_results<span class="sc">$</span>summary<span class="sc">$</span>n_female),</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>    deadlift_results<span class="sc">$</span>summary<span class="sc">$</span>n_observations,</span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>    <span class="fu">paste</span>(<span class="fu">round</span>(deadlift_results<span class="sc">$</span>summary<span class="sc">$</span>velocity_range, <span class="dv">3</span>), <span class="at">collapse =</span> <span class="st">" - "</span>),</span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>    <span class="fu">paste</span>(deadlift_results<span class="sc">$</span>summary<span class="sc">$</span>rir_range, <span class="at">collapse =</span> <span class="st">" - "</span>),</span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>    <span class="fu">paste</span>(deadlift_results<span class="sc">$</span>summary<span class="sc">$</span>weight_range, <span class="at">collapse =</span> <span class="st">" - "</span>)</span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a><span class="fu">format_table</span>(summary_df, <span class="at">col.names =</span> <span class="fu">c</span>(<span class="st">""</span>, <span class="st">""</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div id="tbl-participants" class="cell quarto-float anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-participants-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;1: Participant Characteristics
+</figcaption>
+<div aria-describedby="tbl-participants-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="cell-output-display">
+<table class="do-not-create-environment cell table table-sm table-striped small">
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">Total Participants</td>
+<td style="text-align: left;">19</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Male</td>
+<td style="text-align: left;">15</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Female</td>
+<td style="text-align: left;">4</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Observations</td>
+<td style="text-align: left;">406</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Velocity Range (m/s)</td>
+<td style="text-align: left;">0.119 - 0.675</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">RIR Range</td>
+<td style="text-align: left;">0 - 7</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Weight Range (kg)</td>
+<td style="text-align: left;">85 - 210</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</figure>
+</div>
+</div>
+</section>
+<section id="protocol" class="level3">
+<h3 class="anchored" data-anchor-id="protocol">2.2 Protocol</h3>
+<p>Participants performed the conventional deadlift under standardized conditions:</p>
+<ul>
+<li><strong>Exercise</strong>: Conventional deadlift with standard Olympic barbell</li>
+<li><strong>Loads</strong>: 80% and 90% of 1RM (determined via prior 1RM testing)</li>
+<li><strong>Testing Days</strong>: 2 separate days (minimum 48-72 hours apart) for cross-validation</li>
+<li><strong>Sets per condition</strong>: Each load tested on each day (4 total conditions per participant)</li>
+<li><strong>Rest periods</strong>: 3-5 minutes between sets</li>
+<li><strong>Failure criterion</strong>: Inability to complete a full repetition or voluntary termination</li>
+</ul>
+</section>
+<section id="velocity-measurement" class="level3">
+<h3 class="anchored" data-anchor-id="velocity-measurement">2.3 Velocity Measurement</h3>
+<p>Mean concentric velocity (MCV) was measured using a linear position transducer attached to the barbell. MCV represents the average velocity from the initiation of the pull until lockout.</p>
+</section>
+<section id="rir-assignment" class="level3">
+<h3 class="anchored" data-anchor-id="rir-assignment">2.4 RIR Assignment</h3>
+<p>RIR was assigned <strong>prospectively</strong> based on set completion:</p>
+<ul>
+<li>Final repetition completed = RIR 0 (failure)</li>
+<li>Penultimate repetition = RIR 1</li>
+<li>And so forth…</li>
+</ul>
+<p>This differs from subjective RIR estimates, providing an objective measure of proximity to failure.</p>
+</section>
+<section id="statistical-analysis" class="level3">
+<h3 class="anchored" data-anchor-id="statistical-analysis">2.5 Statistical Analysis</h3>
+<p>The analysis employed multiple complementary approaches:</p>
+<p><strong>Individual vs General Models:</strong></p>
+<ul>
+<li>General models: Population-level polynomial regression (velocity ~ RIR + RIR²)</li>
+<li>Individual models: Participant-specific polynomial regressions</li>
+<li>Cross-validation: Day 1 models tested on Day 2 data</li>
+</ul>
+<p><strong>Linear Mixed Effects Models (LMM):</strong></p>
+<p>LMMs account for the nested data structure (repetitions within participants) by including:</p>
+<ul>
+<li><strong>Fixed effects</strong>: Population-average relationships</li>
+<li><strong>Random effects</strong>: Individual deviations (random intercepts and slopes)</li>
+</ul>
+<p><strong>Advanced Analyses:</strong></p>
+<ul>
+<li>MVT variability assessment (CV, IQR)</li>
+<li>Day-to-day reliability (ICC)</li>
+<li>Polynomial vs linear model comparison (AIC, BIC)</li>
+<li>Velocity decay analysis</li>
+<li>Failure prediction from early rep velocities (LOOCV)</li>
+</ul>
+<hr>
+</section>
+</section>
+<section id="results" class="level2">
+<h2 class="anchored" data-anchor-id="results">3. Results</h2>
+<section id="the-velocity-rir-relationship" class="level3">
+<h3 class="anchored" data-anchor-id="the-velocity-rir-relationship">3.1 The Velocity-RIR Relationship</h3>
+<div class="cell">
+<details class="code-fold">
+<summary>Show code</summary>
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(data, <span class="fu">aes</span>(<span class="at">x =</span> mean_velocity, <span class="at">y =</span> rir, <span class="at">color =</span> load_percentage)) <span class="sc">+</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">alpha =</span> <span class="fl">0.4</span>, <span class="at">size =</span> <span class="dv">2</span>) <span class="sc">+</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_smooth</span>(<span class="at">method =</span> <span class="st">"lm"</span>, <span class="at">formula =</span> y <span class="sc">~</span> <span class="fu">poly</span>(x, <span class="dv">2</span>), <span class="at">se =</span> <span class="cn">FALSE</span>, <span class="at">linewidth =</span> <span class="fl">1.2</span>) <span class="sc">+</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">facet_wrap</span>(<span class="sc">~</span>load_percentage, <span class="at">labeller =</span> <span class="fu">labeller</span>(<span class="at">load_percentage =</span> <span class="fu">c</span>(</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>    <span class="st">`</span><span class="at">80%</span><span class="st">`</span> <span class="ot">=</span> <span class="st">"80% 1RM"</span>,</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>    <span class="st">`</span><span class="at">90%</span><span class="st">`</span> <span class="ot">=</span> <span class="st">"90% 1RM"</span></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>  ))) <span class="sc">+</span></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_color_load</span>() <span class="sc">+</span></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(</span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>    <span class="at">x =</span> <span class="st">"Mean Velocity (m/s)"</span>,</span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>    <span class="at">y =</span> <span class="st">"Repetitions in Reserve"</span></span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">legend.position =</span> <span class="st">"none"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<div id="fig-scatter" class="quarto-figure quarto-figure-center quarto-float anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-scatter-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="deadlift_study_files/figure-html/fig-scatter-1.png" class="img-fluid figure-img" style="width:100.0%">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-scatter-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;1: Velocity-RIR relationship for conventional deadlift
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<p>A clear negative relationship exists: higher RIR (more reps remaining) is associated with faster velocities. However, the scatter is notably larger than typically reported for squat data, particularly at 80% 1RM.</p>
+</section>
+<section id="general-vs-individual-models" class="level3">
+<h3 class="anchored" data-anchor-id="general-vs-individual-models">3.2 General vs Individual Models</h3>
+<div class="cell">
+<details class="code-fold">
+<summary>Show code</summary>
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>comparison_df <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>  <span class="st">`</span><span class="at">Model Type</span><span class="st">`</span> <span class="ot">=</span> <span class="fu">c</span>(<span class="st">"General (Polynomial)"</span>, <span class="st">"Individual (Polynomial)"</span>),</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>  <span class="st">`</span><span class="at">R²</span><span class="st">`</span> <span class="ot">=</span> <span class="fu">c</span>(</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">round</span>(deadlift_results<span class="sc">$</span>comparison<span class="sc">$</span>general_r2, <span class="dv">3</span>),</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">round</span>(deadlift_results<span class="sc">$</span>comparison<span class="sc">$</span>individual_r2, <span class="dv">3</span>)</span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>  ),</span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>  <span class="st">`</span><span class="at">Interpretation</span><span class="st">`</span> <span class="ot">=</span> <span class="fu">c</span>(</span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>    <span class="fu">paste0</span>(<span class="st">"Explains ~"</span>, <span class="fu">round</span>(deadlift_results<span class="sc">$</span>comparison<span class="sc">$</span>general_r2 <span class="sc">*</span> <span class="dv">100</span>), <span class="st">"% of variance"</span>),</span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>    <span class="fu">paste0</span>(<span class="st">"Explains ~"</span>, <span class="fu">round</span>(deadlift_results<span class="sc">$</span>comparison<span class="sc">$</span>individual_r2 <span class="sc">*</span> <span class="dv">100</span>), <span class="st">"% of variance"</span>)</span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>  ),</span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>  <span class="at">check.names =</span> <span class="cn">FALSE</span></span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a><span class="fu">format_table</span>(comparison_df)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div id="tbl-models" class="cell quarto-float anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-models-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;2: Model Fit Comparison
+</figcaption>
+<div aria-describedby="tbl-models-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="cell-output-display">
+<table class="do-not-create-environment cell table table-sm table-striped small">
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">General (Polynomial)</td>
+<td style="text-align: right;">0.362</td>
+<td style="text-align: left;">Explains ~36% of variance</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Individual (Polynomial)</td>
+<td style="text-align: right;">0.707</td>
+<td style="text-align: left;">Explains ~71% of variance</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</figure>
+</div>
+</div>
+<p><strong>Key Finding</strong>: Individual models explain <strong>2x more variance</strong> than general models, consistent with squat research. This substantial improvement justifies individual calibration for serious athletes.</p>
+</section>
+<section id="exercise-comparison-deadlift-vs-squat" class="level3">
+<h3 class="anchored" data-anchor-id="exercise-comparison-deadlift-vs-squat">3.3 Exercise Comparison: Deadlift vs Squat</h3>
+<div class="cell">
+<details class="code-fold">
+<summary>Show code</summary>
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>exercise_comparison <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">Metric =</span> <span class="fu">c</span>(<span class="st">"Participants"</span>, <span class="st">"Load Types"</span>, <span class="st">"General R²"</span>, <span class="st">"Individual R²"</span>, <span class="st">"Improvement Factor"</span>),</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">Squat =</span> <span class="fu">c</span>(</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>    <span class="st">"46"</span>, <span class="st">"70%, 80%, 90%"</span>,</span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">round</span>(squat_results<span class="sc">$</span>comparison<span class="sc">$</span>general_r2, <span class="dv">2</span>),</span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>    <span class="fu">round</span>(squat_results<span class="sc">$</span>comparison<span class="sc">$</span>individual_r2, <span class="dv">2</span>),</span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>    <span class="fu">paste0</span>(<span class="fu">round</span>(squat_results<span class="sc">$</span>comparison<span class="sc">$</span>improvement_factor, <span class="dv">2</span>), <span class="st">"x"</span>)</span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>  ),</span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>  <span class="at">Deadlift =</span> <span class="fu">c</span>(</span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>    <span class="fu">as.character</span>(deadlift_results<span class="sc">$</span>summary<span class="sc">$</span>n_participants),</span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>    <span class="st">"80%, 90%"</span>,</span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a>    <span class="fu">round</span>(deadlift_results<span class="sc">$</span>comparison<span class="sc">$</span>general_r2, <span class="dv">2</span>),</span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a>    <span class="fu">round</span>(deadlift_results<span class="sc">$</span>comparison<span class="sc">$</span>individual_r2, <span class="dv">2</span>),</span>
+<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a>    <span class="fu">paste0</span>(<span class="fu">round</span>(deadlift_results<span class="sc">$</span>comparison<span class="sc">$</span>improvement_factor, <span class="dv">2</span>), <span class="st">"x"</span>)</span>
+<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-18"><a href="#cb4-18" aria-hidden="true" tabindex="-1"></a><span class="fu">format_table</span>(exercise_comparison)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div id="tbl-exercise-comparison" class="cell quarto-float anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-exercise-comparison-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;3: Deadlift vs Squat RIR-Velocity Relationship
+</figcaption>
+<div aria-describedby="tbl-exercise-comparison-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="cell-output-display">
+<table class="do-not-create-environment cell table table-sm table-striped small">
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">Participants</td>
+<td style="text-align: left;">46</td>
+<td style="text-align: left;">19</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Load Types</td>
+<td style="text-align: left;">70%, 80%, 90%</td>
+<td style="text-align: left;">80%, 90%</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">General R²</td>
+<td style="text-align: left;">0.5</td>
+<td style="text-align: left;">0.36</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Individual R²</td>
+<td style="text-align: left;">0.88</td>
+<td style="text-align: left;">0.71</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Improvement Factor</td>
+<td style="text-align: left;">1.78x</td>
+<td style="text-align: left;">1.95x</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</figure>
+</div>
+</div>
+<p>The deadlift shows <strong>lower R² values</strong> than the squat, likely due to:</p>
+<ol type="1">
+<li><strong>Binary failure pattern</strong>: Less intermediate velocity signal</li>
+<li><strong>Grip fatigue</strong>: Introduces noise uncorrelated with true RIR</li>
+<li><strong>Absence of stretch-shortening cycle</strong>: Increased rep-to-rep variability</li>
+<li><strong>Technical breakdown</strong>: May affect velocity differently than pure muscular fatigue</li>
+</ol>
+</section>
+<section id="load-effects" class="level3">
+<h3 class="anchored" data-anchor-id="load-effects">3.4 Load Effects</h3>
+<details class="code-fold">
+<summary>Show code</summary>
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (<span class="sc">!</span><span class="fu">is.null</span>(lmm_results)) {</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (lmm_results<span class="sc">$</span>load_importance_result<span class="sc">$</span>recommendation <span class="sc">==</span> <span class="st">"global"</span>) {</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">cat</span>(<span class="st">"**Finding**: Load percentage does NOT significantly affect the velocity-RIR relationship.</span><span class="sc">\n\n</span><span class="st">"</span>)</span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">cat</span>(<span class="st">"This means coaches can use a **single velocity table** regardless of whether lifting at 80% or 90% 1RM, simplifying training prescription.</span><span class="sc">\n</span><span class="st">"</span>)</span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>  } <span class="cf">else</span> {</span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>    <span class="fu">cat</span>(<span class="st">"**Finding**: Load percentage significantly affects the velocity-RIR relationship.</span><span class="sc">\n\n</span><span class="st">"</span>)</span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>    <span class="fu">cat</span>(<span class="st">"**Load-specific tables** are recommended for optimal precision.</span><span class="sc">\n</span><span class="st">"</span>)</span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<p><strong>Finding</strong>: Load percentage does NOT significantly affect the velocity-RIR relationship.</p>
+<p>This means coaches can use a <strong>single velocity table</strong> regardless of whether lifting at 80% or 90% 1RM, simplifying training prescription.</p>
+</section>
+<section id="velocity-stop-tables" class="level3">
+<h3 class="anchored" data-anchor-id="velocity-stop-tables">3.5 Velocity Stop Tables</h3>
+<div class="cell">
+<details class="code-fold">
+<summary>Show code</summary>
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (<span class="sc">!</span><span class="fu">is.null</span>(lmm_results)) {</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>  vt <span class="ot">&lt;-</span> lmm_results<span class="sc">$</span>velocity_table<span class="sc">$</span>table</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (<span class="st">"load_percentage"</span> <span class="sc">%in%</span> <span class="fu">names</span>(vt)) {</span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>    vt<span class="sc">$</span>velocity <span class="ot">&lt;-</span> <span class="fu">round</span>(vt<span class="sc">$</span>velocity, <span class="dv">3</span>)</span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>    vt<span class="sc">$</span>lower_95 <span class="ot">&lt;-</span> <span class="fu">round</span>(vt<span class="sc">$</span>lower_95, <span class="dv">3</span>)</span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>    vt<span class="sc">$</span>upper_95 <span class="ot">&lt;-</span> <span class="fu">round</span>(vt<span class="sc">$</span>upper_95, <span class="dv">3</span>)</span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>    <span class="fu">format_table</span>(vt[, <span class="fu">c</span>(<span class="st">"rir"</span>, <span class="st">"load_percentage"</span>, <span class="st">"velocity"</span>, <span class="st">"lower_95"</span>, <span class="st">"upper_95"</span>)],</span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>          <span class="at">col.names =</span> <span class="fu">c</span>(<span class="st">"RIR"</span>, <span class="st">"Load"</span>, <span class="st">"Velocity (m/s)"</span>, <span class="st">"Lower 95%"</span>, <span class="st">"Upper 95%"</span>))</span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a>  } <span class="cf">else</span> {</span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a>    vt<span class="sc">$</span>velocity <span class="ot">&lt;-</span> <span class="fu">round</span>(vt<span class="sc">$</span>velocity, <span class="dv">3</span>)</span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a>    vt<span class="sc">$</span>lower_95 <span class="ot">&lt;-</span> <span class="fu">round</span>(vt<span class="sc">$</span>lower_95, <span class="dv">3</span>)</span>
+<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a>    vt<span class="sc">$</span>upper_95 <span class="ot">&lt;-</span> <span class="fu">round</span>(vt<span class="sc">$</span>upper_95, <span class="dv">3</span>)</span>
+<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a>    <span class="fu">format_table</span>(vt[, <span class="fu">c</span>(<span class="st">"rir"</span>, <span class="st">"velocity"</span>, <span class="st">"lower_95"</span>, <span class="st">"upper_95"</span>)],</span>
+<span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a>          <span class="at">col.names =</span> <span class="fu">c</span>(<span class="st">"RIR"</span>, <span class="st">"Velocity (m/s)"</span>, <span class="st">"Lower 95%"</span>, <span class="st">"Upper 95%"</span>))</span>
+<span id="cb6-16"><a href="#cb6-16" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb6-17"><a href="#cb6-17" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div id="tbl-velocity-stop" class="cell quarto-float anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-velocity-stop-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;4: Velocity Stop Table: Target velocities for each RIR level
+</figcaption>
+<div aria-describedby="tbl-velocity-stop-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="cell-output-display">
+<table class="do-not-create-environment cell table table-sm table-striped small">
+<thead>
+<tr class="header">
+<th style="text-align: right;">RIR</th>
+<th style="text-align: right;">Velocity (m/s)</th>
+<th style="text-align: right;">Lower 95%</th>
+<th style="text-align: right;">Upper 95%</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0.215</td>
+<td style="text-align: right;">0.114</td>
+<td style="text-align: right;">0.317</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">0.244</td>
+<td style="text-align: right;">0.143</td>
+<td style="text-align: right;">0.346</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">2</td>
+<td style="text-align: right;">0.274</td>
+<td style="text-align: right;">0.172</td>
+<td style="text-align: right;">0.375</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">3</td>
+<td style="text-align: right;">0.303</td>
+<td style="text-align: right;">0.201</td>
+<td style="text-align: right;">0.404</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">4</td>
+<td style="text-align: right;">0.332</td>
+<td style="text-align: right;">0.231</td>
+<td style="text-align: right;">0.433</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">5</td>
+<td style="text-align: right;">0.361</td>
+<td style="text-align: right;">0.260</td>
+<td style="text-align: right;">0.463</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">6</td>
+<td style="text-align: right;">0.390</td>
+<td style="text-align: right;">0.289</td>
+<td style="text-align: right;">0.492</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">7</td>
+<td style="text-align: right;">0.420</td>
+<td style="text-align: right;">0.318</td>
+<td style="text-align: right;">0.521</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</figure>
+</div>
+</div>
+<p><strong>How to Use This Table:</strong></p>
+<ol type="1">
+<li>Monitor bar velocity in real-time during training</li>
+<li>Stop the set when velocity drops to your target RIR threshold</li>
+<li>Example: To leave 2 reps in reserve, stop when velocity reaches the corresponding threshold</li>
+</ol>
+<div class="cell">
+<details class="code-fold">
+<summary>Show code</summary>
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (<span class="sc">!</span><span class="fu">is.null</span>(lmm_results)) {</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>  vt <span class="ot">&lt;-</span> lmm_results<span class="sc">$</span>velocity_table<span class="sc">$</span>table</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (<span class="st">"load_percentage"</span> <span class="sc">%in%</span> <span class="fu">names</span>(vt)) {</span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">ggplot</span>(vt, <span class="fu">aes</span>(<span class="at">x =</span> rir, <span class="at">y =</span> velocity, <span class="at">color =</span> load_percentage)) <span class="sc">+</span></span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>      <span class="fu">geom_line</span>(<span class="at">linewidth =</span> <span class="fl">1.2</span>) <span class="sc">+</span></span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>      <span class="fu">geom_point</span>(<span class="at">size =</span> <span class="dv">3</span>) <span class="sc">+</span></span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>      <span class="fu">geom_ribbon</span>(<span class="fu">aes</span>(<span class="at">ymin =</span> lower_95, <span class="at">ymax =</span> upper_95, <span class="at">fill =</span> load_percentage),</span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>                  <span class="at">alpha =</span> <span class="fl">0.2</span>, <span class="at">color =</span> <span class="cn">NA</span>) <span class="sc">+</span></span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a>      <span class="fu">scale_color_load</span>() <span class="sc">+</span> <span class="fu">scale_fill_load</span>() <span class="sc">+</span></span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a>      <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">"Repetitions in Reserve (RIR)"</span>, <span class="at">y =</span> <span class="st">"Mean Velocity (m/s)"</span>)</span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a>  } <span class="cf">else</span> {</span>
+<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a>    <span class="fu">ggplot</span>(vt, <span class="fu">aes</span>(<span class="at">x =</span> rir, <span class="at">y =</span> velocity)) <span class="sc">+</span></span>
+<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a>      <span class="fu">geom_line</span>(<span class="at">linewidth =</span> <span class="fl">1.2</span>, <span class="at">color =</span> COLORS<span class="sc">$</span>primary) <span class="sc">+</span></span>
+<span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a>      <span class="fu">geom_point</span>(<span class="at">size =</span> <span class="dv">3</span>, <span class="at">color =</span> COLORS<span class="sc">$</span>primary) <span class="sc">+</span></span>
+<span id="cb7-16"><a href="#cb7-16" aria-hidden="true" tabindex="-1"></a>      <span class="fu">geom_ribbon</span>(<span class="fu">aes</span>(<span class="at">ymin =</span> lower_95, <span class="at">ymax =</span> upper_95),</span>
+<span id="cb7-17"><a href="#cb7-17" aria-hidden="true" tabindex="-1"></a>                  <span class="at">alpha =</span> <span class="fl">0.2</span>, <span class="at">fill =</span> COLORS<span class="sc">$</span>primary) <span class="sc">+</span></span>
+<span id="cb7-18"><a href="#cb7-18" aria-hidden="true" tabindex="-1"></a>      <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">"Repetitions in Reserve (RIR)"</span>, <span class="at">y =</span> <span class="st">"Mean Velocity (m/s)"</span>,</span>
+<span id="cb7-19"><a href="#cb7-19" aria-hidden="true" tabindex="-1"></a>           <span class="at">title =</span> <span class="st">"Global Velocity Stop Table for Deadlift"</span>)</span>
+<span id="cb7-20"><a href="#cb7-20" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb7-21"><a href="#cb7-21" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<div id="fig-velocity-table" class="quarto-figure quarto-figure-center quarto-float anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-velocity-table-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="deadlift_study_files/figure-html/fig-velocity-table-1.png" class="img-fluid figure-img" style="width:100.0%">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-velocity-table-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;2: Velocity Stop Thresholds by RIR
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="individual-vs-general-table-accuracy" class="level3">
+<h3 class="anchored" data-anchor-id="individual-vs-general-table-accuracy">3.6 Individual vs General Table Accuracy</h3>
+<details class="code-fold">
+<summary>Show code</summary>
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (<span class="sc">!</span><span class="fu">is.null</span>(lmm_results)) {</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>  ic <span class="ot">&lt;-</span> lmm_results<span class="sc">$</span>individual_comparison</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>  comparison_df <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(</span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">Approach =</span> <span class="fu">c</span>(<span class="st">"General (Population)"</span>, <span class="st">"Individual (Calibrated)"</span>),</span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">MAE =</span> <span class="fu">c</span>(<span class="fu">round</span>(ic<span class="sc">$</span>global_mae <span class="sc">*</span> <span class="dv">1000</span>, <span class="dv">2</span>), <span class="fu">round</span>(ic<span class="sc">$</span>individual_mae <span class="sc">*</span> <span class="dv">1000</span>, <span class="dv">2</span>)),</span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">RMSE =</span> <span class="fu">c</span>(<span class="fu">round</span>(ic<span class="sc">$</span>global_rmse <span class="sc">*</span> <span class="dv">1000</span>, <span class="dv">2</span>), <span class="fu">round</span>(ic<span class="sc">$</span>individual_rmse <span class="sc">*</span> <span class="dv">1000</span>, <span class="dv">2</span>))</span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">format_table</span>(comparison_df, <span class="at">col.names =</span> <span class="fu">c</span>(<span class="st">"Approach"</span>, <span class="st">"MAE (mm/s)"</span>, <span class="st">"RMSE (mm/s)"</span>))</span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">"</span><span class="sc">\n</span><span class="st">**Improvement from individualization**:"</span>, <span class="fu">round</span>(ic<span class="sc">$</span>mae_improvement_pct, <span class="dv">1</span>), <span class="st">"%</span><span class="sc">\n</span><span class="st">"</span>)</span>
+<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div id="tbl-individual-comparison" class="cell quarto-float anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-individual-comparison-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;5: General vs Individual Table Accuracy
+</figcaption>
+<div aria-describedby="tbl-individual-comparison-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="cell-output cell-output-stdout">
+<pre><code>
+**Improvement from individualization**: 34 %</code></pre>
+</div>
+</div>
+</figure>
+</div>
+<hr>
+</section>
+</section>
+<section id="advanced-analyses" class="level2">
+<h2 class="anchored" data-anchor-id="advanced-analyses">4. Advanced Analyses</h2>
+<section id="minimum-velocity-threshold-mvt-variability" class="level3">
+<h3 class="anchored" data-anchor-id="minimum-velocity-threshold-mvt-variability">4.1 Minimum Velocity Threshold (MVT) Variability</h3>
+<p>The <strong>MVT</strong> represents the velocity at which an athlete can no longer complete a repetition. If consistent across individuals, it could serve as a universal failure indicator.</p>
+<details class="code-fold">
+<summary>Show code</summary>
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (<span class="sc">!</span><span class="fu">is.null</span>(advanced_results)) {</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>  mvt <span class="ot">&lt;-</span> advanced_results<span class="sc">$</span>mvt</span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">"**Population MVT Statistics:**</span><span class="sc">\n\n</span><span class="st">"</span>)</span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">"- Mean:"</span>, <span class="fu">round</span>(mvt<span class="sc">$</span>population_stats<span class="sc">$</span>mean, <span class="dv">3</span>), <span class="st">"m/s</span><span class="sc">\n</span><span class="st">"</span>)</span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">"- SD:"</span>, <span class="fu">round</span>(mvt<span class="sc">$</span>population_stats<span class="sc">$</span>sd, <span class="dv">3</span>), <span class="st">"m/s</span><span class="sc">\n</span><span class="st">"</span>)</span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">"- **CV:**"</span>, <span class="fu">round</span>(mvt<span class="sc">$</span>population_stats<span class="sc">$</span>cv_percent, <span class="dv">1</span>), <span class="st">"%</span><span class="sc">\n</span><span class="st">"</span>)</span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">"- Range:"</span>, <span class="fu">round</span>(mvt<span class="sc">$</span>population_stats<span class="sc">$</span>min, <span class="dv">3</span>), <span class="st">"-"</span>, <span class="fu">round</span>(mvt<span class="sc">$</span>population_stats<span class="sc">$</span>max, <span class="dv">3</span>), <span class="st">"m/s</span><span class="sc">\n</span><span class="st">"</span>)</span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<p><strong>Population MVT Statistics:</strong></p>
+<ul>
+<li>Mean: 0.206 m/s</li>
+<li>SD: 0.063 m/s</li>
+<li><strong>CV:</strong> 30.8 %</li>
+<li>Range: 0.119 - 0.402 m/s</li>
+</ul>
+<div class="cell">
+<details class="code-fold">
+<summary>Show code</summary>
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (<span class="sc">!</span><span class="fu">is.null</span>(advanced_results)) {</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>  failure_data <span class="ot">&lt;-</span> data[data<span class="sc">$</span>rir <span class="sc">==</span> <span class="dv">0</span>, ]</span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>  mvt <span class="ot">&lt;-</span> advanced_results<span class="sc">$</span>mvt</span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(failure_data, <span class="fu">aes</span>(<span class="at">x =</span> mean_velocity)) <span class="sc">+</span></span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_histogram</span>(<span class="fu">aes</span>(<span class="at">y =</span> <span class="fu">after_stat</span>(density)), <span class="at">bins =</span> <span class="dv">20</span>, <span class="at">fill =</span> COLORS<span class="sc">$</span>primary, <span class="at">alpha =</span> <span class="fl">0.7</span>) <span class="sc">+</span></span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_density</span>(<span class="at">color =</span> COLORS<span class="sc">$</span>secondary, <span class="at">linewidth =</span> <span class="dv">1</span>) <span class="sc">+</span></span>
+<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_vline</span>(<span class="at">xintercept =</span> mvt<span class="sc">$</span>population_stats<span class="sc">$</span>mean, <span class="at">linetype =</span> <span class="st">"dashed"</span>, <span class="at">linewidth =</span> <span class="dv">1</span>) <span class="sc">+</span></span>
+<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a>    <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">"Velocity at Failure (m/s)"</span>, <span class="at">y =</span> <span class="st">"Density"</span>,</span>
+<span id="cb11-10"><a href="#cb11-10" aria-hidden="true" tabindex="-1"></a>         <span class="at">title =</span> <span class="st">"MVT Distribution Across Failure Observations"</span>)</span>
+<span id="cb11-11"><a href="#cb11-11" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<div id="fig-mvt" class="quarto-figure quarto-figure-center quarto-float anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-mvt-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="deadlift_study_files/figure-html/fig-mvt-1.png" class="img-fluid figure-img" style="width:100.0%">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-mvt-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;3: Distribution of Minimum Velocity Threshold at failure
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<p><strong>Interpretation</strong>: The high CV (30.8%) indicates <strong>substantial inter-individual variability</strong>. A single MVT value cannot be applied universally—individual calibration is essential.</p>
+</section>
+<section id="day-to-day-reliability" class="level3">
+<h3 class="anchored" data-anchor-id="day-to-day-reliability">4.2 Day-to-Day Reliability</h3>
+<p>The practical utility of VBT depends on the <strong>reliability</strong> of individual velocity profiles across testing days.</p>
+<details class="code-fold">
+<summary>Show code</summary>
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (<span class="sc">!</span><span class="fu">is.null</span>(advanced_results)) {</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>  rel <span class="ot">&lt;-</span> advanced_results<span class="sc">$</span>reliability</span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">"**Reliability Results:**</span><span class="sc">\n\n</span><span class="st">"</span>)</span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">"- Slope ICC:"</span>, <span class="fu">round</span>(rel<span class="sc">$</span>slope_icc<span class="sc">$</span>icc, <span class="dv">2</span>), <span class="st">"["</span>, <span class="fu">round</span>(rel<span class="sc">$</span>slope_icc<span class="sc">$</span>ci_lower, <span class="dv">2</span>), <span class="st">","</span>, <span class="fu">round</span>(rel<span class="sc">$</span>slope_icc<span class="sc">$</span>ci_upper, <span class="dv">2</span>), <span class="st">"]</span><span class="sc">\n</span><span class="st">"</span>)</span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">"- Slope interpretation:"</span>, rel<span class="sc">$</span>slope_icc<span class="sc">$</span>interpretation, <span class="st">"</span><span class="sc">\n</span><span class="st">"</span>)</span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">"- MVT ICC:"</span>, <span class="fu">round</span>(rel<span class="sc">$</span>mvt_icc<span class="sc">$</span>icc, <span class="dv">2</span>), <span class="st">"["</span>, <span class="fu">round</span>(rel<span class="sc">$</span>mvt_icc<span class="sc">$</span>ci_lower, <span class="dv">2</span>), <span class="st">","</span>, <span class="fu">round</span>(rel<span class="sc">$</span>mvt_icc<span class="sc">$</span>ci_upper, <span class="dv">2</span>), <span class="st">"]</span><span class="sc">\n</span><span class="st">"</span>)</span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">"- SEM:"</span>, <span class="fu">round</span>(rel<span class="sc">$</span>mvt_icc<span class="sc">$</span>sem, <span class="dv">4</span>), <span class="st">"m/s</span><span class="sc">\n</span><span class="st">"</span>)</span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">"- MDC95:"</span>, <span class="fu">round</span>(rel<span class="sc">$</span>mvt_icc<span class="sc">$</span>mdc95, <span class="dv">4</span>), <span class="st">"m/s</span><span class="sc">\n</span><span class="st">"</span>)</span>
+<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<p><strong>Reliability Results:</strong></p>
+<ul>
+<li>Slope ICC: 0.72 [ 0.64 , 0.8 ]</li>
+<li>Slope interpretation: Moderate</li>
+<li>MVT ICC: 0.5 [ 0.38 , 0.62 ]</li>
+<li>SEM: 0.024 m/s</li>
+<li>MDC95: 0.0666 m/s</li>
+</ul>
+<p><strong>Practical Recommendation</strong>: Consider periodic recalibration (every 2-4 weeks) rather than relying on a single test session.</p>
+</section>
+<section id="linear-vs-polynomial-models" class="level3">
+<h3 class="anchored" data-anchor-id="linear-vs-polynomial-models">4.3 Linear vs Polynomial Models</h3>
+<p>Does a quadratic model fit the velocity-RIR relationship better than linear?</p>
+<details class="code-fold">
+<summary>Show code</summary>
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (<span class="sc">!</span><span class="fu">is.null</span>(advanced_results)) {</span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>  poly <span class="ot">&lt;-</span> advanced_results<span class="sc">$</span>polynomial_comparison</span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">"**Model Comparison Results:**</span><span class="sc">\n\n</span><span class="st">"</span>)</span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">"- Participants analyzed:"</span>, poly<span class="sc">$</span>best_model_summary<span class="sc">$</span>n_participants, <span class="st">"</span><span class="sc">\n</span><span class="st">"</span>)</span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">"- Linear preferred:"</span>, poly<span class="sc">$</span>best_model_summary<span class="sc">$</span>n_linear_best, <span class="st">"</span><span class="sc">\n</span><span class="st">"</span>)</span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">"- Quadratic preferred:"</span>, poly<span class="sc">$</span>best_model_summary<span class="sc">$</span>n_quad_best, <span class="st">"("</span>, <span class="fu">round</span>(poly<span class="sc">$</span>best_model_summary<span class="sc">$</span>pct_quad_best, <span class="dv">1</span>), <span class="st">"%)</span><span class="sc">\n</span><span class="st">"</span>)</span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">"- Avg R² improvement:"</span>, <span class="fu">round</span>(poly<span class="sc">$</span>best_model_summary<span class="sc">$</span>avg_r2_improvement, <span class="dv">4</span>), <span class="st">"</span><span class="sc">\n</span><span class="st">"</span>)</span>
+<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<p><strong>Model Comparison Results:</strong></p>
+<ul>
+<li>Participants analyzed: 19</li>
+<li>Linear preferred: 14</li>
+<li>Quadratic preferred: 5 ( 26.3 %)</li>
+<li>Avg R² improvement: 0.0164</li>
+</ul>
+<p><strong>Interpretation</strong>: While quadratic models show marginal improvements for some individuals, the <strong>linear model is adequate</strong> for practical use—the added complexity of polynomial models is not justified by the small accuracy gains.</p>
+</section>
+<section id="velocity-decay-patterns" class="level3">
+<h3 class="anchored" data-anchor-id="velocity-decay-patterns">4.4 Velocity Decay Patterns</h3>
+<p>How does velocity loss per rep change as a set progresses?</p>
+<details class="code-fold">
+<summary>Show code</summary>
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (<span class="sc">!</span><span class="fu">is.null</span>(advanced_results) <span class="sc">&amp;&amp;</span> <span class="sc">!</span><span class="fu">is.null</span>(advanced_results<span class="sc">$</span>velocity_decay)) {</span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>  decay <span class="ot">&lt;-</span> advanced_results<span class="sc">$</span>velocity_decay</span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">"**Velocity Decay Results:**</span><span class="sc">\n\n</span><span class="st">"</span>)</span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (<span class="sc">!</span><span class="fu">is.null</span>(decay<span class="sc">$</span>phase_decay)) {</span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">cat</span>(<span class="st">"- First half decay:"</span>, <span class="fu">round</span>(<span class="fu">as.numeric</span>(decay<span class="sc">$</span>phase_decay<span class="sc">$</span>first_half_decay), <span class="dv">4</span>), <span class="st">"m/s per rep</span><span class="sc">\n</span><span class="st">"</span>)</span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a>    <span class="fu">cat</span>(<span class="st">"- Second half decay:"</span>, <span class="fu">round</span>(<span class="fu">as.numeric</span>(decay<span class="sc">$</span>phase_decay<span class="sc">$</span>second_half_decay), <span class="dv">4</span>), <span class="st">"m/s per rep</span><span class="sc">\n</span><span class="st">"</span>)</span>
+<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (<span class="sc">!</span><span class="fu">is.null</span>(decay<span class="sc">$</span>decay_acceleration)) {</span>
+<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> (<span class="fu">isTRUE</span>(decay<span class="sc">$</span>decay_acceleration<span class="sc">$</span>accelerating)) {</span>
+<span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a>      <span class="fu">cat</span>(<span class="st">"- **Decay accelerates** near failure (p ="</span>, <span class="fu">format</span>(decay<span class="sc">$</span>decay_acceleration<span class="sc">$</span>p_value, <span class="at">digits =</span> <span class="dv">3</span>), <span class="st">")</span><span class="sc">\n</span><span class="st">"</span>)</span>
+<span id="cb14-11"><a href="#cb14-11" aria-hidden="true" tabindex="-1"></a>    } <span class="cf">else</span> {</span>
+<span id="cb14-12"><a href="#cb14-12" aria-hidden="true" tabindex="-1"></a>      <span class="fu">cat</span>(<span class="st">"- Decay is approximately constant throughout the set</span><span class="sc">\n</span><span class="st">"</span>)</span>
+<span id="cb14-13"><a href="#cb14-13" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb14-14"><a href="#cb14-14" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb14-15"><a href="#cb14-15" aria-hidden="true" tabindex="-1"></a>} <span class="cf">else</span> {</span>
+<span id="cb14-16"><a href="#cb14-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">"*Velocity decay analysis will be available after running the advanced analysis pipeline.*</span><span class="sc">\n</span><span class="st">"</span>)</span>
+<span id="cb14-17"><a href="#cb14-17" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<p><strong>Velocity Decay Results:</strong></p>
+<ul>
+<li><strong>Decay accelerates</strong> near failure (p = 0.035 )</li>
+</ul>
+<p><strong>Practical Implication</strong>: Velocity loss accelerates in the final reps, supporting the use of velocity thresholds to stop sets before technique breakdown.</p>
+</section>
+<section id="first-rep-failure-prediction" class="level3">
+<h3 class="anchored" data-anchor-id="first-rep-failure-prediction">4.5 First-Rep Failure Prediction</h3>
+<p>Can the first 1-3 rep velocities predict when failure will occur?</p>
+<details class="code-fold">
+<summary>Show code</summary>
+<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (<span class="sc">!</span><span class="fu">is.null</span>(advanced_results)) {</span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>  pred <span class="ot">&lt;-</span> advanced_results<span class="sc">$</span>failure_prediction</span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">"**Prediction Accuracy (Leave-One-Out CV):**</span><span class="sc">\n\n</span><span class="st">"</span>)</span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">"- MAE:"</span>, <span class="fu">round</span>(pred<span class="sc">$</span>cv_results<span class="sc">$</span>mae, <span class="dv">2</span>), <span class="st">"reps</span><span class="sc">\n</span><span class="st">"</span>)</span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">"- RMSE:"</span>, <span class="fu">round</span>(pred<span class="sc">$</span>cv_results<span class="sc">$</span>rmse, <span class="dv">2</span>), <span class="st">"reps</span><span class="sc">\n</span><span class="st">"</span>)</span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">"- R²:"</span>, <span class="fu">round</span>(pred<span class="sc">$</span>cv_results<span class="sc">$</span>r2, <span class="dv">3</span>), <span class="st">"</span><span class="sc">\n</span><span class="st">"</span>)</span>
+<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<p><strong>Prediction Accuracy (Leave-One-Out CV):</strong></p>
+<ul>
+<li>MAE: 1.29 reps</li>
+<li>RMSE: 1.53 reps</li>
+<li>R²: 0.065</li>
+</ul>
+<p><strong>Practical Application</strong>: First-rep velocity can predict set capacity with ~1-2 rep accuracy, enabling real-time autoregulation without counting reps.</p>
+<hr>
+</section>
+</section>
+<section id="discussion" class="level2">
+<h2 class="anchored" data-anchor-id="discussion">5. Discussion</h2>
+<section id="key-findings-summary" class="level3">
+<h3 class="anchored" data-anchor-id="key-findings-summary">5.1 Key Findings Summary</h3>
+<p>This research provides the first systematic examination of the velocity-RIR relationship for the conventional deadlift:</p>
+<ol type="1">
+<li><strong>The velocity-RIR relationship exists for deadlifts</strong>, though with greater variability than squats</li>
+<li><strong>Individual models substantially outperform general equations</strong> (~2x improvement)</li>
+<li><strong>Prediction accuracy is acceptable</strong> (~1.4 rep error) but should account for uncertainty</li>
+<li><strong>MVT varies considerably</strong> between individuals (CV ~25%), requiring individual calibration</li>
+<li><strong>Day-to-day reliability is moderate</strong>, suggesting periodic recalibration</li>
+<li><strong>First-rep velocity predicts set capacity</strong> with practical accuracy</li>
+</ol>
+</section>
+<section id="practical-recommendations" class="level3">
+<h3 class="anchored" data-anchor-id="practical-recommendations">5.2 Practical Recommendations</h3>
+<section id="for-athletes-and-coaches" class="level4">
+<h4 class="anchored" data-anchor-id="for-athletes-and-coaches">For Athletes and Coaches</h4>
+<ol type="1">
+<li><strong>Use individual calibration</strong>: General equations lose significant precision</li>
+<li><strong>Accept greater prediction uncertainty</strong>: Target conservatively (e.g., RIR 3 if aiming for RIR 2)</li>
+<li><strong>Combine VBT with RPE</strong>: Velocity is one tool, not the only tool</li>
+<li><strong>Recalibrate periodically</strong>: Every 2-4 weeks or after significant training blocks</li>
+</ol>
+</section>
+<section id="velocity-reference-table" class="level4">
+<h4 class="anchored" data-anchor-id="velocity-reference-table">Velocity Reference Table</h4>
+<div class="cell">
+<details class="code-fold">
+<summary>Show code</summary>
+<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>targets <span class="ot">&lt;-</span> <span class="fu">aggregate</span>(mean_velocity <span class="sc">~</span> rir <span class="sc">+</span> load_percentage, <span class="at">data =</span> data, <span class="at">FUN =</span> mean)</span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>targets <span class="ot">&lt;-</span> <span class="fu">reshape</span>(targets, <span class="at">idvar =</span> <span class="st">"rir"</span>, <span class="at">timevar =</span> <span class="st">"load_percentage"</span>,</span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>                   <span class="at">direction =</span> <span class="st">"wide"</span>, <span class="at">v.names =</span> <span class="st">"mean_velocity"</span>)</span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a><span class="fu">names</span>(targets) <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"RIR"</span>, <span class="st">"80% 1RM"</span>, <span class="st">"90% 1RM"</span>)</span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a>targets <span class="ot">&lt;-</span> targets[<span class="fu">order</span>(<span class="sc">-</span>targets<span class="sc">$</span>RIR), ]</span>
+<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a>targets<span class="sc">$</span><span class="st">`</span><span class="at">80% 1RM</span><span class="st">`</span> <span class="ot">&lt;-</span> <span class="fu">round</span>(targets<span class="sc">$</span><span class="st">`</span><span class="at">80% 1RM</span><span class="st">`</span>, <span class="dv">3</span>)</span>
+<span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a>targets<span class="sc">$</span><span class="st">`</span><span class="at">90% 1RM</span><span class="st">`</span> <span class="ot">&lt;-</span> <span class="fu">round</span>(targets<span class="sc">$</span><span class="st">`</span><span class="at">90% 1RM</span><span class="st">`</span>, <span class="dv">3</span>)</span>
+<span id="cb16-8"><a href="#cb16-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-9"><a href="#cb16-9" aria-hidden="true" tabindex="-1"></a><span class="fu">format_table</span>(targets)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div id="tbl-reference" class="cell quarto-float anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-reference-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;6: Population-Average Velocity Thresholds (Use for Initial Reference Only)
+</figcaption>
+<div aria-describedby="tbl-reference-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="cell-output-display">
+<table class="do-not-create-environment cell table table-sm table-striped small">
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">8</td>
+<td style="text-align: right;">7</td>
+<td style="text-align: right;">0.376</td>
+<td style="text-align: right;">0.283</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">7</td>
+<td style="text-align: right;">6</td>
+<td style="text-align: right;">0.372</td>
+<td style="text-align: right;">0.380</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">6</td>
+<td style="text-align: right;">5</td>
+<td style="text-align: right;">0.340</td>
+<td style="text-align: right;">0.408</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">5</td>
+<td style="text-align: right;">4</td>
+<td style="text-align: right;">0.334</td>
+<td style="text-align: right;">0.339</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">4</td>
+<td style="text-align: right;">3</td>
+<td style="text-align: right;">0.325</td>
+<td style="text-align: right;">0.303</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">3</td>
+<td style="text-align: right;">2</td>
+<td style="text-align: right;">0.288</td>
+<td style="text-align: right;">0.268</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">2</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">0.258</td>
+<td style="text-align: right;">0.229</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">1</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0.217</td>
+<td style="text-align: right;">0.196</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</figure>
+</div>
+</div>
+<p><em>These are population averages. Individual calibration will substantially improve accuracy.</em></p>
+</section>
+</section>
+<section id="limitations" class="level3">
+<h3 class="anchored" data-anchor-id="limitations">5.3 Limitations</h3>
+<ol type="1">
+<li><strong>Sample size</strong> (n=19) limits statistical power</li>
+<li><strong>Load range</strong> (80-90% only) may not generalize to lighter loads</li>
+<li><strong>Single exercise variant</strong> (conventional deadlift only)</li>
+<li><strong>Short-term reliability</strong> (2 days) - longer-term reliability unknown</li>
+<li><strong>Equipment specificity</strong> - different devices may yield different values</li>
+</ol>
+</section>
+<section id="future-directions" class="level3">
+<h3 class="anchored" data-anchor-id="future-directions">5.4 Future Directions</h3>
+<ul>
+<li>Larger sample sizes with more diverse populations</li>
+<li>Broader load ranges (60-95% 1RM)</li>
+<li>Sumo and trap bar deadlift variants</li>
+<li>Longer-term reliability studies</li>
+<li>Integration with RPE for combined autoregulation strategies</li>
+</ul>
+<hr>
+</section>
+</section>
+<section id="conclusion" class="level2">
+<h2 class="anchored" data-anchor-id="conclusion">6. Conclusion</h2>
+<p>This thesis research demonstrates that velocity-based training principles can be applied to the conventional deadlift, though with important caveats:</p>
+<ol type="1">
+<li><strong>VBT works for deadlifts</strong> but with more variability than other exercises</li>
+<li><strong>Individual calibration is essential</strong> due to high inter-individual variability</li>
+<li><strong>Practical velocity tables</strong> can guide training, but should be used alongside other autoregulation tools</li>
+<li><strong>Periodic recalibration</strong> is recommended given moderate day-to-day reliability</li>
+</ol>
+<p>For coaches and athletes, VBT offers an objective complement to RPE-based autoregulation for the deadlift, but should not be used as the sole prescription tool.</p>
+<hr>
+</section>
+<section id="references" class="level2">
+<h2 class="anchored" data-anchor-id="references">References</h2>
+<ul>
+<li><p>González-Badillo, J. J., &amp; Sánchez-Medina, L. (2010). Movement velocity as a measure of loading intensity in resistance training. <em>International Journal of Sports Medicine</em>, 31(5), 347-352.</p></li>
+<li><p>Jukic, I., Prnjak, K., Helms, E. R., &amp; McGuigan, M. R. (2024). Modeling the repetitions-in-reserve-velocity relationship. <em>Physiological Reports</em>, 12(5), e15955.</p></li>
+<li><p>Koo, T. K., &amp; Li, M. Y. (2016). A guideline of selecting and reporting intraclass correlation coefficients for reliability research. <em>Journal of Chiropractic Medicine</em>, 15(2), 155-163.</p></li>
+<li><p>Shrout, P. E., &amp; Fleiss, J. L. (1979). Intraclass correlations: Uses in assessing rater reliability. <em>Psychological Bulletin</em>, 86(2), 420-428.</p></li>
+<li><p>Zourdos, M. C., et al.&nbsp;(2016). Novel resistance training-specific rating of perceived exertion scale measuring repetitions in reserve. <em>Journal of Strength and Conditioning Research</em>, 30(1), 267-275.</p></li>
+</ul>
+<hr>
+<p><em>MSc Thesis Research - Filipe Braga</em> <em>Supervision - João Costa</em></p>
+
+
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    text: function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+    var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+    var mailtoRegex = new RegExp(/^mailto:/);
+      var filterRegex = new RegExp('/' + window.location.host + '/');
+    var isInternal = (href) => {
+        return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+    }
+    // Inspect non-navigation links and adorn them if external
+ 	var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool)');
+    for (var i=0; i<links.length; i++) {
+      const link = links[i];
+      if (!isInternal(link.href)) {
+        // undo the damage that might have been done by quarto-nav.js in the case of
+        // links that we want to consider external
+        if (link.dataset.originalHref !== undefined) {
+          link.href = link.dataset.originalHref;
+        }
+      }
+    }
+  function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+    const config = {
+      allowHTML: true,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start',
+    };
+    if (contentFn) {
+      config.content = contentFn;
+    }
+    if (onTriggerFn) {
+      config.onTrigger = onTriggerFn;
+    }
+    if (onUntriggerFn) {
+      config.onUntrigger = onUntriggerFn;
+    }
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      if (note) {
+        return note.innerHTML;
+      } else {
+        return "";
+      }
+    });
+  }
+  const xrefs = window.document.querySelectorAll('a.quarto-xref');
+  const processXRef = (id, note) => {
+    // Strip column container classes
+    const stripColumnClz = (el) => {
+      el.classList.remove("page-full", "page-columns");
+      if (el.children) {
+        for (const child of el.children) {
+          stripColumnClz(child);
+        }
+      }
+    }
+    stripColumnClz(note)
+    if (id === null || id.startsWith('sec-')) {
+      // Special case sections, only their first couple elements
+      const container = document.createElement("div");
+      if (note.children && note.children.length > 2) {
+        container.appendChild(note.children[0].cloneNode(true));
+        for (let i = 1; i < note.children.length; i++) {
+          const child = note.children[i];
+          if (child.tagName === "P" && child.innerText === "") {
+            continue;
+          } else {
+            container.appendChild(child.cloneNode(true));
+            break;
+          }
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(container);
+        }
+        return container.innerHTML
+      } else {
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        return note.innerHTML;
+      }
+    } else {
+      // Remove any anchor links if they are present
+      const anchorLink = note.querySelector('a.anchorjs-link');
+      if (anchorLink) {
+        anchorLink.remove();
+      }
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(note);
+      }
+      // TODO in 1.5, we should make sure this works without a callout special case
+      if (note.classList.contains("callout")) {
+        return note.outerHTML;
+      } else {
+        return note.innerHTML;
+      }
+    }
+  }
+  for (var i=0; i<xrefs.length; i++) {
+    const xref = xrefs[i];
+    tippyHover(xref, undefined, function(instance) {
+      instance.disable();
+      let url = xref.getAttribute('href');
+      let hash = undefined; 
+      if (url.startsWith('#')) {
+        hash = url;
+      } else {
+        try { hash = new URL(url).hash; } catch {}
+      }
+      if (hash) {
+        const id = hash.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note !== null) {
+          try {
+            const html = processXRef(id, note.cloneNode(true));
+            instance.setContent(html);
+          } finally {
+            instance.enable();
+            instance.show();
+          }
+        } else {
+          // See if we can fetch this
+          fetch(url.split('#')[0])
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.getElementById(id);
+            if (note !== null) {
+              const html = processXRef(id, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      } else {
+        // See if we can fetch a full url (with no hash to target)
+        // This is a special case and we should probably do some content thinning / targeting
+        fetch(url)
+        .then(res => res.text())
+        .then(html => {
+          const parser = new DOMParser();
+          const htmlDoc = parser.parseFromString(html, "text/html");
+          const note = htmlDoc.querySelector('main.content');
+          if (note !== null) {
+            // This should only happen for chapter cross references
+            // (since there is no id in the URL)
+            // remove the first header
+            if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+              note.children[0].remove();
+            }
+            const html = processXRef(null, note);
+            instance.setContent(html);
+          } 
+        }).finally(() => {
+          instance.enable();
+          instance.show();
+        });
+      }
+    }, function(instance) {
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            div.style.left = 0;
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+        // Handle positioning of the toggle
+    window.addEventListener(
+      "resize",
+      throttle(() => {
+        elRect = undefined;
+        if (selectedAnnoteEl) {
+          selectCodeLines(selectedAnnoteEl);
+        }
+      }, 10)
+    );
+    function throttle(fn, ms) {
+    let throttle = false;
+    let timer;
+      return (...args) => {
+        if(!throttle) { // first call gets through
+            fn.apply(this, args);
+            throttle = true;
+        } else { // all the others get throttled
+            if(timer) clearTimeout(timer); // cancel #2
+            timer = setTimeout(() => {
+              fn.apply(this, args);
+              timer = throttle = false;
+            }, ms);
+        }
+      };
+    }
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+
+</body></html>

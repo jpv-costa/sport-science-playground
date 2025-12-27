@@ -23,7 +23,14 @@
       "Bash(wc:*)",
       "Bash(cat:*)",
       "Bash(head:*)",
-      "Bash(grep:*)"
+      "Bash(grep:*)",
+      "Bash(xargs ls:*)",
+      "Bash(tree:*)",
+      "Bash(R_LIBS_USER=\"$HOME/Documents/1-Projects/deadlift-study/renv/library/linux-ubuntu-noble/R-4.4/x86_64-pc-linux-gnu\" /usr/lib/rstudio/resources/app/bin/quarto/bin/quarto render:*)",
+      "Bash(/usr/local/bin/Rscript:*)",
+      "Bash(rig list:*)",
+      "Bash(QUARTO_R=/opt/R/4.4.2/bin/R /usr/lib/rstudio/resources/app/bin/quarto/bin/quarto render:*)",
+      "Bash(uvx:*)"
     ]
   }
 }

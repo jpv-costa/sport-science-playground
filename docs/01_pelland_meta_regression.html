@@ -9,7 +9,7 @@
 <meta name="author" content="Deadlift Study Project">
 <meta name="dcterms.date" content="2025-12-27">
 
-<title>RIR &amp; Training Outcomes - Does Training to Failure Matter?</title>
+<title>Velocity-Based Training &amp; RIR Research - Does Training to Failure Matter?</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -133,7 +133,7 @@ div.csl-indent {
       <div class="navbar-container container-fluid">
       <div class="navbar-brand-container mx-auto">
     <a class="navbar-brand" href="./index.html">
-    <span class="navbar-title">RIR &amp; Training Outcomes</span>
+    <span class="navbar-title">Velocity-Based Training &amp; RIR Research</span>
     </a>
   </div>
             <div id="quarto-search" class="" title="Search"></div>
@@ -147,36 +147,28 @@ div.csl-indent {
 <span class="menu-text">Home</span></a>
   </li>  
   <li class="nav-item dropdown ">
-    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-replications" role="button" data-bs-toggle="dropdown" aria-expanded="false">
- <span class="menu-text">Replications</span>
+    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-background-studies" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+ <span class="menu-text">Background Studies</span>
     </a>
-    <ul class="dropdown-menu" aria-labelledby="nav-menu-replications">    
+    <ul class="dropdown-menu" aria-labelledby="nav-menu-background-studies">    
         <li>
     <a class="dropdown-item" href="./01_pelland_meta_regression.html">
- <span class="dropdown-text">Pelland Meta-Regression</span></a>
+ <span class="dropdown-text">1. Does Training to Failure Matter?</span></a>
   </li>  
         <li>
     <a class="dropdown-item" href="./02_velocity_rir_relationship.html">
- <span class="dropdown-text">Velocity-RIR Relationship</span></a>
+ <span class="dropdown-text">2. Can Velocity Predict Effort?</span></a>
   </li>  
         <li>
     <a class="dropdown-item" href="./03_rir_velocity_modeling.html">
- <span class="dropdown-text">RIR-Velocity Modeling (Squat)</span></a>
-  </li>  
-        <li>
-    <a class="dropdown-item" href="./04_deadlift_rir_velocity.html">
- <span class="dropdown-text">Deadlift RIR-Velocity</span></a>
-  </li>  
-        <li>
-    <a class="dropdown-item" href="./05_deadlift_lmm_analysis.html">
- <span class="dropdown-text">LMM &amp; Velocity Tables</span></a>
-  </li>  
-        <li>
-    <a class="dropdown-item" href="./06_advanced_velocity_analyses.html">
- <span class="dropdown-text">Advanced Velocity Analyses</span></a>
+ <span class="dropdown-text">3. General vs Individual Models</span></a>
   </li>  
     </ul>
   </li>
+  <li class="nav-item">
+    <a class="nav-link" href="./deadlift_study.html"> 
+<span class="menu-text">Deadlift Study (Thesis)</span></a>
+  </li>  
 </ul>
           </div> <!-- /navcollapse -->
           <div class="quarto-navbar-tools">
@@ -325,7 +317,7 @@ div.csl-indent {
 <span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>    <span class="fu">round</span>(results<span class="sc">$</span>correlation_hypertrophy, <span class="dv">3</span>)</span>
 <span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>  ),</span>
 <span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">check.names =</span> <span class="cn">FALSE</span></span>
-<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>) <span class="sc">|&gt;</span> knitr<span class="sc">::</span><span class="fu">kable</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>) <span class="sc">|&gt;</span> <span class="fu">format_table</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div id="tbl-data-summary" class="cell quarto-float anchored">
 <figure class="quarto-float quarto-float-tbl figure">
@@ -335,13 +327,6 @@ Table&nbsp;1: Summary of included effect sizes
 <div aria-describedby="tbl-data-summary-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <div class="cell-output-display">
 <table class="do-not-create-environment cell table table-sm table-striped small">
-<thead>
-<tr class="header">
-<th style="text-align: left;">Outcome</th>
-<th style="text-align: right;">Effect Sizes</th>
-<th style="text-align: right;">Imputed Correlation</th>
-</tr>
-</thead>
 <tbody>
 <tr class="odd">
 <td style="text-align: left;">Strength</td>
@@ -408,7 +393,7 @@ What This Means for Strength Training
 <p>For <strong>muscle growth</strong>, RIR showed:</p>
 <ul>
 <li><strong>Coefficient</strong>: -0.0193 (effect per 1 RIR increase)</li>
-<li><strong>P-value</strong>: 0.0042</li>
+<li><strong>P-value</strong>: 0.004</li>
 <li><strong>Interpretation</strong>: Statistically significant and negative</li>
 </ul>
 <div class="callout callout-style-default callout-important callout-titled">
@@ -446,22 +431,20 @@ What This Means for Muscle Building
 <span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(comparison_df, <span class="fu">aes</span>(<span class="at">x =</span> Outcome, <span class="at">y =</span> Estimate, <span class="at">color =</span> Significant)) <span class="sc">+</span></span>
 <span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">size =</span> <span class="dv">4</span>) <span class="sc">+</span></span>
 <span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_errorbar</span>(<span class="fu">aes</span>(<span class="at">ymin =</span> Lower, <span class="at">ymax =</span> Upper), <span class="at">width =</span> <span class="fl">0.2</span>, <span class="at">linewidth =</span> <span class="dv">1</span>) <span class="sc">+</span></span>
-<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_hline</span>(<span class="at">yintercept =</span> <span class="dv">0</span>, <span class="at">linetype =</span> <span class="st">"dashed"</span>, <span class="at">color =</span> <span class="st">"gray50"</span>) <span class="sc">+</span></span>
-<span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_color_manual</span>(<span class="at">values =</span> <span class="fu">c</span>(<span class="st">"No"</span> <span class="ot">=</span> <span class="st">"gray50"</span>, <span class="st">"Yes"</span> <span class="ot">=</span> <span class="st">"#E41A1C"</span>)) <span class="sc">+</span></span>
+<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_hline</span>(<span class="at">yintercept =</span> <span class="dv">0</span>, <span class="at">linetype =</span> <span class="st">"dashed"</span>, <span class="at">color =</span> COLORS<span class="sc">$</span>gray) <span class="sc">+</span></span>
+<span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_color_significance</span>() <span class="sc">+</span></span>
 <span id="cb4-18"><a href="#cb4-18" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(</span>
 <span id="cb4-19"><a href="#cb4-19" aria-hidden="true" tabindex="-1"></a>    <span class="at">x =</span> <span class="cn">NULL</span>,</span>
 <span id="cb4-20"><a href="#cb4-20" aria-hidden="true" tabindex="-1"></a>    <span class="at">y =</span> <span class="st">"RIR Coefficient (Hedge's g per RIR)"</span>,</span>
 <span id="cb4-21"><a href="#cb4-21" aria-hidden="true" tabindex="-1"></a>    <span class="at">title =</span> <span class="st">"Effect of RIR on Training Outcomes"</span>,</span>
 <span id="cb4-22"><a href="#cb4-22" aria-hidden="true" tabindex="-1"></a>    <span class="at">subtitle =</span> <span class="st">"Negative values = closer to failure is better"</span></span>
-<span id="cb4-23"><a href="#cb4-23" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
-<span id="cb4-24"><a href="#cb4-24" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>(<span class="at">base_size =</span> <span class="dv">14</span>) <span class="sc">+</span></span>
-<span id="cb4-25"><a href="#cb4-25" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">legend.position =</span> <span class="st">"bottom"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb4-23"><a href="#cb4-23" aria-hidden="true" tabindex="-1"></a>  )</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output-display">
 <div id="fig-comparison" class="quarto-figure quarto-figure-center quarto-float anchored">
 <figure class="quarto-float quarto-float-fig figure">
 <div aria-describedby="fig-comparison-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<img src="01_pelland_meta_regression_files/figure-html/fig-comparison-1.png" class="img-fluid figure-img" width="768">
+<img src="01_pelland_meta_regression_files/figure-html/fig-comparison-1.png" class="img-fluid figure-img" style="width:100.0%">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-comparison-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 Figure&nbsp;1: RIR Effect on Strength vs Hypertrophy Outcomes
@@ -489,12 +472,12 @@ Figure&nbsp;1: RIR Effect on Strength vs Hypertrophy Outcomes
 <span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Negative slope, CI excludes null"</span></span>
 <span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>  ),</span>
 <span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>  <span class="st">`</span><span class="at">Our Result</span><span class="st">`</span> <span class="ot">=</span> <span class="fu">c</span>(</span>
-<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>    <span class="fu">paste0</span>(<span class="st">"p = "</span>, <span class="fu">round</span>(str_rir_p, <span class="dv">3</span>), <span class="st">" (not significant)"</span>),</span>
-<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>    <span class="fu">paste0</span>(<span class="st">"b = "</span>, <span class="fu">round</span>(hyp_rir_b, <span class="dv">3</span>), <span class="st">", p = "</span>, <span class="fu">round</span>(hyp_rir_p, <span class="dv">3</span>))</span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>    <span class="fu">paste0</span>(<span class="st">"p = "</span>, <span class="fu">format_p</span>(str_rir_p), <span class="st">" (not significant)"</span>),</span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>    <span class="fu">paste0</span>(<span class="st">"b = "</span>, <span class="fu">round</span>(hyp_rir_b, <span class="dv">3</span>), <span class="st">", p = "</span>, <span class="fu">format_p</span>(hyp_rir_p))</span>
 <span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>  ),</span>
 <span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>  <span class="at">Match =</span> <span class="fu">c</span>(<span class="st">"Yes"</span>, <span class="st">"Yes"</span>),</span>
 <span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a>  <span class="at">check.names =</span> <span class="cn">FALSE</span></span>
-<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a>) <span class="sc">|&gt;</span> knitr<span class="sc">::</span><span class="fu">kable</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a>) <span class="sc">|&gt;</span> <span class="fu">format_table</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div id="tbl-validation" class="cell quarto-float anchored">
 <figure class="quarto-float quarto-float-tbl figure">
@@ -505,19 +488,11 @@ Table&nbsp;2: Replication vs Published Results
 <div class="cell-output-display">
 <table class="do-not-create-environment cell table table-sm table-striped small">
 <colgroup>
-<col style="width: 14%">
-<col style="width: 43%">
-<col style="width: 34%">
-<col style="width: 7%">
+<col style="width: 15%">
+<col style="width: 44%">
+<col style="width: 35%">
+<col style="width: 5%">
 </colgroup>
-<thead>
-<tr class="header">
-<th style="text-align: left;">Outcome</th>
-<th style="text-align: left;">Paper Claim</th>
-<th style="text-align: left;">Our Result</th>
-<th style="text-align: left;">Match</th>
-</tr>
-</thead>
 <tbody>
 <tr class="odd">
 <td style="text-align: left;">Strength</td>
@@ -577,21 +552,19 @@ Table&nbsp;2: Replication vs Published Results
 <span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_line</span>(<span class="at">linewidth =</span> <span class="fl">1.5</span>) <span class="sc">+</span></span>
 <span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">size =</span> <span class="dv">3</span>) <span class="sc">+</span></span>
 <span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_x_reverse</span>() <span class="sc">+</span></span>
-<span id="cb6-16"><a href="#cb6-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_color_manual</span>(<span class="at">values =</span> <span class="fu">c</span>(<span class="st">"Strength Gain"</span> <span class="ot">=</span> <span class="st">"#377EB8"</span>, <span class="st">"Muscle Growth"</span> <span class="ot">=</span> <span class="st">"#E41A1C"</span>)) <span class="sc">+</span></span>
+<span id="cb6-16"><a href="#cb6-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_color_outcome</span>() <span class="sc">+</span></span>
 <span id="cb6-17"><a href="#cb6-17" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(</span>
 <span id="cb6-18"><a href="#cb6-18" aria-hidden="true" tabindex="-1"></a>    <span class="at">x =</span> <span class="st">"Repetitions in Reserve (RIR)"</span>,</span>
 <span id="cb6-19"><a href="#cb6-19" aria-hidden="true" tabindex="-1"></a>    <span class="at">y =</span> <span class="st">"Relative Benefit"</span>,</span>
 <span id="cb6-20"><a href="#cb6-20" aria-hidden="true" tabindex="-1"></a>    <span class="at">title =</span> <span class="st">"Conceptual Model: RIR Effects by Outcome"</span>,</span>
 <span id="cb6-21"><a href="#cb6-21" aria-hidden="true" tabindex="-1"></a>    <span class="at">subtitle =</span> <span class="st">"Lower RIR = closer to failure"</span></span>
-<span id="cb6-22"><a href="#cb6-22" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
-<span id="cb6-23"><a href="#cb6-23" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>(<span class="at">base_size =</span> <span class="dv">14</span>) <span class="sc">+</span></span>
-<span id="cb6-24"><a href="#cb6-24" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">legend.position =</span> <span class="st">"bottom"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb6-22"><a href="#cb6-22" aria-hidden="true" tabindex="-1"></a>  )</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output-display">
 <div id="fig-tradeoff" class="quarto-figure quarto-figure-center quarto-float anchored">
 <figure class="quarto-float quarto-float-fig figure">
 <div aria-describedby="fig-tradeoff-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<img src="01_pelland_meta_regression_files/figure-html/fig-tradeoff-1.png" class="img-fluid figure-img" width="768">
+<img src="01_pelland_meta_regression_files/figure-html/fig-tradeoff-1.png" class="img-fluid figure-img" style="width:100.0%">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-tradeoff-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 Figure&nbsp;2: The Strength-Hypertrophy Trade-off with RIR

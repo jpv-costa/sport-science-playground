@@ -276,30 +276,27 @@ analyze-all: replicate-all analyze-lmm analyze-advanced  ## Run all analyses
 #------------------------------------------------------------------------------
 # Reporting
 #------------------------------------------------------------------------------
+# Use R 4.4.2 for Quarto rendering (matches .R-version)
+QUARTO_R := /opt/R/$(R_VERSION)/bin/R
+
 reports:  ## Render all Quarto reports
 	@echo "$(BLUE)Rendering reports...$(NC)"
-	$(QUARTO) render analyses/
+	QUARTO_R=$(QUARTO_R) $(QUARTO) render analyses/
 
 report-index:  ## Render index/overview page
-	$(QUARTO) render analyses/index.qmd
+	QUARTO_R=$(QUARTO_R) $(QUARTO) render analyses/index.qmd
 
 report-pelland:  ## Render Pelland meta-regression replication
-	$(QUARTO) render analyses/01_pelland_meta_regression.qmd
+	QUARTO_R=$(QUARTO_R) $(QUARTO) render analyses/01_pelland_meta_regression.qmd
 
 report-velocity:  ## Render velocity-RIR relationship report
-	$(QUARTO) render analyses/02_velocity_rir_relationship.qmd
+	QUARTO_R=$(QUARTO_R) $(QUARTO) render analyses/02_velocity_rir_relationship.qmd
 
 report-rir-velocity:  ## Render RIR-velocity modeling report (Jukic et al.)
-	$(QUARTO) render analyses/03_rir_velocity_modeling.qmd
+	QUARTO_R=$(QUARTO_R) $(QUARTO) render analyses/03_rir_velocity_modeling.qmd
 
-report-deadlift:  ## Render deadlift RIR-velocity report (Study 4)
-	$(QUARTO) render analyses/04_deadlift_rir_velocity.qmd
-
-report-lmm:  ## Render LMM analysis report (Study 5)
-	$(QUARTO) render analyses/05_deadlift_lmm_analysis.qmd
-
-report-advanced:  ## Render advanced velocity analysis report (Study 6)
-	$(QUARTO) render analyses/06_advanced_velocity_analyses.qmd
+report-deadlift:  ## Render merged deadlift study (Thesis - HTML + PDF)
+	QUARTO_R=$(QUARTO_R) $(QUARTO) render analyses/deadlift_study.qmd
 
 reports-all: reports  ## Render all reports (alias for reports)
 	@echo "$(GREEN)All reports rendered!$(NC)"

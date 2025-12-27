@@ -3,33 +3,31 @@ project:
   output-dir: ../docs
 
 website:
-  title: "RIR & Training Outcomes"
+  title: "Velocity-Based Training & RIR Research"
   navbar:
     left:
       - href: index.qmd
         text: Home
-      - text: "Replications"
+      - text: "Background Studies"
         menu:
           - href: 01_pelland_meta_regression.qmd
-            text: "Pelland Meta-Regression"
+            text: "1. Does Training to Failure Matter?"
           - href: 02_velocity_rir_relationship.qmd
-            text: "Velocity-RIR Relationship"
+            text: "2. Can Velocity Predict Effort?"
           - href: 03_rir_velocity_modeling.qmd
-            text: "RIR-Velocity Modeling (Squat)"
-          - href: 04_deadlift_rir_velocity.qmd
-            text: "Deadlift RIR-Velocity"
-          - href: 05_deadlift_lmm_analysis.qmd
-            text: "LMM & Velocity Tables"
-          - href: 06_advanced_velocity_analyses.qmd
-            text: "Advanced Velocity Analyses"
+            text: "3. General vs Individual Models"
+      - href: deadlift_study.qmd
+        text: "Deadlift Study (Thesis)"
 
 format:
   html:
-    theme: cosmo
+    theme: [cosmo, _brand.scss]
     toc: true
     toc-depth: 3
     code-fold: true
     code-summary: "Show code"
+    fig-width: 10
+    fig-height: 6
 
 execute:
   freeze: auto

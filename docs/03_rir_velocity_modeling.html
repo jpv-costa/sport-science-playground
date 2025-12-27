@@ -9,7 +9,7 @@
 <meta name="author" content="Deadlift Study Project">
 <meta name="dcterms.date" content="2025-12-27">
 
-<title>RIR &amp; Training Outcomes - Can We Predict How Many Reps You Have Left?</title>
+<title>Velocity-Based Training &amp; RIR Research - Can We Predict How Many Reps You Have Left?</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -114,7 +114,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
       <div class="navbar-container container-fluid">
       <div class="navbar-brand-container mx-auto">
     <a class="navbar-brand" href="./index.html">
-    <span class="navbar-title">RIR &amp; Training Outcomes</span>
+    <span class="navbar-title">Velocity-Based Training &amp; RIR Research</span>
     </a>
   </div>
             <div id="quarto-search" class="" title="Search"></div>
@@ -128,36 +128,28 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span class="menu-text">Home</span></a>
   </li>  
   <li class="nav-item dropdown ">
-    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-replications" role="button" data-bs-toggle="dropdown" aria-expanded="false">
- <span class="menu-text">Replications</span>
+    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-background-studies" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+ <span class="menu-text">Background Studies</span>
     </a>
-    <ul class="dropdown-menu" aria-labelledby="nav-menu-replications">    
+    <ul class="dropdown-menu" aria-labelledby="nav-menu-background-studies">    
         <li>
     <a class="dropdown-item" href="./01_pelland_meta_regression.html">
- <span class="dropdown-text">Pelland Meta-Regression</span></a>
+ <span class="dropdown-text">1. Does Training to Failure Matter?</span></a>
   </li>  
         <li>
     <a class="dropdown-item" href="./02_velocity_rir_relationship.html">
- <span class="dropdown-text">Velocity-RIR Relationship</span></a>
+ <span class="dropdown-text">2. Can Velocity Predict Effort?</span></a>
   </li>  
         <li>
     <a class="dropdown-item" href="./03_rir_velocity_modeling.html">
- <span class="dropdown-text">RIR-Velocity Modeling (Squat)</span></a>
-  </li>  
-        <li>
-    <a class="dropdown-item" href="./04_deadlift_rir_velocity.html">
- <span class="dropdown-text">Deadlift RIR-Velocity</span></a>
-  </li>  
-        <li>
-    <a class="dropdown-item" href="./05_deadlift_lmm_analysis.html">
- <span class="dropdown-text">LMM &amp; Velocity Tables</span></a>
-  </li>  
-        <li>
-    <a class="dropdown-item" href="./06_advanced_velocity_analyses.html">
- <span class="dropdown-text">Advanced Velocity Analyses</span></a>
+ <span class="dropdown-text">3. General vs Individual Models</span></a>
   </li>  
     </ul>
   </li>
+  <li class="nav-item">
+    <a class="nav-link" href="./deadlift_study.html"> 
+<span class="menu-text">Deadlift Study (Thesis)</span></a>
+  </li>  
 </ul>
           </div> <!-- /navcollapse -->
           <div class="quarto-navbar-tools">
@@ -240,7 +232,12 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <li><strong>General models</strong>: One equation for everyone</li>
 <li><strong>Individual models</strong>: Personalized equations for each lifter</li>
 </ol>
-<p>Their key findings: - Individual models explain about <strong>2x more variance</strong> than general models - Polynomial (curved) relationships fit better than linear ones - Prediction accuracy is acceptable for practical use</p>
+<p>Their key findings:</p>
+<ul>
+<li>Individual models explain about <strong>2x more variance</strong> than general models</li>
+<li>Polynomial (curved) relationships fit better than linear ones</li>
+<li>Prediction accuracy is acceptable for practical use</li>
+</ul>
 </section>
 <section id="our-data" class="level2">
 <h2 class="anchored" data-anchor-id="our-data">Our Data</h2>
@@ -248,11 +245,11 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <div class="cell">
 <details class="code-fold">
 <summary>Show code</summary>
-<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>summary_df <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(</span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">Metric =</span> <span class="fu">c</span>(<span class="st">"Participants"</span>, <span class="st">"Male"</span>, <span class="st">"Female"</span>,</span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>             <span class="st">"Observations"</span>, <span class="st">"Velocity Range (m/s)"</span>,</span>
-<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>             <span class="st">"RIR Range"</span>, <span class="st">"Relative Strength (1RM/BW)"</span>),</span>
-<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">Value =</span> <span class="fu">c</span>(</span>
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summary_table</span>(</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">metrics =</span> <span class="fu">c</span>(<span class="st">"Participants"</span>, <span class="st">"Male"</span>, <span class="st">"Female"</span>,</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>              <span class="st">"Observations"</span>, <span class="st">"Velocity Range (m/s)"</span>,</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>              <span class="st">"RIR Range"</span>, <span class="st">"Relative Strength (1RM/BW)"</span>),</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">values =</span> <span class="fu">c</span>(</span>
 <span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>    results<span class="sc">$</span>summary<span class="sc">$</span>n_participants,</span>
 <span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>    <span class="fu">round</span>(results<span class="sc">$</span>summary<span class="sc">$</span>n_male),</span>
 <span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>    <span class="fu">round</span>(results<span class="sc">$</span>summary<span class="sc">$</span>n_female),</span>
@@ -261,9 +258,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>    <span class="fu">paste</span>(results<span class="sc">$</span>summary<span class="sc">$</span>rir_range, <span class="at">collapse =</span> <span class="st">" - "</span>),</span>
 <span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>    <span class="fu">round</span>(results<span class="sc">$</span>summary<span class="sc">$</span>mean_relative_strength, <span class="dv">2</span>)</span>
 <span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>  )</span>
-<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>knitr<span class="sc">::</span><span class="fu">kable</span>(summary_df, <span class="at">col.names =</span> <span class="fu">c</span>(<span class="st">""</span>, <span class="st">""</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div id="tbl-participants" class="cell quarto-float anchored">
 <figure class="quarto-float quarto-float-tbl figure">
@@ -319,7 +314,7 @@ Table&nbsp;1: Participant Characteristics
 <div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Create velocity-RIR scatter plot</span></span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(data, <span class="fu">aes</span>(<span class="at">x =</span> mean_velocity, <span class="at">y =</span> rir, <span class="at">color =</span> set_type)) <span class="sc">+</span></span>
 <span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">alpha =</span> <span class="fl">0.3</span>, <span class="at">size =</span> <span class="dv">1</span>) <span class="sc">+</span></span>
-<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_smooth</span>(<span class="at">method =</span> <span class="st">"lm"</span>, <span class="at">formula =</span> y <span class="sc">~</span> <span class="fu">poly</span>(x, <span class="dv">2</span>), <span class="at">se =</span> <span class="cn">FALSE</span>, <span class="at">size =</span> <span class="fl">1.2</span>) <span class="sc">+</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_smooth</span>(<span class="at">method =</span> <span class="st">"lm"</span>, <span class="at">formula =</span> y <span class="sc">~</span> <span class="fu">poly</span>(x, <span class="dv">2</span>), <span class="at">se =</span> <span class="cn">FALSE</span>, <span class="at">linewidth =</span> <span class="fl">1.2</span>) <span class="sc">+</span></span>
 <span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">facet_wrap</span>(<span class="sc">~</span>set_type, <span class="at">labeller =</span> <span class="fu">labeller</span>(<span class="at">set_type =</span> <span class="fu">c</span>(</span>
 <span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">RTF70 =</span> <span class="st">"70% 1RM"</span>,</span>
 <span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">RTF80 =</span> <span class="st">"80% 1RM"</span>,</span>
@@ -330,18 +325,17 @@ Table&nbsp;1: Participant Characteristics
 <span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>    <span class="at">y =</span> <span class="st">"Repetitions in Reserve"</span>,</span>
 <span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>    <span class="at">color =</span> <span class="st">"Load"</span></span>
 <span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
-<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>() <span class="sc">+</span></span>
-<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(</span>
-<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a>    <span class="at">legend.position =</span> <span class="st">"none"</span>,</span>
-<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a>    <span class="at">strip.text =</span> <span class="fu">element_text</span>(<span class="at">face =</span> <span class="st">"bold"</span>, <span class="at">size =</span> <span class="dv">12</span>)</span>
-<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
-<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_color_manual</span>(<span class="at">values =</span> <span class="fu">c</span>(<span class="st">"#E69F00"</span>, <span class="st">"#56B4E9"</span>, <span class="st">"#009E73"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(</span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a>    <span class="at">legend.position =</span> <span class="st">"none"</span>,</span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a>    <span class="at">strip.text =</span> <span class="fu">element_text</span>(<span class="at">face =</span> <span class="st">"bold"</span>, <span class="at">size =</span> <span class="dv">12</span>)</span>
+<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
+<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_color_manual</span>(<span class="at">values =</span> <span class="fu">c</span>(COLORS<span class="sc">$</span>load_80, COLORS<span class="sc">$</span>primary, COLORS<span class="sc">$</span>load_90))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output-display">
 <div id="fig-scatter" class="quarto-figure quarto-figure-center quarto-float anchored">
 <figure class="quarto-float quarto-float-fig figure">
 <div aria-describedby="fig-scatter-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<img src="03_rir_velocity_modeling_files/figure-html/fig-scatter-1.png" class="img-fluid figure-img" width="960">
+<img src="03_rir_velocity_modeling_files/figure-html/fig-scatter-1.png" class="img-fluid figure-img" style="width:100.0%">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-scatter-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 Figure&nbsp;1: Velocity-RIR relationship across all participants and loads
@@ -358,19 +352,11 @@ Figure&nbsp;1: Velocity-RIR relationship across all participants and loads
 <div class="cell">
 <details class="code-fold">
 <summary>Show code</summary>
-<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>comparison_df <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(</span>
-<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>  <span class="st">`</span><span class="at">Model Type</span><span class="st">`</span> <span class="ot">=</span> <span class="fu">c</span>(<span class="st">"General (Polynomial)"</span>, <span class="st">"Individual (Polynomial)"</span>),</span>
-<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>  <span class="st">`</span><span class="at">Median R²</span><span class="st">`</span> <span class="ot">=</span> <span class="fu">c</span>(</span>
-<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">round</span>(results<span class="sc">$</span>comparison<span class="sc">$</span>general_r2, <span class="dv">3</span>),</span>
-<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">round</span>(results<span class="sc">$</span>comparison<span class="sc">$</span>individual_r2, <span class="dv">3</span>)</span>
-<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>  ),</span>
-<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>  <span class="st">`</span><span class="at">Interpretation</span><span class="st">`</span> <span class="ot">=</span> <span class="fu">c</span>(</span>
-<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Explains ~50% of variance"</span>,</span>
-<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Explains ~88% of variance"</span></span>
-<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>  )</span>
-<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a>knitr<span class="sc">::</span><span class="fu">kable</span>(comparison_df, <span class="at">col.names =</span> <span class="fu">c</span>(<span class="st">"Model Type"</span>, <span class="st">"Median R²"</span>, <span class="st">"Interpretation"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">model_comparison_table</span>(</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">models =</span> <span class="fu">c</span>(<span class="st">"General (Polynomial)"</span>, <span class="st">"Individual (Polynomial)"</span>),</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">r2_values =</span> <span class="fu">c</span>(results<span class="sc">$</span>comparison<span class="sc">$</span>general_r2, results<span class="sc">$</span>comparison<span class="sc">$</span>individual_r2),</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">interpretations =</span> <span class="fu">c</span>(<span class="st">"Explains ~50% of variance"</span>, <span class="st">"Explains ~88% of variance"</span>)</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div id="tbl-models" class="cell quarto-float anchored">
 <figure class="quarto-float quarto-float-tbl figure">
@@ -380,13 +366,6 @@ Table&nbsp;2: Model Fit Comparison: General vs Individual
 <div aria-describedby="tbl-models-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <div class="cell-output-display">
 <table class="do-not-create-environment cell table table-sm table-striped small">
-<thead>
-<tr class="header">
-<th style="text-align: left;">Model Type</th>
-<th style="text-align: right;">Median R²</th>
-<th style="text-align: left;">Interpretation</th>
-</tr>
-</thead>
 <tbody>
 <tr class="odd">
 <td style="text-align: left;">General (Polynomial)</td>
@@ -433,14 +412,14 @@ Table&nbsp;2: Model Fit Comparison: General vs Individual
 <div class="cell">
 <details class="code-fold">
 <summary>Show code</summary>
-<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>load_df <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(</span>
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">data.frame</span>(</span>
 <span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">Load =</span> <span class="fu">c</span>(<span class="st">"90% 1RM"</span>, <span class="st">"80% 1RM"</span>, <span class="st">"70% 1RM"</span>),</span>
-<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>  <span class="st">`</span><span class="at">Linear R²</span><span class="st">`</span> <span class="ot">=</span> <span class="fu">c</span>(</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>  <span class="st">`</span><span class="at">Linear R2</span><span class="st">`</span> <span class="ot">=</span> <span class="fu">c</span>(</span>
 <span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">round</span>(results<span class="sc">$</span>general_results<span class="sc">$</span>RTF90<span class="sc">$</span>linear<span class="sc">$</span>r_squared, <span class="dv">3</span>),</span>
 <span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">round</span>(results<span class="sc">$</span>general_results<span class="sc">$</span>RTF80<span class="sc">$</span>linear<span class="sc">$</span>r_squared, <span class="dv">3</span>),</span>
 <span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>    <span class="fu">round</span>(results<span class="sc">$</span>general_results<span class="sc">$</span>RTF70<span class="sc">$</span>linear<span class="sc">$</span>r_squared, <span class="dv">3</span>)</span>
 <span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>  ),</span>
-<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>  <span class="st">`</span><span class="at">Polynomial R²</span><span class="st">`</span> <span class="ot">=</span> <span class="fu">c</span>(</span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>  <span class="st">`</span><span class="at">Polynomial R2</span><span class="st">`</span> <span class="ot">=</span> <span class="fu">c</span>(</span>
 <span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>    <span class="fu">round</span>(results<span class="sc">$</span>general_results<span class="sc">$</span>RTF90<span class="sc">$</span>polynomial<span class="sc">$</span>r_squared, <span class="dv">3</span>),</span>
 <span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>    <span class="fu">round</span>(results<span class="sc">$</span>general_results<span class="sc">$</span>RTF80<span class="sc">$</span>polynomial<span class="sc">$</span>r_squared, <span class="dv">3</span>),</span>
 <span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>    <span class="fu">round</span>(results<span class="sc">$</span>general_results<span class="sc">$</span>RTF70<span class="sc">$</span>polynomial<span class="sc">$</span>r_squared, <span class="dv">3</span>)</span>
@@ -449,10 +428,9 @@ Table&nbsp;2: Model Fit Comparison: General vs Individual
 <span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a>    <span class="fu">round</span>(results<span class="sc">$</span>general_results<span class="sc">$</span>RTF90<span class="sc">$</span>polynomial<span class="sc">$</span>rse, <span class="dv">2</span>),</span>
 <span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a>    <span class="fu">round</span>(results<span class="sc">$</span>general_results<span class="sc">$</span>RTF80<span class="sc">$</span>polynomial<span class="sc">$</span>rse, <span class="dv">2</span>),</span>
 <span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a>    <span class="fu">round</span>(results<span class="sc">$</span>general_results<span class="sc">$</span>RTF70<span class="sc">$</span>polynomial<span class="sc">$</span>rse, <span class="dv">2</span>)</span>
-<span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a>  )</span>
-<span id="cb4-18"><a href="#cb4-18" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb4-19"><a href="#cb4-19" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-20"><a href="#cb4-20" aria-hidden="true" tabindex="-1"></a>knitr<span class="sc">::</span><span class="fu">kable</span>(load_df, <span class="at">col.names =</span> <span class="fu">c</span>(<span class="st">"Load"</span>, <span class="st">"Linear R²"</span>, <span class="st">"Polynomial R²"</span>, <span class="st">"RSE (reps)"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a>  ),</span>
+<span id="cb4-18"><a href="#cb4-18" aria-hidden="true" tabindex="-1"></a>  <span class="at">check.names =</span> <span class="cn">FALSE</span></span>
+<span id="cb4-19"><a href="#cb4-19" aria-hidden="true" tabindex="-1"></a>) <span class="sc">|&gt;</span> <span class="fu">format_table</span>(<span class="at">col.names =</span> <span class="fu">c</span>(<span class="st">"Load"</span>, <span class="st">"Linear R2"</span>, <span class="st">"Polynomial R2"</span>, <span class="st">"RSE (reps)"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div id="tbl-loads" class="cell quarto-float anchored">
 <figure class="quarto-float quarto-float-tbl figure">
@@ -465,8 +443,8 @@ Table&nbsp;3: General Model Performance by Load
 <thead>
 <tr class="header">
 <th style="text-align: left;">Load</th>
-<th style="text-align: right;">Linear R²</th>
-<th style="text-align: right;">Polynomial R²</th>
+<th style="text-align: right;">Linear R2</th>
+<th style="text-align: right;">Polynomial R2</th>
 <th style="text-align: right;">RSE (reps)</th>
 </tr>
 </thead>
@@ -503,7 +481,7 @@ Table&nbsp;3: General Model Performance by Load
 <div class="cell">
 <details class="code-fold">
 <summary>Show code</summary>
-<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Extract R² values from individual results</span></span>
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Extract R2 values from individual results</span></span>
 <span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>r2_values <span class="ot">&lt;-</span> <span class="fu">c</span>()</span>
 <span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (id <span class="cf">in</span> <span class="fu">names</span>(results<span class="sc">$</span>general_results)) {</span>
 <span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (<span class="sc">!</span><span class="fu">is.null</span>(results<span class="sc">$</span>general_results[[id]]<span class="sc">$</span>polynomial<span class="sc">$</span>r_squared)) {</span>
@@ -519,9 +497,9 @@ Table&nbsp;3: General Model Performance by Load
 <span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a><span class="co"># Simple visualization</span></span>
 <span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(<span class="fu">data.frame</span>(<span class="at">x =</span> <span class="dv">1</span>), <span class="fu">aes</span>(<span class="at">x =</span> x)) <span class="sc">+</span></span>
 <span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">annotate</span>(<span class="st">"rect"</span>, <span class="at">xmin =</span> <span class="fl">0.2</span>, <span class="at">xmax =</span> <span class="fl">1.0</span>, <span class="at">ymin =</span> <span class="dv">0</span>, <span class="at">ymax =</span> <span class="dv">1</span>,</span>
-<span id="cb5-17"><a href="#cb5-17" aria-hidden="true" tabindex="-1"></a>           <span class="at">fill =</span> <span class="st">"steelblue"</span>, <span class="at">alpha =</span> <span class="fl">0.3</span>) <span class="sc">+</span></span>
+<span id="cb5-17"><a href="#cb5-17" aria-hidden="true" tabindex="-1"></a>           <span class="at">fill =</span> COLORS<span class="sc">$</span>primary, <span class="at">alpha =</span> <span class="fl">0.3</span>) <span class="sc">+</span></span>
 <span id="cb5-18"><a href="#cb5-18" aria-hidden="true" tabindex="-1"></a>  <span class="fu">annotate</span>(<span class="st">"segment"</span>, <span class="at">x =</span> individual_r2_median, <span class="at">xend =</span> individual_r2_median,</span>
-<span id="cb5-19"><a href="#cb5-19" aria-hidden="true" tabindex="-1"></a>           <span class="at">y =</span> <span class="dv">0</span>, <span class="at">yend =</span> <span class="dv">1</span>, <span class="at">color =</span> <span class="st">"darkblue"</span>, <span class="at">size =</span> <span class="dv">2</span>) <span class="sc">+</span></span>
+<span id="cb5-19"><a href="#cb5-19" aria-hidden="true" tabindex="-1"></a>           <span class="at">y =</span> <span class="dv">0</span>, <span class="at">yend =</span> <span class="dv">1</span>, <span class="at">color =</span> COLORS<span class="sc">$</span>primary, <span class="at">linewidth =</span> <span class="dv">2</span>) <span class="sc">+</span></span>
 <span id="cb5-20"><a href="#cb5-20" aria-hidden="true" tabindex="-1"></a>  <span class="fu">annotate</span>(<span class="st">"text"</span>, <span class="at">x =</span> individual_r2_median, <span class="at">y =</span> <span class="fl">1.1</span>,</span>
 <span id="cb5-21"><a href="#cb5-21" aria-hidden="true" tabindex="-1"></a>           <span class="at">label =</span> <span class="fu">paste</span>(<span class="st">"Median:"</span>, <span class="fu">round</span>(individual_r2_median, <span class="dv">2</span>)),</span>
 <span id="cb5-22"><a href="#cb5-22" aria-hidden="true" tabindex="-1"></a>           <span class="at">fontface =</span> <span class="st">"bold"</span>) <span class="sc">+</span></span>
@@ -530,29 +508,28 @@ Table&nbsp;3: General Model Performance by Load
 <span id="cb5-25"><a href="#cb5-25" aria-hidden="true" tabindex="-1"></a>  <span class="fu">annotate</span>(<span class="st">"text"</span>, <span class="at">x =</span> individual_r2_range[<span class="dv">2</span>], <span class="at">y =</span> <span class="fl">0.5</span>,</span>
 <span id="cb5-26"><a href="#cb5-26" aria-hidden="true" tabindex="-1"></a>           <span class="at">label =</span> <span class="fu">paste</span>(<span class="st">"Max:"</span>, <span class="fu">round</span>(individual_r2_range[<span class="dv">2</span>], <span class="dv">2</span>))) <span class="sc">+</span></span>
 <span id="cb5-27"><a href="#cb5-27" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_x_continuous</span>(<span class="at">limits =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="fl">1.1</span>), <span class="at">breaks =</span> <span class="fu">seq</span>(<span class="dv">0</span>, <span class="dv">1</span>, <span class="fl">0.2</span>)) <span class="sc">+</span></span>
-<span id="cb5-28"><a href="#cb5-28" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">"R² (Individual Models)"</span>, <span class="at">y =</span> <span class="st">""</span>) <span class="sc">+</span></span>
-<span id="cb5-29"><a href="#cb5-29" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>() <span class="sc">+</span></span>
-<span id="cb5-30"><a href="#cb5-30" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(</span>
-<span id="cb5-31"><a href="#cb5-31" aria-hidden="true" tabindex="-1"></a>    <span class="at">axis.text.y =</span> <span class="fu">element_blank</span>(),</span>
-<span id="cb5-32"><a href="#cb5-32" aria-hidden="true" tabindex="-1"></a>    <span class="at">axis.ticks.y =</span> <span class="fu">element_blank</span>(),</span>
-<span id="cb5-33"><a href="#cb5-33" aria-hidden="true" tabindex="-1"></a>    <span class="at">panel.grid.major.y =</span> <span class="fu">element_blank</span>(),</span>
-<span id="cb5-34"><a href="#cb5-34" aria-hidden="true" tabindex="-1"></a>    <span class="at">panel.grid.minor.y =</span> <span class="fu">element_blank</span>()</span>
-<span id="cb5-35"><a href="#cb5-35" aria-hidden="true" tabindex="-1"></a>  )</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb5-28"><a href="#cb5-28" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">"R-squared (Individual Models)"</span>, <span class="at">y =</span> <span class="st">""</span>) <span class="sc">+</span></span>
+<span id="cb5-29"><a href="#cb5-29" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(</span>
+<span id="cb5-30"><a href="#cb5-30" aria-hidden="true" tabindex="-1"></a>    <span class="at">axis.text.y =</span> <span class="fu">element_blank</span>(),</span>
+<span id="cb5-31"><a href="#cb5-31" aria-hidden="true" tabindex="-1"></a>    <span class="at">axis.ticks.y =</span> <span class="fu">element_blank</span>(),</span>
+<span id="cb5-32"><a href="#cb5-32" aria-hidden="true" tabindex="-1"></a>    <span class="at">panel.grid.major.y =</span> <span class="fu">element_blank</span>(),</span>
+<span id="cb5-33"><a href="#cb5-33" aria-hidden="true" tabindex="-1"></a>    <span class="at">panel.grid.minor.y =</span> <span class="fu">element_blank</span>()</span>
+<span id="cb5-34"><a href="#cb5-34" aria-hidden="true" tabindex="-1"></a>  )</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output-display">
 <div id="fig-individual-r2" class="quarto-figure quarto-figure-center quarto-float anchored">
 <figure class="quarto-float quarto-float-fig figure">
 <div aria-describedby="fig-individual-r2-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<img src="03_rir_velocity_modeling_files/figure-html/fig-individual-r2-1.png" class="img-fluid figure-img" width="960">
+<img src="03_rir_velocity_modeling_files/figure-html/fig-individual-r2-1.png" class="img-fluid figure-img" style="width:100.0%">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-individual-r2-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;2: Distribution of R² values for individual polynomial models
+Figure&nbsp;2: Distribution of R-squared values for individual polynomial models
 </figcaption>
 </figure>
 </div>
 </div>
 </div>
-<p><strong>Key insight</strong>: Most individual models achieve R² &gt; 0.80, meaning velocity explains over 80% of the variance in RIR for most people.</p>
+<p><strong>Key insight</strong>: Most individual models achieve R-squared &gt; 0.80, meaning velocity explains over 80% of the variance in RIR for most people.</p>
 </section>
 <section id="validation-against-the-paper" class="level2">
 <h2 class="anchored" data-anchor-id="validation-against-the-paper">Validation Against the Paper</h2>
@@ -567,13 +544,13 @@ Figure&nbsp;2: Distribution of R² values for individual polynomial models
 </thead>
 <tbody>
 <tr class="odd">
-<td>General R²</td>
+<td>General R-squared</td>
 <td>~0.50-0.60</td>
 <td>0.5</td>
 <td>Yes</td>
 </tr>
 <tr class="even">
-<td>Individual R² (median)</td>
+<td>Individual R-squared (median)</td>
 <td>~0.85-0.95</td>
 <td>0.88</td>
 <td>Yes</td>
@@ -599,7 +576,12 @@ Figure&nbsp;2: Distribution of R² values for individual polynomial models
 </section>
 <section id="technical-notes" class="level2">
 <h2 class="anchored" data-anchor-id="technical-notes">Technical Notes</h2>
-<p>This analysis used: - <strong>R6 classes</strong> for clean, object-oriented code - <strong>Linear and polynomial regression</strong> for model fitting - <strong>Cross-validation</strong> (Day 1 → Day 2 prediction) for practical validity</p>
+<p>This analysis used:</p>
+<ul>
+<li><strong>R6 classes</strong> for clean, object-oriented code</li>
+<li><strong>Linear and polynomial regression</strong> for model fitting</li>
+<li><strong>Cross-validation</strong> (Day 1 -&gt; Day 2 prediction) for practical validity</li>
+</ul>
 <p>Data source: <a href="https://osf.io/5ejcp/">OSF Repository</a></p>
 </section>
 <section id="references" class="level2">

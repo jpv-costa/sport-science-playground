@@ -3,23 +3,11 @@ title: "Can Bar Speed Tell You How Hard a Set Was?"
 subtitle: "Replicating Paulsen et al. (2025) on Velocity and Perceived Effort"
 author: "Deadlift Study Project"
 date: today
-format:
-  html:
-    toc: true
-    toc-depth: 3
-    code-fold: true
-    code-summary: "Show code"
-    theme: cosmo
-    fig-width: 8
-    fig-height: 6
-execute:
-  warning: false
-  message: false
 ---
 
 ```{r setup}
 #| include: false
-library(ggplot2)
+source("_common.R")
 
 # Load our replication results
 results <- readRDS("../data/processed/peerj_velocity_replication_results.rds")
@@ -80,7 +68,7 @@ overall_r <- cor(df$mean_velocity_, df$perceived_reps_in_reserve_, use = "comple
 
 This means:
 
-- Faster bar speed → Higher perceived RIR (more reps left)
+- Faster bar speed -> Higher perceived RIR (more reps left)
 - The relationship is **moderate** - not perfect
 
 ```{r fig-scatter}
@@ -90,28 +78,20 @@ This means:
 ggplot(df, aes(x = mean_velocity_, y = perceived_reps_in_reserve_, color = exercise)) +
   geom_point(alpha = 0.2, size = 1) +
   geom_smooth(method = "lm", se = TRUE) +
-  scale_color_manual(values = c("Bench press" = "#E41A1C", "Squat" = "#377EB8")) +
+  scale_color_manual(values = c("Bench press" = COLORS$secondary, "Squat" = COLORS$strength)) +
   labs(
     x = "Mean Velocity (m/s)",
     y = "Perceived Repetitions in Reserve",
     title = "Bar Speed vs Perceived Effort",
     subtitle = "Higher velocity generally means more reps left",
     color = "Exercise"
-  ) +
-  theme_minimal(base_size = 14) +
-  theme(legend.position = "bottom")
+  )
 ```
 
 ## Individual Variation: Not Everyone is the Same
 
 ```{r individual-correlations}
 # Calculate per-participant correlations
-participant_cors <- aggregate(
-  cbind(mean_velocity_, perceived_reps_in_reserve_) ~ id,
-  data = df,
-  FUN = function(x) x
-)
-
 cors_by_id <- sapply(unique(df$id), function(pid) {
   sub_df <- df[df$id == pid, ]
   cor(sub_df$mean_velocity_, sub_df$perceived_reps_in_reserve_, use = "complete.obs")
@@ -123,7 +103,7 @@ min_r <- min(cors_by_id, na.rm = TRUE)
 max_r <- max(cors_by_id, na.rm = TRUE)
 ```
 
-Here's where it gets interesting. The average correlation was **r = `r round(mean_r, 2)` ± `r round(sd_r, 2)`**, but:
+Here's where it gets interesting. The average correlation was **r = `r round(mean_r, 2)` +/- `r round(sd_r, 2)`**, but:
 
 - **Strongest**: r = `r round(max_r, 2)` (velocity explains 62% of RIR variation)
 - **Weakest**: r = `r round(min_r, 2)` (velocity explains only 1% of RIR variation)
@@ -140,17 +120,16 @@ cors_df <- cors_df[order(cors_df$r), ]
 cors_df$rank <- seq_len(nrow(cors_df))
 
 ggplot(cors_df, aes(x = rank, y = r)) +
-  geom_bar(stat = "identity", fill = ifelse(cors_df$r > 0.5, "#377EB8", "#999999")) +
-  geom_hline(yintercept = mean_r, linetype = "dashed", color = "red", linewidth = 1) +
+  geom_bar(stat = "identity", fill = ifelse(cors_df$r > 0.5, COLORS$primary, COLORS$gray)) +
+  geom_hline(yintercept = mean_r, linetype = "dashed", color = COLORS$secondary, linewidth = 1) +
   annotate("text", x = 5, y = mean_r + 0.05, label = paste0("Mean r = ", round(mean_r, 2)),
-           color = "red", hjust = 0) +
+           color = COLORS$secondary, hjust = 0) +
   labs(
     x = "Participant (ranked by correlation)",
     y = "Velocity-RIR Correlation (r)",
     title = "Some People's Velocity Tracks Their Effort Better",
     subtitle = "Blue bars = strong correlation (r > 0.5)"
-  ) +
-  theme_minimal(base_size = 14)
+  )
 ```
 
 ::: {.callout-warning}
@@ -186,14 +165,13 @@ ggplot(exercise_summary, aes(x = Exercise, y = Correlation, fill = Exercise)) +
   geom_bar(stat = "identity", width = 0.6) +
   geom_text(aes(label = paste0("r = ", round(Correlation, 2))),
             vjust = -0.5, size = 5) +
-  scale_fill_manual(values = c("Bench Press" = "#E41A1C", "Squat" = "#377EB8")) +
+  scale_fill_manual(values = c("Bench Press" = COLORS$secondary, "Squat" = COLORS$strength)) +
   ylim(0, 0.7) +
   labs(
     x = NULL,
     y = "Correlation with Perceived RIR",
     title = "Both Exercises Show Moderate Velocity-RIR Correlation"
   ) +
-  theme_minimal(base_size = 14) +
   theme(legend.position = "none")
 ```
 
@@ -217,8 +195,8 @@ At the same velocity (say, 0.3 m/s):
 #| label: tbl-summary
 #| tbl-cap: "Summary of Velocity-RIR Analysis"
 
-summary_df <- data.frame(
-  Metric = c(
+summary_table(
+  metrics = c(
     "Total observations",
     "Participants",
     "Overall correlation",
@@ -227,7 +205,7 @@ summary_df <- data.frame(
     "Bench press correlation",
     "Squat correlation"
   ),
-  Value = c(
+  values = c(
     format(n_obs, big.mark = ","),
     n_participants,
     round(overall_r, 3),
@@ -235,10 +213,9 @@ summary_df <- data.frame(
     round(sd_r, 3),
     round(bench_r, 3),
     round(squat_r, 3)
-  )
+  ),
+  caption = "Summary of Velocity-RIR Analysis"
 )
-
-knitr::kable(summary_df)
 ```
 
 ## Replication Validation
@@ -247,7 +224,7 @@ Our results match the published paper:
 
 | Finding | Paper | Our Replication |
 |---------|-------|-----------------|
-| Per-participant r | 0.6 ± 0.2 | `r round(mean_r, 2)` ± `r round(sd_r, 2)` |
+| Per-participant r | 0.6 +/- 0.2 | `r round(mean_r, 2)` +/- `r round(sd_r, 2)` |
 | Squat r range | 0.3 - 0.9 | `r round(min_r, 2)` - `r round(max_r, 2)` |
 | Exercise difference | Yes | Yes |
 

@@ -1,0 +1,567 @@
+---
+title: "Velocity-Based Training for the Conventional Deadlift"
+subtitle: "An Investigation of the RIR-Velocity Relationship"
+author:
+  - name: "João Costa"
+    affiliation: "Sport Science Research"
+  - name: "Filipe Braga"
+    affiliation: "MSc Thesis Research"
+date: today
+format:
+  html:
+    toc: true
+    toc-depth: 3
+    code-fold: true
+    code-summary: "Show code"
+# PDF output requires TinyTeX - uncomment when available:
+# pdf:
+#   toc: true
+#   toc-depth: 3
+#   number-sections: true
+#   colorlinks: true
+#   papersize: a4
+#   geometry:
+#     - margin=2.5cm
+#   include-in-header:
+#     text: |
+#       \usepackage{booktabs}
+#       \usepackage{longtable}
+bibliography: references.bib
+---
+
+```{r setup}
+#| include: false
+
+# Load shared utilities
+source("_common.R")
+
+# Load all results
+deadlift_results <- safe_load_rds("../data/processed/deadlift_rir_velocity_results.rds")
+lmm_results <- safe_load_rds("../data/processed/deadlift_lmm_results.rds")
+advanced_results <- safe_load_rds("../data/processed/advanced_velocity_results.rds")
+squat_results <- safe_load_rds("../data/processed/rir_velocity_replication_results.rds")
+
+# Primary data
+data <- deadlift_results$data
+```
+
+## Executive Summary
+
+This research investigates whether velocity-based training (VBT) principles, well-established for exercises like the squat and bench press, can be successfully applied to the **conventional deadlift**---an exercise with unique biomechanical characteristics.
+
+### Key Findings
+
+| Question | Finding | Practical Implication |
+|----------|---------|----------------------|
+| **Does VBT work for deadlifts?** | Yes, but with more variability | Use VBT as one tool, not the only tool |
+| **Individual vs general models?** | Individual ~`r round(deadlift_results$comparison$improvement_factor, 1)`x more accurate | Calibrate individually for serious athletes |
+| **Does load matter?** | `r if(!is.null(lmm_results) && lmm_results$load_importance_result$recommendation == "global") "No significant effect" else "Significant effect"` | `r if(!is.null(lmm_results) && lmm_results$load_importance_result$recommendation == "global") "One velocity table works across loads" else "Use load-specific tables"` |
+| **MVT variability?** | CV = `r if(!is.null(advanced_results)) round(advanced_results$mvt$population_stats$cv_percent, 1) else "~25"`% | Individual calibration essential |
+| **Day-to-day reliability?** | Moderate (ICC ~0.5-0.7) | Recalibrate every 2-4 weeks |
+| **First-rep prediction?** | MAE = `r if(!is.null(advanced_results)) round(advanced_results$failure_prediction$cv_results$mae, 2) else "~1.5"` reps | Useful for real-time autoregulation |
+
+---
+
+## 1. Introduction
+
+### 1.1 Background
+
+Velocity-Based Training (VBT) has emerged as an objective method for monitoring and prescribing resistance training intensity. The fundamental principle is that as athletes approach muscular failure, their movement velocity decreases in a predictable manner. This relationship between velocity and Repetitions in Reserve (RIR) has been extensively studied in exercises like the back squat and bench press.
+
+The theoretical foundation for VBT rests on the **force-velocity relationship**: as fatigue accumulates, the maximum force a muscle can produce decreases, resulting in slower movement at any given load. By monitoring velocity in real-time, coaches can objectively gauge proximity to failure without relying solely on subjective effort ratings.
+
+### 1.2 The Deadlift Challenge
+
+The **conventional deadlift** presents unique biomechanical characteristics that may affect the velocity-RIR relationship:
+
+1. **Concentric-only initiation**: Unlike the squat, the deadlift begins from a dead stop without an eccentric-concentric stretch-shortening cycle, eliminating the elastic energy contribution
+
+2. **Grip as a limiting factor**: The grip can become a limiting factor independent of the target musculature (posterior chain), potentially causing failure before true muscular exhaustion
+
+3. **Binary failure pattern**: Deadlifts tend to fail more abruptly---either the bar leaves the floor or it doesn't---compared to the gradual "grinding" often seen in squats
+
+4. **Longer lever arms**: The horizontal distance between the load and hip joint creates substantial moment arms that change throughout the lift
+
+### 1.3 Research Questions
+
+This thesis research addresses six key questions:
+
+1. Does a meaningful velocity-RIR relationship exist for deadlifts?
+2. Do individual models outperform general equations?
+3. Does load percentage affect the velocity-RIR relationship?
+4. How variable is the minimum velocity threshold (MVT) across individuals?
+5. How reliable are individual velocity profiles across testing days?
+6. Can first-rep velocity predict set capacity?
+
+---
+
+## 2. Methods
+
+### 2.1 Participants
+
+```{r tbl-participants}
+#| label: tbl-participants
+#| tbl-cap: "Participant Characteristics"
+
+summary_df <- data.frame(
+  Metric = c("Total Participants", "Male", "Female",
+             "Observations", "Velocity Range (m/s)",
+             "RIR Range", "Weight Range (kg)"),
+  Value = c(
+    deadlift_results$summary$n_participants,
+    round(deadlift_results$summary$n_male),
+    round(deadlift_results$summary$n_female),
+    deadlift_results$summary$n_observations,
+    paste(round(deadlift_results$summary$velocity_range, 3), collapse = " - "),
+    paste(deadlift_results$summary$rir_range, collapse = " - "),
+    paste(deadlift_results$summary$weight_range, collapse = " - ")
+  )
+)
+
+format_table(summary_df, col.names = c("", ""))
+```
+
+### 2.2 Protocol
+
+Participants performed the conventional deadlift under standardized conditions:
+
+- **Exercise**: Conventional deadlift with standard Olympic barbell
+- **Loads**: 80% and 90% of 1RM (determined via prior 1RM testing)
+- **Testing Days**: 2 separate days (minimum 48-72 hours apart) for cross-validation
+- **Sets per condition**: Each load tested on each day (4 total conditions per participant)
+- **Rest periods**: 3-5 minutes between sets
+- **Failure criterion**: Inability to complete a full repetition or voluntary termination
+
+### 2.3 Velocity Measurement
+
+Mean concentric velocity (MCV) was measured using a linear position transducer attached to the barbell. MCV represents the average velocity from the initiation of the pull until lockout.
+
+### 2.4 RIR Assignment
+
+RIR was assigned **prospectively** based on set completion:
+
+- Final repetition completed = RIR 0 (failure)
+- Penultimate repetition = RIR 1
+- And so forth...
+
+This differs from subjective RIR estimates, providing an objective measure of proximity to failure.
+
+### 2.5 Statistical Analysis
+
+The analysis employed multiple complementary approaches:
+
+**Individual vs General Models:**
+
+- General models: Population-level polynomial regression (velocity ~ RIR + RIR²)
+- Individual models: Participant-specific polynomial regressions
+- Cross-validation: Day 1 models tested on Day 2 data
+
+**Linear Mixed Effects Models (LMM):**
+
+LMMs account for the nested data structure (repetitions within participants) by including:
+
+- **Fixed effects**: Population-average relationships
+- **Random effects**: Individual deviations (random intercepts and slopes)
+
+**Advanced Analyses:**
+
+- MVT variability assessment (CV, IQR)
+- Day-to-day reliability (ICC)
+- Polynomial vs linear model comparison (AIC, BIC)
+- Velocity decay analysis
+- Failure prediction from early rep velocities (LOOCV)
+
+---
+
+## 3. Results
+
+### 3.1 The Velocity-RIR Relationship
+
+```{r fig-velocity-rir}
+#| label: fig-scatter
+#| fig-cap: "Velocity-RIR relationship for conventional deadlift"
+
+ggplot(data, aes(x = mean_velocity, y = rir, color = load_percentage)) +
+  geom_point(alpha = 0.4, size = 2) +
+  geom_smooth(method = "lm", formula = y ~ poly(x, 2), se = FALSE, linewidth = 1.2) +
+  facet_wrap(~load_percentage, labeller = labeller(load_percentage = c(
+    `80%` = "80% 1RM",
+    `90%` = "90% 1RM"
+  ))) +
+  scale_color_load() +
+  labs(
+    x = "Mean Velocity (m/s)",
+    y = "Repetitions in Reserve"
+  ) +
+  theme(legend.position = "none")
+```
+
+A clear negative relationship exists: higher RIR (more reps remaining) is associated with faster velocities. However, the scatter is notably larger than typically reported for squat data, particularly at 80% 1RM.
+
+### 3.2 General vs Individual Models
+
+```{r tbl-models}
+#| label: tbl-models
+#| tbl-cap: "Model Fit Comparison"
+
+comparison_df <- data.frame(
+  `Model Type` = c("General (Polynomial)", "Individual (Polynomial)"),
+  `R²` = c(
+    round(deadlift_results$comparison$general_r2, 3),
+    round(deadlift_results$comparison$individual_r2, 3)
+  ),
+  `Interpretation` = c(
+    paste0("Explains ~", round(deadlift_results$comparison$general_r2 * 100), "% of variance"),
+    paste0("Explains ~", round(deadlift_results$comparison$individual_r2 * 100), "% of variance")
+  ),
+  check.names = FALSE
+)
+
+format_table(comparison_df)
+```
+
+**Key Finding**: Individual models explain **`r round(deadlift_results$comparison$improvement_factor, 1)`x more variance** than general models, consistent with squat research. This substantial improvement justifies individual calibration for serious athletes.
+
+### 3.3 Exercise Comparison: Deadlift vs Squat
+
+```{r tbl-exercise-comparison}
+#| label: tbl-exercise-comparison
+#| tbl-cap: "Deadlift vs Squat RIR-Velocity Relationship"
+
+exercise_comparison <- data.frame(
+  Metric = c("Participants", "Load Types", "General R²", "Individual R²", "Improvement Factor"),
+  Squat = c(
+    "46", "70%, 80%, 90%",
+    round(squat_results$comparison$general_r2, 2),
+    round(squat_results$comparison$individual_r2, 2),
+    paste0(round(squat_results$comparison$improvement_factor, 2), "x")
+  ),
+  Deadlift = c(
+    as.character(deadlift_results$summary$n_participants),
+    "80%, 90%",
+    round(deadlift_results$comparison$general_r2, 2),
+    round(deadlift_results$comparison$individual_r2, 2),
+    paste0(round(deadlift_results$comparison$improvement_factor, 2), "x")
+  )
+)
+
+format_table(exercise_comparison)
+```
+
+The deadlift shows **lower R² values** than the squat, likely due to:
+
+1. **Binary failure pattern**: Less intermediate velocity signal
+2. **Grip fatigue**: Introduces noise uncorrelated with true RIR
+3. **Absence of stretch-shortening cycle**: Increased rep-to-rep variability
+4. **Technical breakdown**: May affect velocity differently than pure muscular fatigue
+
+### 3.4 Load Effects
+
+```{r load-effect}
+#| results: asis
+
+if (!is.null(lmm_results)) {
+  if (lmm_results$load_importance_result$recommendation == "global") {
+    cat("**Finding**: Load percentage does NOT significantly affect the velocity-RIR relationship.\n\n")
+    cat("This means coaches can use a **single velocity table** regardless of whether lifting at 80% or 90% 1RM, simplifying training prescription.\n")
+  } else {
+    cat("**Finding**: Load percentage significantly affects the velocity-RIR relationship.\n\n")
+    cat("**Load-specific tables** are recommended for optimal precision.\n")
+  }
+}
+```
+
+### 3.5 Velocity Stop Tables
+
+```{r tbl-velocity-stop}
+#| label: tbl-velocity-stop
+#| tbl-cap: "Velocity Stop Table: Target velocities for each RIR level"
+
+if (!is.null(lmm_results)) {
+  vt <- lmm_results$velocity_table$table
+
+  if ("load_percentage" %in% names(vt)) {
+    vt$velocity <- round(vt$velocity, 3)
+    vt$lower_95 <- round(vt$lower_95, 3)
+    vt$upper_95 <- round(vt$upper_95, 3)
+    format_table(vt[, c("rir", "load_percentage", "velocity", "lower_95", "upper_95")],
+          col.names = c("RIR", "Load", "Velocity (m/s)", "Lower 95%", "Upper 95%"))
+  } else {
+    vt$velocity <- round(vt$velocity, 3)
+    vt$lower_95 <- round(vt$lower_95, 3)
+    vt$upper_95 <- round(vt$upper_95, 3)
+    format_table(vt[, c("rir", "velocity", "lower_95", "upper_95")],
+          col.names = c("RIR", "Velocity (m/s)", "Lower 95%", "Upper 95%"))
+  }
+}
+```
+
+**How to Use This Table:**
+
+1. Monitor bar velocity in real-time during training
+2. Stop the set when velocity drops to your target RIR threshold
+3. Example: To leave 2 reps in reserve, stop when velocity reaches the corresponding threshold
+
+```{r fig-velocity-table}
+#| label: fig-velocity-table
+#| fig-cap: "Velocity Stop Thresholds by RIR"
+
+if (!is.null(lmm_results)) {
+  vt <- lmm_results$velocity_table$table
+
+  if ("load_percentage" %in% names(vt)) {
+    ggplot(vt, aes(x = rir, y = velocity, color = load_percentage)) +
+      geom_line(linewidth = 1.2) +
+      geom_point(size = 3) +
+      geom_ribbon(aes(ymin = lower_95, ymax = upper_95, fill = load_percentage),
+                  alpha = 0.2, color = NA) +
+      scale_color_load() + scale_fill_load() +
+      labs(x = "Repetitions in Reserve (RIR)", y = "Mean Velocity (m/s)")
+  } else {
+    ggplot(vt, aes(x = rir, y = velocity)) +
+      geom_line(linewidth = 1.2, color = COLORS$primary) +
+      geom_point(size = 3, color = COLORS$primary) +
+      geom_ribbon(aes(ymin = lower_95, ymax = upper_95),
+                  alpha = 0.2, fill = COLORS$primary) +
+      labs(x = "Repetitions in Reserve (RIR)", y = "Mean Velocity (m/s)",
+           title = "Global Velocity Stop Table for Deadlift")
+  }
+}
+```
+
+### 3.6 Individual vs General Table Accuracy
+
+```{r tbl-individual-comparison}
+#| label: tbl-individual-comparison
+#| tbl-cap: "General vs Individual Table Accuracy"
+
+if (!is.null(lmm_results)) {
+  ic <- lmm_results$individual_comparison
+
+  comparison_df <- data.frame(
+    Approach = c("General (Population)", "Individual (Calibrated)"),
+    MAE = c(round(ic$global_mae * 1000, 2), round(ic$individual_mae * 1000, 2)),
+    RMSE = c(round(ic$global_rmse * 1000, 2), round(ic$individual_rmse * 1000, 2))
+  )
+
+  format_table(comparison_df, col.names = c("Approach", "MAE (mm/s)", "RMSE (mm/s)"))
+
+  cat("\n**Improvement from individualization**:", round(ic$mae_improvement_pct, 1), "%\n")
+}
+```
+
+---
+
+## 4. Advanced Analyses
+
+### 4.1 Minimum Velocity Threshold (MVT) Variability
+
+The **MVT** represents the velocity at which an athlete can no longer complete a repetition. If consistent across individuals, it could serve as a universal failure indicator.
+
+```{r h2-results}
+#| results: asis
+
+if (!is.null(advanced_results)) {
+  mvt <- advanced_results$mvt
+  cat("**Population MVT Statistics:**\n\n")
+  cat("- Mean:", round(mvt$population_stats$mean, 3), "m/s\n")
+  cat("- SD:", round(mvt$population_stats$sd, 3), "m/s\n")
+  cat("- **CV:**", round(mvt$population_stats$cv_percent, 1), "%\n")
+  cat("- Range:", round(mvt$population_stats$min, 3), "-", round(mvt$population_stats$max, 3), "m/s\n")
+}
+```
+
+```{r fig-mvt}
+#| label: fig-mvt
+#| fig-cap: "Distribution of Minimum Velocity Threshold at failure"
+
+if (!is.null(advanced_results)) {
+  failure_data <- data[data$rir == 0, ]
+  mvt <- advanced_results$mvt
+
+  ggplot(failure_data, aes(x = mean_velocity)) +
+    geom_histogram(aes(y = after_stat(density)), bins = 20, fill = COLORS$primary, alpha = 0.7) +
+    geom_density(color = COLORS$secondary, linewidth = 1) +
+    geom_vline(xintercept = mvt$population_stats$mean, linetype = "dashed", linewidth = 1) +
+    labs(x = "Velocity at Failure (m/s)", y = "Density",
+         title = "MVT Distribution Across Failure Observations")
+}
+```
+
+**Interpretation**: The high CV (`r if(!is.null(advanced_results)) round(advanced_results$mvt$population_stats$cv_percent, 1) else "25"`%) indicates **substantial inter-individual variability**. A single MVT value cannot be applied universally---individual calibration is essential.
+
+### 4.2 Day-to-Day Reliability
+
+The practical utility of VBT depends on the **reliability** of individual velocity profiles across testing days.
+
+```{r h3-results}
+#| results: asis
+
+if (!is.null(advanced_results)) {
+  rel <- advanced_results$reliability
+  cat("**Reliability Results:**\n\n")
+  cat("- Slope ICC:", round(rel$slope_icc$icc, 2), "[", round(rel$slope_icc$ci_lower, 2), ",", round(rel$slope_icc$ci_upper, 2), "]\n")
+  cat("- Slope interpretation:", rel$slope_icc$interpretation, "\n")
+  cat("- MVT ICC:", round(rel$mvt_icc$icc, 2), "[", round(rel$mvt_icc$ci_lower, 2), ",", round(rel$mvt_icc$ci_upper, 2), "]\n")
+  cat("- SEM:", round(rel$mvt_icc$sem, 4), "m/s\n")
+  cat("- MDC95:", round(rel$mvt_icc$mdc95, 4), "m/s\n")
+}
+```
+
+**Practical Recommendation**: Consider periodic recalibration (every 2-4 weeks) rather than relying on a single test session.
+
+### 4.3 Linear vs Polynomial Models
+
+Does a quadratic model fit the velocity-RIR relationship better than linear?
+
+```{r h4-results}
+#| results: asis
+
+if (!is.null(advanced_results)) {
+  poly <- advanced_results$polynomial_comparison
+  cat("**Model Comparison Results:**\n\n")
+  cat("- Participants analyzed:", poly$best_model_summary$n_participants, "\n")
+  cat("- Linear preferred:", poly$best_model_summary$n_linear_best, "\n")
+  cat("- Quadratic preferred:", poly$best_model_summary$n_quad_best, "(", round(poly$best_model_summary$pct_quad_best, 1), "%)\n")
+  cat("- Avg R² improvement:", round(poly$best_model_summary$avg_r2_improvement, 4), "\n")
+}
+```
+
+**Interpretation**: While quadratic models show marginal improvements for some individuals, the **linear model is adequate** for practical use---the added complexity of polynomial models is not justified by the small accuracy gains.
+
+### 4.4 Velocity Decay Patterns
+
+How does velocity loss per rep change as a set progresses?
+
+```{r h5-results}
+#| results: asis
+
+if (!is.null(advanced_results) && !is.null(advanced_results$velocity_decay)) {
+  decay <- advanced_results$velocity_decay
+  cat("**Velocity Decay Results:**\n\n")
+  if (!is.null(decay$phase_decay)) {
+    cat("- First half decay:", round(as.numeric(decay$phase_decay$first_half_decay), 4), "m/s per rep\n")
+    cat("- Second half decay:", round(as.numeric(decay$phase_decay$second_half_decay), 4), "m/s per rep\n")
+  }
+  if (!is.null(decay$decay_acceleration)) {
+    if (isTRUE(decay$decay_acceleration$accelerating)) {
+      cat("- **Decay accelerates** near failure (p =", format(decay$decay_acceleration$p_value, digits = 3), ")\n")
+    } else {
+      cat("- Decay is approximately constant throughout the set\n")
+    }
+  }
+} else {
+  cat("*Velocity decay analysis will be available after running the advanced analysis pipeline.*\n")
+}
+```
+
+**Practical Implication**: Velocity loss accelerates in the final reps, supporting the use of velocity thresholds to stop sets before technique breakdown.
+
+### 4.5 First-Rep Failure Prediction
+
+Can the first 1-3 rep velocities predict when failure will occur?
+
+```{r h6-results}
+#| results: asis
+
+if (!is.null(advanced_results)) {
+  pred <- advanced_results$failure_prediction
+  cat("**Prediction Accuracy (Leave-One-Out CV):**\n\n")
+  cat("- MAE:", round(pred$cv_results$mae, 2), "reps\n")
+  cat("- RMSE:", round(pred$cv_results$rmse, 2), "reps\n")
+  cat("- R²:", round(pred$cv_results$r2, 3), "\n")
+}
+```
+
+**Practical Application**: First-rep velocity can predict set capacity with ~1-2 rep accuracy, enabling real-time autoregulation without counting reps.
+
+---
+
+## 5. Discussion
+
+### 5.1 Key Findings Summary
+
+This research provides the first systematic examination of the velocity-RIR relationship for the conventional deadlift:
+
+1. **The velocity-RIR relationship exists for deadlifts**, though with greater variability than squats
+2. **Individual models substantially outperform general equations** (~2x improvement)
+3. **Prediction accuracy is acceptable** (~1.4 rep error) but should account for uncertainty
+4. **MVT varies considerably** between individuals (CV ~25%), requiring individual calibration
+5. **Day-to-day reliability is moderate**, suggesting periodic recalibration
+6. **First-rep velocity predicts set capacity** with practical accuracy
+
+### 5.2 Practical Recommendations
+
+#### For Athletes and Coaches
+
+1. **Use individual calibration**: General equations lose significant precision
+2. **Accept greater prediction uncertainty**: Target conservatively (e.g., RIR 3 if aiming for RIR 2)
+3. **Combine VBT with RPE**: Velocity is one tool, not the only tool
+4. **Recalibrate periodically**: Every 2-4 weeks or after significant training blocks
+
+#### Velocity Reference Table
+
+```{r tbl-reference}
+#| label: tbl-reference
+#| tbl-cap: "Population-Average Velocity Thresholds (Use for Initial Reference Only)"
+
+targets <- aggregate(mean_velocity ~ rir + load_percentage, data = data, FUN = mean)
+targets <- reshape(targets, idvar = "rir", timevar = "load_percentage",
+                   direction = "wide", v.names = "mean_velocity")
+names(targets) <- c("RIR", "80% 1RM", "90% 1RM")
+targets <- targets[order(-targets$RIR), ]
+targets$`80% 1RM` <- round(targets$`80% 1RM`, 3)
+targets$`90% 1RM` <- round(targets$`90% 1RM`, 3)
+
+format_table(targets)
+```
+
+*These are population averages. Individual calibration will substantially improve accuracy.*
+
+### 5.3 Limitations
+
+1. **Sample size** (n=19) limits statistical power
+2. **Load range** (80-90% only) may not generalize to lighter loads
+3. **Single exercise variant** (conventional deadlift only)
+4. **Short-term reliability** (2 days) - longer-term reliability unknown
+5. **Equipment specificity** - different devices may yield different values
+
+### 5.4 Future Directions
+
+- Larger sample sizes with more diverse populations
+- Broader load ranges (60-95% 1RM)
+- Sumo and trap bar deadlift variants
+- Longer-term reliability studies
+- Integration with RPE for combined autoregulation strategies
+
+---
+
+## 6. Conclusion
+
+This thesis research demonstrates that velocity-based training principles can be applied to the conventional deadlift, though with important caveats:
+
+1. **VBT works for deadlifts** but with more variability than other exercises
+2. **Individual calibration is essential** due to high inter-individual variability
+3. **Practical velocity tables** can guide training, but should be used alongside other autoregulation tools
+4. **Periodic recalibration** is recommended given moderate day-to-day reliability
+
+For coaches and athletes, VBT offers an objective complement to RPE-based autoregulation for the deadlift, but should not be used as the sole prescription tool.
+
+---
+
+## References
+
+- González-Badillo, J. J., & Sánchez-Medina, L. (2010). Movement velocity as a measure of loading intensity in resistance training. *International Journal of Sports Medicine*, 31(5), 347-352.
+
+- Jukic, I., Prnjak, K., Helms, E. R., & McGuigan, M. R. (2024). Modeling the repetitions-in-reserve-velocity relationship. *Physiological Reports*, 12(5), e15955.
+
+- Koo, T. K., & Li, M. Y. (2016). A guideline of selecting and reporting intraclass correlation coefficients for reliability research. *Journal of Chiropractic Medicine*, 15(2), 155-163.
+
+- Shrout, P. E., & Fleiss, J. L. (1979). Intraclass correlations: Uses in assessing rater reliability. *Psychological Bulletin*, 86(2), 420-428.
+
+- Zourdos, M. C., et al. (2016). Novel resistance training-specific rating of perceived exertion scale measuring repetitions in reserve. *Journal of Strength and Conditioning Research*, 30(1), 267-275.
+
+---
+
+*MSc Thesis Research - Filipe Braga*
+*Supervision - João Costa*

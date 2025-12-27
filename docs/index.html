@@ -6,11 +6,11 @@
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
-<meta name="author" content="João Costa">
+<meta name="author" content="Joao Costa">
 <meta name="author" content="Filipe Braga">
 <meta name="dcterms.date" content="2025-12-27">
 
-<title>RIR &amp; Training Outcomes - Velocity-Based Training &amp; RIR: A Research Compendium</title>
+<title>Velocity-Based Training &amp; RIR Research</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -22,6 +22,40 @@ ul.task-list li input[type="checkbox"] {
   width: 0.8em;
   margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
   vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
 }
 </style>
 
@@ -81,7 +115,7 @@ ul.task-list li input[type="checkbox"] {
       <div class="navbar-container container-fluid">
       <div class="navbar-brand-container mx-auto">
     <a class="navbar-brand" href="./index.html">
-    <span class="navbar-title">RIR &amp; Training Outcomes</span>
+    <span class="navbar-title">Velocity-Based Training &amp; RIR Research</span>
     </a>
   </div>
             <div id="quarto-search" class="" title="Search"></div>
@@ -95,36 +129,28 @@ ul.task-list li input[type="checkbox"] {
 <span class="menu-text">Home</span></a>
   </li>  
   <li class="nav-item dropdown ">
-    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-replications" role="button" data-bs-toggle="dropdown" aria-expanded="false">
- <span class="menu-text">Replications</span>
+    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-background-studies" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+ <span class="menu-text">Background Studies</span>
     </a>
-    <ul class="dropdown-menu" aria-labelledby="nav-menu-replications">    
+    <ul class="dropdown-menu" aria-labelledby="nav-menu-background-studies">    
         <li>
     <a class="dropdown-item" href="./01_pelland_meta_regression.html">
- <span class="dropdown-text">Pelland Meta-Regression</span></a>
+ <span class="dropdown-text">1. Does Training to Failure Matter?</span></a>
   </li>  
         <li>
     <a class="dropdown-item" href="./02_velocity_rir_relationship.html">
- <span class="dropdown-text">Velocity-RIR Relationship</span></a>
+ <span class="dropdown-text">2. Can Velocity Predict Effort?</span></a>
   </li>  
         <li>
     <a class="dropdown-item" href="./03_rir_velocity_modeling.html">
- <span class="dropdown-text">RIR-Velocity Modeling (Squat)</span></a>
-  </li>  
-        <li>
-    <a class="dropdown-item" href="./04_deadlift_rir_velocity.html">
- <span class="dropdown-text">Deadlift RIR-Velocity</span></a>
-  </li>  
-        <li>
-    <a class="dropdown-item" href="./05_deadlift_lmm_analysis.html">
- <span class="dropdown-text">LMM &amp; Velocity Tables</span></a>
-  </li>  
-        <li>
-    <a class="dropdown-item" href="./06_advanced_velocity_analyses.html">
- <span class="dropdown-text">Advanced Velocity Analyses</span></a>
+ <span class="dropdown-text">3. General vs Individual Models</span></a>
   </li>  
     </ul>
   </li>
+  <li class="nav-item">
+    <a class="nav-link" href="./deadlift_study.html"> 
+<span class="menu-text">Deadlift Study (Thesis)</span></a>
+  </li>  
 </ul>
           </div> <!-- /navcollapse -->
           <div class="quarto-navbar-tools">
@@ -140,16 +166,41 @@ ul.task-list li input[type="checkbox"] {
         <nav id="TOC" role="doc-toc" class="toc-active">
     <h2 id="toc-title">On this page</h2>
    
+  <ul>
+  <li><a href="#about-this-research" id="toc-about-this-research" class="nav-link active" data-scroll-target="#about-this-research">About This Research</a>
   <ul class="collapse">
-  <li><a href="#about-this-research" id="toc-about-this-research" class="nav-link active" data-scroll-target="#about-this-research">About This Research</a></li>
-  <li><a href="#key-concepts" id="toc-key-concepts" class="nav-link" data-scroll-target="#key-concepts">Key Concepts</a></li>
-  <li><a href="#replication-studies-background" id="toc-replication-studies-background" class="nav-link" data-scroll-target="#replication-studies-background">Replication Studies (Background)</a></li>
-  <li><a href="#original-deadlift-research-msc-thesis" id="toc-original-deadlift-research-msc-thesis" class="nav-link" data-scroll-target="#original-deadlift-research-msc-thesis">Original Deadlift Research (MSc Thesis)</a></li>
-  <li><a href="#practical-implications" id="toc-practical-implications" class="nav-link" data-scroll-target="#practical-implications">Practical Implications</a></li>
+  <li><a href="#project-structure" id="toc-project-structure" class="nav-link" data-scroll-target="#project-structure">Project Structure</a></li>
+  <li><a href="#the-deadlift-challenge" id="toc-the-deadlift-challenge" class="nav-link" data-scroll-target="#the-deadlift-challenge">The Deadlift Challenge</a></li>
+  </ul></li>
+  <li><a href="#key-concepts" id="toc-key-concepts" class="nav-link" data-scroll-target="#key-concepts">Key Concepts</a>
+  <ul class="collapse">
+  <li><a href="#repetitions-in-reserve-rir" id="toc-repetitions-in-reserve-rir" class="nav-link" data-scroll-target="#repetitions-in-reserve-rir">Repetitions in Reserve (RIR)</a></li>
+  <li><a href="#velocity-based-training-vbt" id="toc-velocity-based-training-vbt" class="nav-link" data-scroll-target="#velocity-based-training-vbt">Velocity-Based Training (VBT)</a></li>
+  </ul></li>
+  <li><a href="#background-studies" id="toc-background-studies" class="nav-link" data-scroll-target="#background-studies">Background Studies</a>
+  <ul class="collapse">
+  <li><a href="#study-1-does-training-to-failure-matter" id="toc-study-1-does-training-to-failure-matter" class="nav-link" data-scroll-target="#study-1-does-training-to-failure-matter">Study 1: Does Training to Failure Matter?</a></li>
+  <li><a href="#study-2-can-bar-speed-predict-effort" id="toc-study-2-can-bar-speed-predict-effort" class="nav-link" data-scroll-target="#study-2-can-bar-speed-predict-effort">Study 2: Can Bar Speed Predict Effort?</a></li>
+  <li><a href="#study-3-general-vs-individual-models" id="toc-study-3-general-vs-individual-models" class="nav-link" data-scroll-target="#study-3-general-vs-individual-models">Study 3: General vs Individual Models</a></li>
+  </ul></li>
+  <li><a href="#deadlift-study-msc-thesis" id="toc-deadlift-study-msc-thesis" class="nav-link" data-scroll-target="#deadlift-study-msc-thesis">Deadlift Study (MSc Thesis)</a>
+  <ul class="collapse">
+  <li><a href="#key-findings-summary" id="toc-key-findings-summary" class="nav-link" data-scroll-target="#key-findings-summary">Key Findings Summary</a></li>
+  <li><a href="#why-lower-for-deadlifts" id="toc-why-lower-for-deadlifts" class="nav-link" data-scroll-target="#why-lower-for-deadlifts">Why Lower for Deadlifts?</a></li>
+  </ul></li>
   <li><a href="#summary-of-key-findings" id="toc-summary-of-key-findings" class="nav-link" data-scroll-target="#summary-of-key-findings">Summary of Key Findings</a></li>
+  <li><a href="#practical-implications" id="toc-practical-implications" class="nav-link" data-scroll-target="#practical-implications">Practical Implications</a>
+  <ul class="collapse">
+  <li><a href="#for-strength-training" id="toc-for-strength-training" class="nav-link" data-scroll-target="#for-strength-training">For Strength Training</a></li>
+  <li><a href="#for-muscle-building" id="toc-for-muscle-building" class="nav-link" data-scroll-target="#for-muscle-building">For Muscle Building</a></li>
+  <li><a href="#for-velocity-based-training" id="toc-for-velocity-based-training" class="nav-link" data-scroll-target="#for-velocity-based-training">For Velocity-Based Training</a></li>
+  <li><a href="#for-deadlift-training" id="toc-for-deadlift-training" class="nav-link" data-scroll-target="#for-deadlift-training">For Deadlift Training</a></li>
+  </ul></li>
   <li><a href="#data-sources" id="toc-data-sources" class="nav-link" data-scroll-target="#data-sources">Data Sources</a></li>
-  <li><a href="#methodology" id="toc-methodology" class="nav-link" data-scroll-target="#methodology">Methodology</a></li>
-  <li><a href="#references" id="toc-references" class="nav-link" data-scroll-target="#references">References</a></li>
+  <li><a href="#methodology" id="toc-methodology" class="nav-link" data-scroll-target="#methodology">Methodology</a>
+  <ul class="collapse">
+  <li><a href="#code-architecture" id="toc-code-architecture" class="nav-link" data-scroll-target="#code-architecture">Code Architecture</a></li>
+  </ul></li>
   </ul>
 </nav>
     </div>
@@ -158,7 +209,7 @@ ul.task-list li input[type="checkbox"] {
 
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
-<h1 class="title">Velocity-Based Training &amp; RIR: A Research Compendium</h1>
+<h1 class="title">Velocity-Based Training &amp; RIR Research</h1>
 <p class="subtitle lead">Investigating Velocity-Based Training Applications for Powerlifting</p>
 </div>
 
@@ -168,7 +219,7 @@ ul.task-list li input[type="checkbox"] {
   <div class="quarto-title-meta-heading">Affiliations</div>
   
     <div class="quarto-title-meta-contents">
-    <p class="author">João Costa </p>
+    <p class="author">Joao Costa </p>
   </div>
   <div class="quarto-title-meta-contents">
         <p class="affiliation">
@@ -212,16 +263,21 @@ ul.task-list li input[type="checkbox"] {
 </blockquote>
 <section id="project-structure" class="level3">
 <h3 class="anchored" data-anchor-id="project-structure">Project Structure</h3>
-<p>This project combines:</p>
+<p>This project is organized into two main sections:</p>
 <ol type="1">
-<li><strong>Replications</strong> of key published studies (Studies 1-3) to validate methodology</li>
-<li><strong>Original research</strong> on the conventional deadlift (Studies 4-6)—part of Filipe Braga’s MSc thesis</li>
-<li><strong>Practical tools</strong> including velocity stop tables and prediction models</li>
+<li><strong>Background Studies</strong> (Studies 1-3) - Replications of key published research to validate methodology</li>
+<li><strong>Deadlift Study (Thesis)</strong> - Original research on the conventional deadlift forming Filipe Braga’s MSc thesis</li>
 </ol>
 </section>
-<section id="research-focus" class="level3">
-<h3 class="anchored" data-anchor-id="research-focus">Research Focus</h3>
-<p>The original research (Studies 4-6) investigates whether velocity-based training principles, well-established for exercises like the squat and bench press, can be successfully applied to the <strong>conventional deadlift</strong>—an exercise with unique biomechanical characteristics (no stretch-shortening cycle, grip limitations, binary failure patterns).</p>
+<section id="the-deadlift-challenge" class="level3">
+<h3 class="anchored" data-anchor-id="the-deadlift-challenge">The Deadlift Challenge</h3>
+<p>The original research investigates whether velocity-based training principles, well-established for exercises like the squat and bench press, can be successfully applied to the <strong>conventional deadlift</strong>—an exercise with unique biomechanical characteristics:</p>
+<ul>
+<li>No stretch-shortening cycle (concentric-only movement)</li>
+<li>Grip limitations affecting perceived fatigue</li>
+<li>Binary failure patterns (grip release vs gradual deceleration)</li>
+</ul>
+<hr>
 </section>
 </section>
 <section id="key-concepts" class="level2">
@@ -274,16 +330,29 @@ ul.task-list li input[type="checkbox"] {
 <li><strong>Slower velocity</strong> = Closer to failure</li>
 <li><strong>Velocity loss</strong> = Fatigue accumulation within a set</li>
 </ul>
+<hr>
 </section>
 </section>
-<section id="replication-studies-background" class="level2">
-<h2 class="anchored" data-anchor-id="replication-studies-background">Replication Studies (Background)</h2>
+<section id="background-studies" class="level2">
+<h2 class="anchored" data-anchor-id="background-studies">Background Studies</h2>
 <p>These replications validate our methodology before applying it to original deadlift research.</p>
 <section id="study-1-does-training-to-failure-matter" class="level3">
 <h3 class="anchored" data-anchor-id="study-1-does-training-to-failure-matter">Study 1: Does Training to Failure Matter?</h3>
 <p><strong><a href="./01_pelland_meta_regression.html">Pelland et al.&nbsp;(2024) Replication</a></strong></p>
 <p>A meta-regression examining RIR and training outcomes across strength and hypertrophy studies.</p>
-<p><strong>Key Finding</strong>: Training closer to failure benefits <strong>hypertrophy</strong> but not <strong>strength</strong>.</p>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Key Finding
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Training closer to failure benefits <strong>hypertrophy</strong> but not <strong>strength</strong>.</p>
+</div>
+</div>
 <table class="table">
 <thead>
 <tr class="header">
@@ -310,8 +379,20 @@ ul.task-list li input[type="checkbox"] {
 <section id="study-2-can-bar-speed-predict-effort" class="level3">
 <h3 class="anchored" data-anchor-id="study-2-can-bar-speed-predict-effort">Study 2: Can Bar Speed Predict Effort?</h3>
 <p><strong><a href="./02_velocity_rir_relationship.html">Paulsen et al.&nbsp;(2025) Replication</a></strong></p>
-<p>Analysis of 2,972 observations examining velocity-RIR relationships.</p>
-<p><strong>Key Finding</strong>: Velocity <strong>moderately predicts</strong> perceived effort (r ≈ 0.5), but varies substantially between individuals.</p>
+<p>Analysis examining velocity-RIR relationships in squat and bench press.</p>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Key Finding
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Velocity <strong>moderately predicts</strong> perceived effort (r ~ 0.5), but varies substantially between individuals.</p>
+</div>
+</div>
 <table class="table">
 <thead>
 <tr class="header">
@@ -332,16 +413,28 @@ ul.task-list li input[type="checkbox"] {
 </table>
 <hr>
 </section>
-<section id="study-3-can-we-model-the-rir-velocity-relationship" class="level3">
-<h3 class="anchored" data-anchor-id="study-3-can-we-model-the-rir-velocity-relationship">Study 3: Can We Model the RIR-Velocity Relationship?</h3>
+<section id="study-3-general-vs-individual-models" class="level3">
+<h3 class="anchored" data-anchor-id="study-3-general-vs-individual-models">Study 3: General vs Individual Models</h3>
 <p><strong><a href="./03_rir_velocity_modeling.html">Jukic et al.&nbsp;(2024) Replication</a></strong></p>
-<p>Analysis of 2,601 observations examining whether individual RIR-velocity models outperform general equations.</p>
-<p><strong>Key Finding</strong>: Individual models explain <strong>~2x more variance</strong> than general models (R² = 0.88 vs 0.50).</p>
+<p>Analysis examining whether individual RIR-velocity models outperform general equations.</p>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Key Finding
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Individual models explain <strong>~2x more variance</strong> than general models (R-squared = 0.88 vs 0.50).</p>
+</div>
+</div>
 <table class="table">
 <thead>
 <tr class="header">
 <th>Model Type</th>
-<th>Median R²</th>
+<th>Median R-squared</th>
 <th>Implication</th>
 </tr>
 </thead>
@@ -361,156 +454,72 @@ ul.task-list li input[type="checkbox"] {
 <hr>
 </section>
 </section>
-<section id="original-deadlift-research-msc-thesis" class="level2">
-<h2 class="anchored" data-anchor-id="original-deadlift-research-msc-thesis">Original Deadlift Research (MSc Thesis)</h2>
-<p>The following studies represent original research investigating the velocity-RIR relationship for the conventional deadlift, forming the core of Filipe Braga’s MSc thesis.</p>
-<section id="study-4-does-vbt-work-for-deadlifts" class="level3">
-<h3 class="anchored" data-anchor-id="study-4-does-vbt-work-for-deadlifts">Study 4: Does VBT Work for Deadlifts?</h3>
-<p><strong><a href="./04_deadlift_rir_velocity.html">Deadlift RIR-Velocity Study</a></strong></p>
-<p>Original thesis research applying the same methodology to <strong>conventional deadlift</strong> with 406 observations from 19 participants.</p>
-<p><strong>Key Finding</strong>: The RIR-velocity relationship holds for deadlifts, but with <strong>lower predictability</strong> than squats.</p>
+<section id="deadlift-study-msc-thesis" class="level2">
+<h2 class="anchored" data-anchor-id="deadlift-study-msc-thesis">Deadlift Study (MSc Thesis)</h2>
+<p><strong><a href="./deadlift_study.html">Full Deadlift Study Report</a></strong></p>
+<p>This comprehensive report presents original thesis research investigating the velocity-RIR relationship for the <strong>conventional deadlift</strong>. It combines:</p>
+<ul>
+<li><strong>Exploratory analysis</strong> of the deadlift velocity-RIR relationship</li>
+<li><strong>Linear Mixed Effects Models</strong> with nested random effects</li>
+<li><strong>Practical velocity stop tables</strong> for training prescription</li>
+<li><strong>Advanced analyses</strong> including reliability, model comparison, and failure prediction</li>
+</ul>
+<section id="key-findings-summary" class="level3">
+<h3 class="anchored" data-anchor-id="key-findings-summary">Key Findings Summary</h3>
+<details class="code-fold">
+<summary>Show code</summary>
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (<span class="sc">!</span><span class="fu">is.null</span>(deadlift_results)) {</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">"| Metric | Deadlift | Squat (Reference) |</span><span class="sc">\n</span><span class="st">"</span>)</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">"|--------|----------|-------------------|</span><span class="sc">\n</span><span class="st">"</span>)</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="fu">sprintf</span>(<span class="st">"| General R-squared | %.2f | 0.50 |</span><span class="sc">\n</span><span class="st">"</span>, deadlift_results<span class="sc">$</span>comparison<span class="sc">$</span>general_r2))</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="fu">sprintf</span>(<span class="st">"| Individual R-squared | %.2f | 0.88 |</span><span class="sc">\n</span><span class="st">"</span>, deadlift_results<span class="sc">$</span>comparison<span class="sc">$</span>individual_r2))</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="fu">sprintf</span>(<span class="st">"| Improvement Factor | %.1fx | 1.8x |</span><span class="sc">\n</span><span class="st">"</span>, deadlift_results<span class="sc">$</span>comparison<span class="sc">$</span>improvement_factor))</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="fu">sprintf</span>(<span class="st">"| Participants | %d | 19 |</span><span class="sc">\n</span><span class="st">"</span>, deadlift_results<span class="sc">$</span>summary<span class="sc">$</span>n_participants))</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>} <span class="cf">else</span> {</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">"*Results will be available after running the analysis pipeline*</span><span class="sc">\n</span><span class="st">"</span>)</span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
 <table class="table">
 <thead>
 <tr class="header">
-<th>Exercise</th>
-<th>General R²</th>
-<th>Individual R²</th>
-<th>Improvement</th>
+<th>Metric</th>
+<th>Deadlift</th>
+<th>Squat (Reference)</th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
-<td>Squat (Study 3)</td>
+<td>General R-squared</td>
+<td>0.36</td>
 <td>0.50</td>
+</tr>
+<tr class="even">
+<td>Individual R-squared</td>
+<td>0.71</td>
 <td>0.88</td>
+</tr>
+<tr class="odd">
+<td>Improvement Factor</td>
+<td>2.0x</td>
 <td>1.8x</td>
 </tr>
 <tr class="even">
-<td>Deadlift (Study 4)</td>
-<td>0.36</td>
-<td>0.71</td>
-<td>2x</td>
+<td>Participants</td>
+<td>19</td>
+<td>19</td>
 </tr>
 </tbody>
 </table>
-<p><strong>Why lower for deadlifts?</strong> Binary failure patterns, grip fatigue, and lack of stretch-shortening cycle.</p>
+</section>
+<section id="why-lower-for-deadlifts" class="level3">
+<h3 class="anchored" data-anchor-id="why-lower-for-deadlifts">Why Lower for Deadlifts?</h3>
+<p>The deadlift presents unique challenges for velocity-based training:</p>
+<ol type="1">
+<li><strong>Binary failure</strong> - Grip often fails suddenly rather than gradual velocity decline</li>
+<li><strong>No eccentric phase</strong> - Each rep starts from a dead stop (no stretch-shortening cycle)</li>
+<li><strong>Grip fatigue</strong> - May affect velocity independently of target muscle fatigue</li>
+</ol>
 <hr>
-</section>
-<section id="study-5-practical-velocity-tables-for-training" class="level3">
-<h3 class="anchored" data-anchor-id="study-5-practical-velocity-tables-for-training">Study 5: Practical Velocity Tables for Training</h3>
-<p><strong><a href="./05_deadlift_lmm_analysis.html">LMM Analysis &amp; Velocity Stop Tables</a></strong></p>
-<p>Linear Mixed Effects analysis extending Study 4 with practical velocity thresholds for training.</p>
-<p><strong>Key Finding</strong>: Load percentage does NOT significantly affect the velocity-RIR relationship. A <strong>single global velocity table</strong> is sufficient.</p>
-<table class="table">
-<thead>
-<tr class="header">
-<th>Table Type</th>
-<th>MAE</th>
-<th>Use Case</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td>General</td>
-<td>0.0599 m/s</td>
-<td>Quick reference, new athletes</td>
-</tr>
-<tr class="even">
-<td>Individual</td>
-<td>0.0395 m/s</td>
-<td>Established athletes with calibration</td>
-</tr>
-</tbody>
-</table>
-<p><strong>Improvement from individualization</strong>: 34.0%</p>
-<hr>
-</section>
-<section id="study-6-advanced-velocity-rir-analyses" class="level3">
-<h3 class="anchored" data-anchor-id="study-6-advanced-velocity-rir-analyses">Study 6: Advanced Velocity-RIR Analyses</h3>
-<p><strong><a href="./06_advanced_velocity_analyses.html">Advanced Velocity Analyses (H2-H6)</a></strong></p>
-<p>Five novel analyses extending the deadlift velocity-RIR research with practical insights.</p>
-<table class="table">
-<colgroup>
-<col style="width: 24%">
-<col style="width: 21%">
-<col style="width: 53%">
-</colgroup>
-<thead>
-<tr class="header">
-<th>Analysis</th>
-<th>Finding</th>
-<th>Practical Implication</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td>MVT Variability</td>
-<td>CV = 30.8%</td>
-<td>Individual calibration essential</td>
-</tr>
-<tr class="even">
-<td>Day-to-Day Reliability</td>
-<td>Slope ICC = 0.72</td>
-<td>Periodic recalibration needed</td>
-</tr>
-<tr class="odd">
-<td>Model Comparison</td>
-<td>26.3% prefer quadratic</td>
-<td>Linear model adequate</td>
-</tr>
-<tr class="even">
-<td>Velocity Decay</td>
-<td>Accelerates</td>
-<td>Decay accelerates toward failure</td>
-</tr>
-<tr class="odd">
-<td>Failure Prediction</td>
-<td>MAE = 1.29 reps</td>
-<td>First rep velocity useful</td>
-</tr>
-</tbody>
-</table>
-<hr>
-</section>
-</section>
-<section id="practical-implications" class="level2">
-<h2 class="anchored" data-anchor-id="practical-implications">Practical Implications</h2>
-<section id="for-strength-training" class="level3">
-<h3 class="anchored" data-anchor-id="for-strength-training">For Strength Training</h3>
-<p>Based on the Pelland meta-regression:</p>
-<ul>
-<li><strong>Stop 2-3 reps short</strong> of failure on most sets</li>
-<li>Failure training is not necessary for strength gains</li>
-<li>This allows higher training frequency and volume</li>
-</ul>
-</section>
-<section id="for-muscle-building" class="level3">
-<h3 class="anchored" data-anchor-id="for-muscle-building">For Muscle Building</h3>
-<p>Based on the Pelland meta-regression:</p>
-<ul>
-<li><strong>Train closer to failure</strong> (0-2 RIR) for optimal hypertrophy</li>
-<li>The relationship is statistically significant but effect size is modest</li>
-<li>Balance against recovery demands</li>
-</ul>
-</section>
-<section id="for-velocity-based-training" class="level3">
-<h3 class="anchored" data-anchor-id="for-velocity-based-training">For Velocity-Based Training</h3>
-<p>Based on the Paulsen analysis:</p>
-<ul>
-<li><strong>Individual calibration is essential</strong> - Group averages don’t work for everyone</li>
-<li><strong>Exercise-specific targets</strong> - Bench press and squat need different thresholds</li>
-<li><strong>Use as complement</strong> - Velocity + RPE together is better than either alone</li>
-</ul>
-</section>
-<section id="for-deadlift-training" class="level3">
-<h3 class="anchored" data-anchor-id="for-deadlift-training">For Deadlift Training</h3>
-<p>Based on Study 4:</p>
-<ul>
-<li><strong>VBT works, but with caveats</strong> - Expect ~1.4 rep prediction error (vs ~1 rep for squat)</li>
-<li><strong>Individual calibration still essential</strong> - 2x improvement over general equations</li>
-<li><strong>Load-specific thresholds</strong> - Different velocity targets for 80% vs 90% 1RM</li>
-<li><strong>Consider grip fatigue</strong> - May affect velocity independently of target muscle fatigue</li>
-</ul>
 </section>
 </section>
 <section id="summary-of-key-findings" class="level2">
@@ -557,6 +566,47 @@ ul.task-list li input[type="checkbox"] {
 </tr>
 </tbody>
 </table>
+<hr>
+</section>
+<section id="practical-implications" class="level2">
+<h2 class="anchored" data-anchor-id="practical-implications">Practical Implications</h2>
+<section id="for-strength-training" class="level3">
+<h3 class="anchored" data-anchor-id="for-strength-training">For Strength Training</h3>
+<p>Based on the Pelland meta-regression:</p>
+<ul>
+<li><strong>Stop 2-3 reps short</strong> of failure on most sets</li>
+<li>Failure training is not necessary for strength gains</li>
+<li>This allows higher training frequency and volume</li>
+</ul>
+</section>
+<section id="for-muscle-building" class="level3">
+<h3 class="anchored" data-anchor-id="for-muscle-building">For Muscle Building</h3>
+<p>Based on the Pelland meta-regression:</p>
+<ul>
+<li><strong>Train closer to failure</strong> (0-2 RIR) for optimal hypertrophy</li>
+<li>The relationship is statistically significant but effect size is modest</li>
+<li>Balance against recovery demands</li>
+</ul>
+</section>
+<section id="for-velocity-based-training" class="level3">
+<h3 class="anchored" data-anchor-id="for-velocity-based-training">For Velocity-Based Training</h3>
+<p>Based on the Paulsen analysis:</p>
+<ul>
+<li><strong>Individual calibration is essential</strong> - Group averages don’t work for everyone</li>
+<li><strong>Exercise-specific targets</strong> - Different exercises need different thresholds</li>
+<li><strong>Use as complement</strong> - Velocity + RPE together is better than either alone</li>
+</ul>
+</section>
+<section id="for-deadlift-training" class="level3">
+<h3 class="anchored" data-anchor-id="for-deadlift-training">For Deadlift Training</h3>
+<p>Based on the thesis research:</p>
+<ul>
+<li><strong>VBT works, but with caveats</strong> - Expect ~1.4 rep prediction error (vs ~1 rep for squat)</li>
+<li><strong>Individual calibration still essential</strong> - 2x improvement over general equations</li>
+<li><strong>Consider grip fatigue</strong> - May affect velocity independently of target muscle fatigue</li>
+</ul>
+<hr>
+</section>
 </section>
 <section id="data-sources" class="level2">
 <h2 class="anchored" data-anchor-id="data-sources">Data Sources</h2>
@@ -612,26 +662,8 @@ ul.task-list li input[type="checkbox"] {
 <li><code>scripts/</code> - Analysis scripts</li>
 <li><code>analyses/</code> - Quarto reports</li>
 </ul>
-</section>
-</section>
-<section id="references" class="level2">
-<h2 class="anchored" data-anchor-id="references">References</h2>
-<section id="replication-studies" class="level3">
-<h3 class="anchored" data-anchor-id="replication-studies">Replication Studies</h3>
-<ul>
-<li><p>Robinson ZH, Pelland JC, Zourdos MC, et al.&nbsp;(2024). Exploring the Dose-Response Relationship Between Estimated Resistance Training Proximity to Failure, Strength Gain, and Muscle Hypertrophy. <em>Sports Medicine</em>, 54, 2209-2231.</p></li>
-<li><p>Paulsen K, Seynnes O, van den Tillaar R. (2025). Exercise type, training load, velocity loss threshold, and sets affect the relationship between lifting velocity and perceived repetitions in reserve. <em>PeerJ</em>, 13:e19797.</p></li>
-<li><p>Jukic I, Prnjak K, Helms ER, McGuigan MR. (2024). Modeling the repetitions-in-reserve-velocity relationship: A valid method for resistance training monitoring and prescription, and fatigue management. <em>Physiological Reports</em>, 12(5), e15955.</p></li>
-</ul>
-</section>
-<section id="additional-references" class="level3">
-<h3 class="anchored" data-anchor-id="additional-references">Additional References</h3>
-<ul>
-<li><p>González-Badillo JJ, Sánchez-Medina L. (2010). Movement velocity as a measure of loading intensity in resistance training. <em>International Journal of Sports Medicine</em>, 31(5), 347-352.</p></li>
-<li><p>Zourdos MC, et al.&nbsp;(2016). Novel resistance training–specific rating of perceived exertion scale measuring repetitions in reserve. <em>Journal of Strength and Conditioning Research</em>, 30(1), 267-275.</p></li>
-</ul>
 <hr>
-<p><em>Research conducted by João Costa and Filipe Braga (MSc Thesis)</em></p>
+<p><em>Research conducted by Joao Costa and Filipe Braga (MSc Thesis)</em></p>
 
 
 </section>

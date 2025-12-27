@@ -9,7 +9,7 @@
 <meta name="author" content="Deadlift Study Project">
 <meta name="dcterms.date" content="2025-12-27">
 
-<title>RIR &amp; Training Outcomes - Can Bar Speed Tell You How Hard a Set Was?</title>
+<title>Velocity-Based Training &amp; RIR Research - Can Bar Speed Tell You How Hard a Set Was?</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -114,7 +114,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
       <div class="navbar-container container-fluid">
       <div class="navbar-brand-container mx-auto">
     <a class="navbar-brand" href="./index.html">
-    <span class="navbar-title">RIR &amp; Training Outcomes</span>
+    <span class="navbar-title">Velocity-Based Training &amp; RIR Research</span>
     </a>
   </div>
             <div id="quarto-search" class="" title="Search"></div>
@@ -128,36 +128,28 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span class="menu-text">Home</span></a>
   </li>  
   <li class="nav-item dropdown ">
-    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-replications" role="button" data-bs-toggle="dropdown" aria-expanded="false">
- <span class="menu-text">Replications</span>
+    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-background-studies" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+ <span class="menu-text">Background Studies</span>
     </a>
-    <ul class="dropdown-menu" aria-labelledby="nav-menu-replications">    
+    <ul class="dropdown-menu" aria-labelledby="nav-menu-background-studies">    
         <li>
     <a class="dropdown-item" href="./01_pelland_meta_regression.html">
- <span class="dropdown-text">Pelland Meta-Regression</span></a>
+ <span class="dropdown-text">1. Does Training to Failure Matter?</span></a>
   </li>  
         <li>
     <a class="dropdown-item" href="./02_velocity_rir_relationship.html">
- <span class="dropdown-text">Velocity-RIR Relationship</span></a>
+ <span class="dropdown-text">2. Can Velocity Predict Effort?</span></a>
   </li>  
         <li>
     <a class="dropdown-item" href="./03_rir_velocity_modeling.html">
- <span class="dropdown-text">RIR-Velocity Modeling (Squat)</span></a>
-  </li>  
-        <li>
-    <a class="dropdown-item" href="./04_deadlift_rir_velocity.html">
- <span class="dropdown-text">Deadlift RIR-Velocity</span></a>
-  </li>  
-        <li>
-    <a class="dropdown-item" href="./05_deadlift_lmm_analysis.html">
- <span class="dropdown-text">LMM &amp; Velocity Tables</span></a>
-  </li>  
-        <li>
-    <a class="dropdown-item" href="./06_advanced_velocity_analyses.html">
- <span class="dropdown-text">Advanced Velocity Analyses</span></a>
+ <span class="dropdown-text">3. General vs Individual Models</span></a>
   </li>  
     </ul>
   </li>
+  <li class="nav-item">
+    <a class="nav-link" href="./deadlift_study.html"> 
+<span class="menu-text">Deadlift Study (Thesis)</span></a>
+  </li>  
 </ul>
           </div> <!-- /navcollapse -->
           <div class="quarto-navbar-tools">
@@ -293,7 +285,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <p><strong>Overall correlation: r = 0.45</strong></p>
 <p>This means:</p>
 <ul>
-<li>Faster bar speed → Higher perceived RIR (more reps left)</li>
+<li>Faster bar speed -&gt; Higher perceived RIR (more reps left)</li>
 <li>The relationship is <strong>moderate</strong> - not perfect</li>
 </ul>
 <div class="cell">
@@ -302,22 +294,20 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(df, <span class="fu">aes</span>(<span class="at">x =</span> mean_velocity_, <span class="at">y =</span> perceived_reps_in_reserve_, <span class="at">color =</span> exercise)) <span class="sc">+</span></span>
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">alpha =</span> <span class="fl">0.2</span>, <span class="at">size =</span> <span class="dv">1</span>) <span class="sc">+</span></span>
 <span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_smooth</span>(<span class="at">method =</span> <span class="st">"lm"</span>, <span class="at">se =</span> <span class="cn">TRUE</span>) <span class="sc">+</span></span>
-<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_color_manual</span>(<span class="at">values =</span> <span class="fu">c</span>(<span class="st">"Bench press"</span> <span class="ot">=</span> <span class="st">"#E41A1C"</span>, <span class="st">"Squat"</span> <span class="ot">=</span> <span class="st">"#377EB8"</span>)) <span class="sc">+</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_color_manual</span>(<span class="at">values =</span> <span class="fu">c</span>(<span class="st">"Bench press"</span> <span class="ot">=</span> COLORS<span class="sc">$</span>secondary, <span class="st">"Squat"</span> <span class="ot">=</span> COLORS<span class="sc">$</span>strength)) <span class="sc">+</span></span>
 <span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(</span>
 <span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">x =</span> <span class="st">"Mean Velocity (m/s)"</span>,</span>
 <span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">y =</span> <span class="st">"Perceived Repetitions in Reserve"</span>,</span>
 <span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">title =</span> <span class="st">"Bar Speed vs Perceived Effort"</span>,</span>
 <span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>    <span class="at">subtitle =</span> <span class="st">"Higher velocity generally means more reps left"</span>,</span>
 <span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>    <span class="at">color =</span> <span class="st">"Exercise"</span></span>
-<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
-<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>(<span class="at">base_size =</span> <span class="dv">14</span>) <span class="sc">+</span></span>
-<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">legend.position =</span> <span class="st">"bottom"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>  )</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output-display">
 <div id="fig-scatter" class="quarto-figure quarto-figure-center quarto-float anchored">
 <figure class="quarto-float quarto-float-fig figure">
 <div aria-describedby="fig-scatter-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<img src="02_velocity_rir_relationship_files/figure-html/fig-scatter-1.png" class="img-fluid figure-img" width="768">
+<img src="02_velocity_rir_relationship_files/figure-html/fig-scatter-1.png" class="img-fluid figure-img" style="width:100.0%">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-scatter-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 Figure&nbsp;1: Velocity vs Perceived RIR: Each Point is One Set
@@ -333,24 +323,18 @@ Figure&nbsp;1: Velocity vs Perceived RIR: Each Point is One Set
 <details class="code-fold">
 <summary>Show code</summary>
 <div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Calculate per-participant correlations</span></span>
-<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>participant_cors <span class="ot">&lt;-</span> <span class="fu">aggregate</span>(</span>
-<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cbind</span>(mean_velocity_, perceived_reps_in_reserve_) <span class="sc">~</span> id,</span>
-<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">data =</span> df,</span>
-<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">FUN =</span> <span class="cf">function</span>(x) x</span>
-<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>cors_by_id <span class="ot">&lt;-</span> <span class="fu">sapply</span>(<span class="fu">unique</span>(df<span class="sc">$</span>id), <span class="cf">function</span>(pid) {</span>
-<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>  sub_df <span class="ot">&lt;-</span> df[df<span class="sc">$</span>id <span class="sc">==</span> pid, ]</span>
-<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cor</span>(sub_df<span class="sc">$</span>mean_velocity_, sub_df<span class="sc">$</span>perceived_reps_in_reserve_, <span class="at">use =</span> <span class="st">"complete.obs"</span>)</span>
-<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>})</span>
-<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a>mean_r <span class="ot">&lt;-</span> <span class="fu">mean</span>(cors_by_id, <span class="at">na.rm =</span> <span class="cn">TRUE</span>)</span>
-<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a>sd_r <span class="ot">&lt;-</span> <span class="fu">sd</span>(cors_by_id, <span class="at">na.rm =</span> <span class="cn">TRUE</span>)</span>
-<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a>min_r <span class="ot">&lt;-</span> <span class="fu">min</span>(cors_by_id, <span class="at">na.rm =</span> <span class="cn">TRUE</span>)</span>
-<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a>max_r <span class="ot">&lt;-</span> <span class="fu">max</span>(cors_by_id, <span class="at">na.rm =</span> <span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>cors_by_id <span class="ot">&lt;-</span> <span class="fu">sapply</span>(<span class="fu">unique</span>(df<span class="sc">$</span>id), <span class="cf">function</span>(pid) {</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>  sub_df <span class="ot">&lt;-</span> df[df<span class="sc">$</span>id <span class="sc">==</span> pid, ]</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cor</span>(sub_df<span class="sc">$</span>mean_velocity_, sub_df<span class="sc">$</span>perceived_reps_in_reserve_, <span class="at">use =</span> <span class="st">"complete.obs"</span>)</span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>})</span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>mean_r <span class="ot">&lt;-</span> <span class="fu">mean</span>(cors_by_id, <span class="at">na.rm =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>sd_r <span class="ot">&lt;-</span> <span class="fu">sd</span>(cors_by_id, <span class="at">na.rm =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>min_r <span class="ot">&lt;-</span> <span class="fu">min</span>(cors_by_id, <span class="at">na.rm =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>max_r <span class="ot">&lt;-</span> <span class="fu">max</span>(cors_by_id, <span class="at">na.rm =</span> <span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
-<p>Here’s where it gets interesting. The average correlation was <strong>r = 0.5 ± 0.21</strong>, but:</p>
+<p>Here’s where it gets interesting. The average correlation was <strong>r = 0.5 +/- 0.21</strong>, but:</p>
 <ul>
 <li><strong>Strongest</strong>: r = 0.79 (velocity explains 62% of RIR variation)</li>
 <li><strong>Weakest</strong>: r = 0.09 (velocity explains only 1% of RIR variation)</li>
@@ -366,23 +350,22 @@ Figure&nbsp;1: Velocity vs Perceived RIR: Each Point is One Set
 <span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>cors_df<span class="sc">$</span>rank <span class="ot">&lt;-</span> <span class="fu">seq_len</span>(<span class="fu">nrow</span>(cors_df))</span>
 <span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(cors_df, <span class="fu">aes</span>(<span class="at">x =</span> rank, <span class="at">y =</span> r)) <span class="sc">+</span></span>
-<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_bar</span>(<span class="at">stat =</span> <span class="st">"identity"</span>, <span class="at">fill =</span> <span class="fu">ifelse</span>(cors_df<span class="sc">$</span>r <span class="sc">&gt;</span> <span class="fl">0.5</span>, <span class="st">"#377EB8"</span>, <span class="st">"#999999"</span>)) <span class="sc">+</span></span>
-<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_hline</span>(<span class="at">yintercept =</span> mean_r, <span class="at">linetype =</span> <span class="st">"dashed"</span>, <span class="at">color =</span> <span class="st">"red"</span>, <span class="at">linewidth =</span> <span class="dv">1</span>) <span class="sc">+</span></span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_bar</span>(<span class="at">stat =</span> <span class="st">"identity"</span>, <span class="at">fill =</span> <span class="fu">ifelse</span>(cors_df<span class="sc">$</span>r <span class="sc">&gt;</span> <span class="fl">0.5</span>, COLORS<span class="sc">$</span>primary, COLORS<span class="sc">$</span>gray)) <span class="sc">+</span></span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_hline</span>(<span class="at">yintercept =</span> mean_r, <span class="at">linetype =</span> <span class="st">"dashed"</span>, <span class="at">color =</span> COLORS<span class="sc">$</span>secondary, <span class="at">linewidth =</span> <span class="dv">1</span>) <span class="sc">+</span></span>
 <span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">annotate</span>(<span class="st">"text"</span>, <span class="at">x =</span> <span class="dv">5</span>, <span class="at">y =</span> mean_r <span class="sc">+</span> <span class="fl">0.05</span>, <span class="at">label =</span> <span class="fu">paste0</span>(<span class="st">"Mean r = "</span>, <span class="fu">round</span>(mean_r, <span class="dv">2</span>)),</span>
-<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a>           <span class="at">color =</span> <span class="st">"red"</span>, <span class="at">hjust =</span> <span class="dv">0</span>) <span class="sc">+</span></span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a>           <span class="at">color =</span> COLORS<span class="sc">$</span>secondary, <span class="at">hjust =</span> <span class="dv">0</span>) <span class="sc">+</span></span>
 <span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(</span>
 <span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a>    <span class="at">x =</span> <span class="st">"Participant (ranked by correlation)"</span>,</span>
 <span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a>    <span class="at">y =</span> <span class="st">"Velocity-RIR Correlation (r)"</span>,</span>
 <span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a>    <span class="at">title =</span> <span class="st">"Some People's Velocity Tracks Their Effort Better"</span>,</span>
 <span id="cb5-17"><a href="#cb5-17" aria-hidden="true" tabindex="-1"></a>    <span class="at">subtitle =</span> <span class="st">"Blue bars = strong correlation (r &gt; 0.5)"</span></span>
-<span id="cb5-18"><a href="#cb5-18" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
-<span id="cb5-19"><a href="#cb5-19" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>(<span class="at">base_size =</span> <span class="dv">14</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb5-18"><a href="#cb5-18" aria-hidden="true" tabindex="-1"></a>  )</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output-display">
 <div id="fig-individual" class="quarto-figure quarto-figure-center quarto-float anchored">
 <figure class="quarto-float quarto-float-fig figure">
 <div aria-describedby="fig-individual-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<img src="02_velocity_rir_relationship_files/figure-html/fig-individual-1.png" class="img-fluid figure-img" width="768">
+<img src="02_velocity_rir_relationship_files/figure-html/fig-individual-1.png" class="img-fluid figure-img" style="width:100.0%">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-individual-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 Figure&nbsp;2: Individual Variation in Velocity-RIR Correlation
@@ -434,21 +417,20 @@ The Calibration Problem
 <span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_bar</span>(<span class="at">stat =</span> <span class="st">"identity"</span>, <span class="at">width =</span> <span class="fl">0.6</span>) <span class="sc">+</span></span>
 <span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_text</span>(<span class="fu">aes</span>(<span class="at">label =</span> <span class="fu">paste0</span>(<span class="st">"r = "</span>, <span class="fu">round</span>(Correlation, <span class="dv">2</span>))),</span>
 <span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a>            <span class="at">vjust =</span> <span class="sc">-</span><span class="fl">0.5</span>, <span class="at">size =</span> <span class="dv">5</span>) <span class="sc">+</span></span>
-<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_fill_manual</span>(<span class="at">values =</span> <span class="fu">c</span>(<span class="st">"Bench Press"</span> <span class="ot">=</span> <span class="st">"#E41A1C"</span>, <span class="st">"Squat"</span> <span class="ot">=</span> <span class="st">"#377EB8"</span>)) <span class="sc">+</span></span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_fill_manual</span>(<span class="at">values =</span> <span class="fu">c</span>(<span class="st">"Bench Press"</span> <span class="ot">=</span> COLORS<span class="sc">$</span>secondary, <span class="st">"Squat"</span> <span class="ot">=</span> COLORS<span class="sc">$</span>strength)) <span class="sc">+</span></span>
 <span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ylim</span>(<span class="dv">0</span>, <span class="fl">0.7</span>) <span class="sc">+</span></span>
 <span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(</span>
 <span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a>    <span class="at">x =</span> <span class="cn">NULL</span>,</span>
 <span id="cb7-16"><a href="#cb7-16" aria-hidden="true" tabindex="-1"></a>    <span class="at">y =</span> <span class="st">"Correlation with Perceived RIR"</span>,</span>
 <span id="cb7-17"><a href="#cb7-17" aria-hidden="true" tabindex="-1"></a>    <span class="at">title =</span> <span class="st">"Both Exercises Show Moderate Velocity-RIR Correlation"</span></span>
 <span id="cb7-18"><a href="#cb7-18" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
-<span id="cb7-19"><a href="#cb7-19" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>(<span class="at">base_size =</span> <span class="dv">14</span>) <span class="sc">+</span></span>
-<span id="cb7-20"><a href="#cb7-20" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">legend.position =</span> <span class="st">"none"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb7-19"><a href="#cb7-19" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">legend.position =</span> <span class="st">"none"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output-display">
 <div id="fig-exercise" class="quarto-figure quarto-figure-center quarto-float anchored">
 <figure class="quarto-float quarto-float-fig figure">
 <div aria-describedby="fig-exercise-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<img src="02_velocity_rir_relationship_files/figure-html/fig-exercise-1.png" class="img-fluid figure-img" width="768">
+<img src="02_velocity_rir_relationship_files/figure-html/fig-exercise-1.png" class="img-fluid figure-img" style="width:100.0%">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-exercise-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 Figure&nbsp;3: Velocity-RIR Relationship by Exercise
@@ -493,8 +475,8 @@ Figure&nbsp;3: Velocity-RIR Relationship by Exercise
 <div class="cell">
 <details class="code-fold">
 <summary>Show code</summary>
-<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>summary_df <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(</span>
-<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">Metric =</span> <span class="fu">c</span>(</span>
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summary_table</span>(</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">metrics =</span> <span class="fu">c</span>(</span>
 <span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Total observations"</span>,</span>
 <span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Participants"</span>,</span>
 <span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Overall correlation"</span>,</span>
@@ -503,7 +485,7 @@ Figure&nbsp;3: Velocity-RIR Relationship by Exercise
 <span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Bench press correlation"</span>,</span>
 <span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Squat correlation"</span></span>
 <span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a>  ),</span>
-<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a>  <span class="at">Value =</span> <span class="fu">c</span>(</span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a>  <span class="at">values =</span> <span class="fu">c</span>(</span>
 <span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a>    <span class="fu">format</span>(n_obs, <span class="at">big.mark =</span> <span class="st">","</span>),</span>
 <span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a>    n_participants,</span>
 <span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a>    <span class="fu">round</span>(overall_r, <span class="dv">3</span>),</span>
@@ -511,10 +493,9 @@ Figure&nbsp;3: Velocity-RIR Relationship by Exercise
 <span id="cb8-16"><a href="#cb8-16" aria-hidden="true" tabindex="-1"></a>    <span class="fu">round</span>(sd_r, <span class="dv">3</span>),</span>
 <span id="cb8-17"><a href="#cb8-17" aria-hidden="true" tabindex="-1"></a>    <span class="fu">round</span>(bench_r, <span class="dv">3</span>),</span>
 <span id="cb8-18"><a href="#cb8-18" aria-hidden="true" tabindex="-1"></a>    <span class="fu">round</span>(squat_r, <span class="dv">3</span>)</span>
-<span id="cb8-19"><a href="#cb8-19" aria-hidden="true" tabindex="-1"></a>  )</span>
-<span id="cb8-20"><a href="#cb8-20" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb8-21"><a href="#cb8-21" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-22"><a href="#cb8-22" aria-hidden="true" tabindex="-1"></a>knitr<span class="sc">::</span><span class="fu">kable</span>(summary_df)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb8-19"><a href="#cb8-19" aria-hidden="true" tabindex="-1"></a>  ),</span>
+<span id="cb8-20"><a href="#cb8-20" aria-hidden="true" tabindex="-1"></a>  <span class="at">caption =</span> <span class="st">"Summary of Velocity-RIR Analysis"</span></span>
+<span id="cb8-21"><a href="#cb8-21" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div id="tbl-summary" class="cell quarto-float anchored">
 <figure class="quarto-float quarto-float-tbl figure">
@@ -524,12 +505,7 @@ Table&nbsp;1: Summary of Velocity-RIR Analysis
 <div aria-describedby="tbl-summary-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <div class="cell-output-display">
 <table class="do-not-create-environment cell table table-sm table-striped small">
-<thead>
-<tr class="header">
-<th style="text-align: left;">Metric</th>
-<th style="text-align: left;">Value</th>
-</tr>
-</thead>
+<caption>Summary of Velocity-RIR Analysis</caption>
 <tbody>
 <tr class="odd">
 <td style="text-align: left;">Total observations</td>
@@ -581,8 +557,8 @@ Table&nbsp;1: Summary of Velocity-RIR Analysis
 <tbody>
 <tr class="odd">
 <td>Per-participant r</td>
-<td>0.6 ± 0.2</td>
-<td>0.5 ± 0.21</td>
+<td>0.6 +/- 0.2</td>
+<td>0.5 +/- 0.21</td>
 </tr>
 <tr class="even">
 <td>Squat r range</td>

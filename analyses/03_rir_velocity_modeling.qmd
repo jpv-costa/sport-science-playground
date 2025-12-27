@@ -3,27 +3,11 @@ title: "Can We Predict How Many Reps You Have Left?"
 subtitle: "Replicating Jukic et al. (2024) on RIR-Velocity Modeling"
 author: "Deadlift Study Project"
 date: today
-format:
-  html:
-    toc: true
-    toc-depth: 3
-    code-fold: true
-    code-summary: "Show code"
-    theme: cosmo
-bibliography: references.bib
 ---
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(
-  echo = TRUE,
-  message = FALSE,
-  warning = FALSE,
-  fig.width = 10,
-  fig.height = 6
-)
-
-# Load required packages
-library(ggplot2)
+```{r setup}
+#| include: false
+source("_common.R")
 
 # Load results
 results <- readRDS("../data/processed/rir_velocity_replication_results.rds")
@@ -44,6 +28,7 @@ Jukic et al. (2024) investigated whether the relationship between bar velocity a
 2. **Individual models**: Personalized equations for each lifter
 
 Their key findings:
+
 - Individual models explain about **2x more variance** than general models
 - Polynomial (curved) relationships fit better than linear ones
 - Prediction accuracy is acceptable for practical use
@@ -56,11 +41,11 @@ We're analyzing data from `r results$summary$n_participants` resistance-trained 
 #| label: tbl-participants
 #| tbl-cap: "Participant Characteristics"
 
-summary_df <- data.frame(
-  Metric = c("Participants", "Male", "Female",
-             "Observations", "Velocity Range (m/s)",
-             "RIR Range", "Relative Strength (1RM/BW)"),
-  Value = c(
+summary_table(
+  metrics = c("Participants", "Male", "Female",
+              "Observations", "Velocity Range (m/s)",
+              "RIR Range", "Relative Strength (1RM/BW)"),
+  values = c(
     results$summary$n_participants,
     round(results$summary$n_male),
     round(results$summary$n_female),
@@ -70,8 +55,6 @@ summary_df <- data.frame(
     round(results$summary$mean_relative_strength, 2)
   )
 )
-
-knitr::kable(summary_df, col.names = c("", ""))
 ```
 
 ## The Velocity-RIR Relationship
@@ -85,7 +68,7 @@ As you get closer to failure, your bar speed slows down. This creates a relation
 # Create velocity-RIR scatter plot
 ggplot(data, aes(x = mean_velocity, y = rir, color = set_type)) +
   geom_point(alpha = 0.3, size = 1) +
-  geom_smooth(method = "lm", formula = y ~ poly(x, 2), se = FALSE, size = 1.2) +
+  geom_smooth(method = "lm", formula = y ~ poly(x, 2), se = FALSE, linewidth = 1.2) +
   facet_wrap(~set_type, labeller = labeller(set_type = c(
     RTF70 = "70% 1RM",
     RTF80 = "80% 1RM",
@@ -96,12 +79,11 @@ ggplot(data, aes(x = mean_velocity, y = rir, color = set_type)) +
     y = "Repetitions in Reserve",
     color = "Load"
   ) +
-  theme_minimal() +
   theme(
     legend.position = "none",
     strip.text = element_text(face = "bold", size = 12)
   ) +
-  scale_color_manual(values = c("#E69F00", "#56B4E9", "#009E73"))
+  scale_color_manual(values = c(COLORS$load_80, COLORS$primary, COLORS$load_90))
 ```
 
 **What you're seeing**: Each point is one repetition. As velocity decreases (moving left), RIR decreases (you're closer to failure). The curves show polynomial fits for each load.
@@ -114,19 +96,11 @@ Here's where it gets interesting. A "general" model uses everyone's data to crea
 #| label: tbl-models
 #| tbl-cap: "Model Fit Comparison: General vs Individual"
 
-comparison_df <- data.frame(
-  `Model Type` = c("General (Polynomial)", "Individual (Polynomial)"),
-  `Median R²` = c(
-    round(results$comparison$general_r2, 3),
-    round(results$comparison$individual_r2, 3)
-  ),
-  `Interpretation` = c(
-    "Explains ~50% of variance",
-    "Explains ~88% of variance"
-  )
+model_comparison_table(
+  models = c("General (Polynomial)", "Individual (Polynomial)"),
+  r2_values = c(results$comparison$general_r2, results$comparison$individual_r2),
+  interpretations = c("Explains ~50% of variance", "Explains ~88% of variance")
 )
-
-knitr::kable(comparison_df, col.names = c("Model Type", "Median R²", "Interpretation"))
 ```
 
 **The takeaway**: Individual models explain **`r round(results$comparison$improvement_factor, 1)`x more variance** than general models. This means personalized equations are much better at predicting your RIR.
@@ -155,14 +129,14 @@ The strong individual relationships suggest:
 #| label: tbl-loads
 #| tbl-cap: "General Model Performance by Load"
 
-load_df <- data.frame(
+data.frame(
   Load = c("90% 1RM", "80% 1RM", "70% 1RM"),
-  `Linear R²` = c(
+  `Linear R2` = c(
     round(results$general_results$RTF90$linear$r_squared, 3),
     round(results$general_results$RTF80$linear$r_squared, 3),
     round(results$general_results$RTF70$linear$r_squared, 3)
   ),
-  `Polynomial R²` = c(
+  `Polynomial R2` = c(
     round(results$general_results$RTF90$polynomial$r_squared, 3),
     round(results$general_results$RTF80$polynomial$r_squared, 3),
     round(results$general_results$RTF70$polynomial$r_squared, 3)
@@ -171,10 +145,9 @@ load_df <- data.frame(
     round(results$general_results$RTF90$polynomial$rse, 2),
     round(results$general_results$RTF80$polynomial$rse, 2),
     round(results$general_results$RTF70$polynomial$rse, 2)
-  )
-)
-
-knitr::kable(load_df, col.names = c("Load", "Linear R²", "Polynomial R²", "RSE (reps)"))
+  ),
+  check.names = FALSE
+) |> format_table(col.names = c("Load", "Linear R2", "Polynomial R2", "RSE (reps)"))
 ```
 
 **Pattern**: Heavier loads (90% 1RM) have lower RSE because there are fewer possible reps, making prediction easier in absolute terms.
@@ -183,9 +156,9 @@ knitr::kable(load_df, col.names = c("Load", "Linear R²", "Polynomial R²", "RSE
 
 ```{r fig-individual}
 #| label: fig-individual-r2
-#| fig-cap: "Distribution of R² values for individual polynomial models"
+#| fig-cap: "Distribution of R-squared values for individual polynomial models"
 
-# Extract R² values from individual results
+# Extract R2 values from individual results
 r2_values <- c()
 for (id in names(results$general_results)) {
   if (!is.null(results$general_results[[id]]$polynomial$r_squared)) {
@@ -201,9 +174,9 @@ individual_r2_range <- c(results$polynomial_summary$min_r_squared,
 # Simple visualization
 ggplot(data.frame(x = 1), aes(x = x)) +
   annotate("rect", xmin = 0.2, xmax = 1.0, ymin = 0, ymax = 1,
-           fill = "steelblue", alpha = 0.3) +
+           fill = COLORS$primary, alpha = 0.3) +
   annotate("segment", x = individual_r2_median, xend = individual_r2_median,
-           y = 0, yend = 1, color = "darkblue", size = 2) +
+           y = 0, yend = 1, color = COLORS$primary, linewidth = 2) +
   annotate("text", x = individual_r2_median, y = 1.1,
            label = paste("Median:", round(individual_r2_median, 2)),
            fontface = "bold") +
@@ -212,8 +185,7 @@ ggplot(data.frame(x = 1), aes(x = x)) +
   annotate("text", x = individual_r2_range[2], y = 0.5,
            label = paste("Max:", round(individual_r2_range[2], 2))) +
   scale_x_continuous(limits = c(0, 1.1), breaks = seq(0, 1, 0.2)) +
-  labs(x = "R² (Individual Models)", y = "") +
-  theme_minimal() +
+  labs(x = "R-squared (Individual Models)", y = "") +
   theme(
     axis.text.y = element_blank(),
     axis.ticks.y = element_blank(),
@@ -222,14 +194,14 @@ ggplot(data.frame(x = 1), aes(x = x)) +
   )
 ```
 
-**Key insight**: Most individual models achieve R² > 0.80, meaning velocity explains over 80% of the variance in RIR for most people.
+**Key insight**: Most individual models achieve R-squared > 0.80, meaning velocity explains over 80% of the variance in RIR for most people.
 
 ## Validation Against the Paper
 
 | Metric | Paper Finding | Our Replication | Match? |
 |--------|---------------|-----------------|--------|
-| General R² | ~0.50-0.60 | `r round(results$comparison$general_r2, 2)` | Yes |
-| Individual R² (median) | ~0.85-0.95 | `r round(results$comparison$individual_r2, 2)` | Yes |
+| General R-squared | ~0.50-0.60 | `r round(results$comparison$general_r2, 2)` | Yes |
+| Individual R-squared (median) | ~0.85-0.95 | `r round(results$comparison$individual_r2, 2)` | Yes |
 | Improvement factor | ~2x | `r round(results$comparison$improvement_factor, 2)`x | Yes |
 
 ## Practical Recommendations
@@ -247,9 +219,10 @@ Based on these findings:
 ## Technical Notes
 
 This analysis used:
+
 - **R6 classes** for clean, object-oriented code
 - **Linear and polynomial regression** for model fitting
-- **Cross-validation** (Day 1 → Day 2 prediction) for practical validity
+- **Cross-validation** (Day 1 -> Day 2 prediction) for practical validity
 
 Data source: [OSF Repository](https://osf.io/5ejcp/)
 
