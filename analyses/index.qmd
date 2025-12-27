@@ -1,7 +1,11 @@
 ---
-title: "RIR & Training Outcomes: A Research Compendium"
-subtitle: "Understanding how training intensity affects strength and muscle growth"
-author: "Deadlift Study Project"
+title: "Velocity-Based Training & RIR: A Research Compendium"
+subtitle: "Investigating Velocity-Based Training Applications for Powerlifting"
+author:
+  - name: "João Costa"
+    affiliation: "Sport Science Research"
+  - name: "Filipe Braga"
+    affiliation: "MSc Thesis Research"
 date: today
 format:
   html:
@@ -22,17 +26,25 @@ lmm_results <- tryCatch(readRDS("../data/processed/deadlift_lmm_results.rds"), e
 advanced_results <- tryCatch(readRDS("../data/processed/advanced_velocity_results.rds"), error = function(e) NULL)
 ```
 
-## What This Project Investigates
+## About This Research
 
-This research compendium explores a fundamental question in resistance training:
+This research compendium explores fundamental questions in resistance training through velocity-based training (VBT) methods:
 
-> **How close to failure should you train for optimal results?**
+> **Can bar velocity objectively measure training proximity to failure?**
+>
+> **Does this relationship hold for the deadlift, and how can we apply it in practice?**
 
-We address this through:
+### Project Structure
 
-1. **Replications** of key published studies
-2. **Meta-analysis** of existing literature
-3. **Practical guidance** for training decisions
+This project combines:
+
+1. **Replications** of key published studies (Studies 1-3) to validate methodology
+2. **Original research** on the conventional deadlift (Studies 4-6)---part of Filipe Braga's MSc thesis
+3. **Practical tools** including velocity stop tables and prediction models
+
+### Research Focus
+
+The original research (Studies 4-6) investigates whether velocity-based training principles, well-established for exercises like the squat and bench press, can be successfully applied to the **conventional deadlift**---an exercise with unique biomechanical characteristics (no stretch-shortening cycle, grip limitations, binary failure patterns).
 
 ## Key Concepts
 
@@ -55,9 +67,11 @@ An objective approach to measuring effort using bar speed:
 - **Slower velocity** = Closer to failure
 - **Velocity loss** = Fatigue accumulation within a set
 
-## Completed Analyses
+## Replication Studies (Background)
 
-### 1. Does Training to Failure Matter?
+These replications validate our methodology before applying it to original deadlift research.
+
+### Study 1: Does Training to Failure Matter?
 
 **[Pelland et al. (2024) Replication](01_pelland_meta_regression.qmd)**
 
@@ -72,7 +86,7 @@ A meta-regression examining RIR and training outcomes across strength and hypert
 
 ---
 
-### 2. Can Bar Speed Predict Effort?
+### Study 2: Can Bar Speed Predict Effort?
 
 **[Paulsen et al. (2025) Replication](02_velocity_rir_relationship.qmd)**
 
@@ -87,7 +101,7 @@ Analysis of `r format(nrow(velocity_results$data), big.mark = ",")` observations
 
 ---
 
-### 3. Can We Model the RIR-Velocity Relationship?
+### Study 3: Can We Model the RIR-Velocity Relationship?
 
 **[Jukic et al. (2024) Replication](03_rir_velocity_modeling.qmd)**
 
@@ -102,7 +116,11 @@ Analysis of `r format(nrow(rir_velocity_results$data), big.mark = ",")` observat
 
 ---
 
-### 4. Does This Work for Deadlifts?
+## Original Deadlift Research (MSc Thesis)
+
+The following studies represent original research investigating the velocity-RIR relationship for the conventional deadlift, forming the core of Filipe Braga's MSc thesis.
+
+### Study 4: Does VBT Work for Deadlifts?
 
 **[Deadlift RIR-Velocity Study](04_deadlift_rir_velocity.qmd)**
 
@@ -119,7 +137,7 @@ Original thesis research applying the same methodology to **conventional deadlif
 
 ---
 
-### 5. Practical Velocity Tables for Deadlift Training
+### Study 5: Practical Velocity Tables for Training
 
 **[LMM Analysis & Velocity Stop Tables](05_deadlift_lmm_analysis.qmd)**
 
@@ -149,7 +167,7 @@ if (!is.null(lmm_results)) {
 
 ---
 
-### 6. Advanced Velocity-RIR Analyses
+### Study 6: Advanced Velocity-RIR Analyses
 
 **[Advanced Velocity Analyses (H2-H6)](06_advanced_velocity_analyses.qmd)**
 
@@ -217,47 +235,63 @@ Based on Study 4:
 - **Load-specific thresholds** - Different velocity targets for 80% vs 90% 1RM
 - **Consider grip fatigue** - May affect velocity independently of target muscle fatigue
 
+## Summary of Key Findings
+
+Based on all studies in this compendium:
+
+| Question | Finding | Practical Implication |
+|----------|---------|----------------------|
+| Does VBT work for deadlifts? | Yes, but with more variability than squats | Use VBT as one tool, not the only tool |
+| Individual vs general models? | Individual models are ~2x more accurate | Calibrate individually for serious athletes |
+| Does load matter? | No significant effect (80% vs 90%) | One velocity table works across loads |
+| How often to recalibrate? | Moderate day-to-day reliability | Update every 2-4 weeks |
+| Can first rep predict set capacity? | Yes, with ~1-2 rep accuracy | Use for real-time autoregulation |
+
 ## Data Sources
 
-| Study | Data | Code |
+| Study | Data | Type |
 |-------|------|------|
-| Pelland et al. (2024) | [OSF Repository](https://osf.io/7knsj/) | Replicated |
-| Paulsen et al. (2025) | [PeerJ Supplement](https://peerj.com/articles/19797/) | Replicated |
-| Jukic et al. (2024) | [OSF Repository](https://osf.io/5ejcp/) | Replicated |
-| Deadlift Thesis (2024) | Original Data | Original Research |
+| Pelland et al. (2024) | [OSF Repository](https://osf.io/7knsj/) | Replication |
+| Paulsen et al. (2025) | [PeerJ Supplement](https://peerj.com/articles/19797/) | Replication |
+| Jukic et al. (2024) | [OSF Repository](https://osf.io/5ejcp/) | Replication |
+| Deadlift Thesis (2024) | Original Data | **Original Research** |
 
 ## Methodology
 
 All analyses use:
 
 - **R** for statistical computing
+- **lme4** for Linear Mixed Effects Models
 - **metafor** for meta-analysis models
 - **Quarto** for reproducible reports
 - **renv** for dependency management
 
 ### Code Architecture
 
-The project follows SOLID principles with:
+The project follows SOLID principles with R6 classes:
 
 - `R/domain/` - Domain objects (EffectSize, TreatmentGroup)
-- `R/calculators/` - Effect size calculation services
-- `scripts/` - Replication scripts
+- `R/calculators/` - Analysis services (RirVelocityModeler, AdvancedVelocityAnalyzer)
+- `R/loaders/` - Data loading classes (DeadliftRirDataLoader)
+- `scripts/` - Analysis scripts
 - `analyses/` - Quarto reports
 
-## Planned Analyses
-
-| Analysis | Description | Status |
-|----------|-------------|--------|
-| Sensitivity Analysis | Robustness checks | Planned |
-| Publication Bias | Bias assessment | Planned |
-| ~~Deadlift-Specific~~ | ~~Application to deadlift training~~ | **Completed** (Study 4) |
-| ~~LMM & Velocity Tables~~ | ~~Practical velocity thresholds~~ | **Completed** (Study 5) |
-| ~~Advanced Velocity~~ | ~~MVT, reliability, decay, prediction~~ | **Completed** (Study 6) |
-
 ## References
+
+### Replication Studies
 
 - Robinson ZH, Pelland JC, Zourdos MC, et al. (2024). Exploring the Dose-Response Relationship Between Estimated Resistance Training Proximity to Failure, Strength Gain, and Muscle Hypertrophy. *Sports Medicine*, 54, 2209-2231.
 
 - Paulsen K, Seynnes O, van den Tillaar R. (2025). Exercise type, training load, velocity loss threshold, and sets affect the relationship between lifting velocity and perceived repetitions in reserve. *PeerJ*, 13:e19797.
 
 - Jukic I, Prnjak K, Helms ER, McGuigan MR. (2024). Modeling the repetitions-in-reserve-velocity relationship: A valid method for resistance training monitoring and prescription, and fatigue management. *Experimental Physiology*, 109(2), 193-206.
+
+### Additional References
+
+- González-Badillo JJ, Sánchez-Medina L. (2010). Movement velocity as a measure of loading intensity in resistance training. *International Journal of Sports Medicine*, 31(5), 347-352.
+
+- Zourdos MC, et al. (2016). Novel resistance training–specific rating of perceived exertion scale measuring repetitions in reserve. *Journal of Strength and Conditioning Research*, 30(1), 267-275.
+
+---
+
+*Research conducted by João Costa and Filipe Braga (MSc Thesis)*

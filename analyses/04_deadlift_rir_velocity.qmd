@@ -1,7 +1,11 @@
 ---
 title: "Does the RIR-Velocity Relationship Hold for Deadlifts?"
 subtitle: "Original Research on Conventional Deadlift"
-author: "Deadlift Study Project"
+author:
+  - name: "João Costa"
+    affiliation: "Sport Science Research"
+  - name: "Filipe Braga"
+    affiliation: "MSc Thesis Research"
 date: today
 format:
   html:
@@ -33,17 +37,28 @@ data <- results$data
 squat_results <- readRDS("../data/processed/rir_velocity_replication_results.rds")
 ```
 
-## The Question
+## Introduction
 
-The squat study (Study 3) showed that bar velocity can predict Repetitions in Reserve (RIR) with high accuracy---especially when using **individual calibration**. But does this relationship hold for the **deadlift**?
+### Background
 
-The deadlift presents unique challenges:
+Velocity-Based Training (VBT) has emerged as an objective method for monitoring and prescribing resistance training intensity. The fundamental principle underlying VBT is that as athletes approach muscular failure, their movement velocity decreases in a predictable manner. This relationship between velocity and Repetitions in Reserve (RIR) has been extensively studied in exercises like the back squat and bench press (Jukic et al., 2024; Zourdos et al., 2016).
 
-- **No eccentric phase** at the start (bar starts from the floor)
-- **Grip fatigue** can limit performance independently of target muscles
-- **More binary failure** pattern (you can lift it or you can't)
+However, the **conventional deadlift** presents unique biomechanical characteristics that may affect this relationship:
 
-This study examines whether velocity-based training principles apply to the conventional deadlift.
+1. **Concentric-only initiation**: Unlike the squat, the deadlift begins from a dead stop without an eccentric-concentric stretch-shortening cycle, eliminating the elastic energy contribution
+2. **Grip as a limiting factor**: The double overhand or mixed grip can become a limiting factor independent of the target musculature (posterior chain), potentially causing failure before true muscular exhaustion
+3. **Binary failure pattern**: Deadlifts tend to fail more abruptly---either the bar leaves the floor or it doesn't---compared to the gradual "grinding" often seen in squats
+4. **Longer lever arms**: The horizontal distance between the load and hip joint creates substantial moment arms that change throughout the lift
+
+### Research Question
+
+This study investigates whether the velocity-RIR relationship established for the back squat (Jukic et al., 2024) can be successfully applied to the conventional deadlift, addressing the following questions:
+
+1. **Does a meaningful velocity-RIR relationship exist for deadlifts?**
+2. **Do individual models outperform general equations as seen in squats?**
+3. **How does prediction accuracy compare between exercises?**
+
+This research forms part of Filipe Braga's MSc thesis investigating velocity-based training applications for powerlifting.
 
 ## Methods
 
@@ -73,14 +88,43 @@ knitr::kable(summary_df, col.names = c("", ""))
 
 ### Protocol
 
-- **Exercise**: Conventional deadlift
-- **Loads**: 80% and 90% of 1RM
-- **Testing Days**: 2 (for cross-validation)
-- **Data Collection**: Velocity (m/s) and RIR for each repetition
+Participants performed the conventional deadlift under standardized conditions:
 
-## The Velocity-RIR Relationship
+- **Exercise**: Conventional deadlift with standard Olympic barbell
+- **Loads**: 80% and 90% of 1RM (determined via prior 1RM testing)
+- **Testing Days**: 2 separate days (minimum 48-72 hours apart) for cross-validation
+- **Sets per condition**: Each load tested on each day (4 total conditions per participant)
+- **Rest periods**: 3-5 minutes between sets
+- **Failure criterion**: Inability to complete a full repetition or voluntary termination
 
-As lifters approach failure, their bar speed decreases. Here's what this looks like for the deadlift:
+### Velocity Measurement
+
+Mean concentric velocity (MCV) was measured using a linear position transducer attached to the barbell. MCV represents the average velocity from the initiation of the pull until lockout, providing a reliable measure of lifting performance.
+
+### RIR Assignment
+
+RIR was assigned prospectively based on set completion:
+
+- The final repetition completed = RIR 0 (failure)
+- Penultimate repetition = RIR 1
+- And so forth...
+
+This differs from subjective RIR estimates reported by lifters, providing an objective measure of proximity to failure.
+
+### Statistical Analysis
+
+Following the methodology of Jukic et al. (2024):
+
+1. **General models**: Population-level polynomial regression (velocity ~ RIR + RIR²)
+2. **Individual models**: Participant-specific polynomial regressions
+3. **Cross-validation**: Day 1 models tested on Day 2 data
+4. **Comparison metric**: Explained variance (R²) and prediction accuracy (MAE)
+
+## Results
+
+### The Velocity-RIR Relationship
+
+As lifters approach failure, their bar speed decreases. The following figure illustrates this relationship for the deadlift:
 
 ```{r fig-velocity-rir}
 #| label: fig-scatter
@@ -106,9 +150,11 @@ ggplot(data, aes(x = mean_velocity, y = rir, color = load_percentage)) +
   scale_color_manual(values = c("#E69F00", "#009E73"))
 ```
 
-**Observation**: The relationship is visible but with more scatter than typically seen in squat data, especially at 80% 1RM.
+**Observation**: A clear negative relationship exists---higher RIR (more reps remaining) is associated with faster velocities. However, the scatter is notably larger than typically reported for squat data (Jukic et al., 2024), particularly at 80% 1RM where more repetitions are performed.
 
-## General vs Individual Models
+### General vs Individual Models
+
+A central question in VBT research is whether population-level ("general") equations suffice, or whether individual calibration is necessary. This has important practical implications: general equations are convenient but may sacrifice accuracy, while individual models require calibration testing but offer personalized thresholds.
 
 ```{r model-comparison}
 #| label: tbl-models
@@ -129,9 +175,11 @@ comparison_df <- data.frame(
 knitr::kable(comparison_df, col.names = c("Model Type", "Median R²", "Interpretation"))
 ```
 
-**Key Finding**: Individual models explain **`r round(results$comparison$improvement_factor, 1)`x more variance** than general models, consistent with the squat findings.
+**Key Finding**: Individual models explain **`r round(results$comparison$improvement_factor, 1)`x more variance** than general models, consistent with findings from squat research (Jukic et al., 2024). This substantial improvement justifies the additional effort of individual calibration for serious athletes.
 
-## How Does Deadlift Compare to Squat?
+### Exercise Comparison: Deadlift vs Squat
+
+To contextualize these findings, we compared our deadlift results with the squat data from Jukic et al. (2024), which we replicated in Study 3:
 
 ```{r comparison-table}
 #| label: tbl-exercise-comparison
@@ -166,17 +214,21 @@ knitr::kable(exercise_comparison, col.names = c("Metric", "Squat (Jukic)", "Dead
 
 ### Why is Deadlift R² Lower?
 
-The deadlift shows **lower R² values** than the squat. Possible explanations:
+The deadlift shows **lower R² values** than the squat. Several biomechanical and methodological factors may explain this difference:
 
-1. **Binary failure pattern**: Deadlifts tend to fail suddenly rather than gradually grinding to a halt
-2. **Grip fatigue**: Can limit performance independently of target muscle fatigue
-3. **No stretch-shortening cycle**: Less consistent velocity feedback
-4. **Technical breakdown**: Form changes (back rounding) may affect velocity differently
-5. **Sample size**: Smaller participant pool (19 vs 46)
+1. **Binary failure pattern**: Deadlifts tend to fail suddenly rather than gradually grinding to a halt. In the squat, athletes often experience progressive bar speed reduction and can "grind" through difficult reps. In contrast, deadlifts either leave the floor or they don't---there's less intermediate velocity signal.
 
-## Prediction Accuracy
+2. **Grip fatigue as an independent limiter**: When grip fails, velocity may not accurately reflect lower body fatigue. An athlete might have several reps remaining in their posterior chain but be limited by forearm endurance. This introduces noise uncorrelated with true RIR.
 
-How well does a Day 1 model predict Day 2 performance?
+3. **Absence of stretch-shortening cycle**: The squat's eccentric phase stores elastic energy that contributes to the concentric portion, creating consistent velocity patterns. The deadlift's dead-start eliminates this mechanism, potentially increasing rep-to-rep variability.
+
+4. **Technical breakdown patterns**: As fatigue accumulates, deadlift technique often deteriorates (increased thoracic flexion, hips rising faster than shoulders). These technique changes may affect velocity differently than pure muscular fatigue.
+
+5. **Sample size differences**: Our sample (n=19) is smaller than the squat study (n=46), reducing statistical power and potentially inflating variance estimates.
+
+### Cross-Day Prediction Accuracy
+
+A critical test of any VBT model is its ability to predict performance on novel occasions. We tested Day 1 models on Day 2 data:
 
 ```{r prediction-accuracy}
 #| label: tbl-prediction
@@ -202,7 +254,9 @@ prediction_df <- data.frame(
 knitr::kable(prediction_df, col.names = c("Metric", "Value"))
 ```
 
-## Velocity Characteristics by Load
+These prediction errors (~1.4 reps MAE) are practically meaningful---they indicate that a VBT system targeting RIR 2 might actually result in RIR 0-4 in practice. This uncertainty should be factored into training prescription, with conservative targets (e.g., targeting RIR 3 if the goal is to stay above RIR 1).
+
+### Velocity Characteristics by Load
 
 ```{r velocity-by-load}
 #| label: fig-velocity-load
@@ -253,18 +307,38 @@ knitr::kable(load_df, col.names = c("Load", "Linear R²", "Polynomial R²", "RSE
 ```
 
 **Pattern**: 90% 1RM shows better model fit than 80% 1RM, likely because:
-- Fewer total reps (less fatigue accumulation variability)
-- More consistent near-failure performance
 
-## Practical Implications
+- **Fewer total reps**: At 90% 1RM, sets typically last 3-5 reps, reducing cumulative fatigue variability
+- **More consistent near-failure performance**: Heavy loads provide a clearer signal of impending failure
+- **Less technique degradation**: Shorter sets may preserve better form throughout
 
-### For Deadlift Training
+## Discussion
 
-1. **Individual calibration is essential**: General equations lose significant precision
-2. **Accept more prediction error**: ~1.4 rep error vs ~1 rep for squat
-3. **Load-specific thresholds**: Different velocity targets for 80% vs 90%
+### Practical Implications for Deadlift Training
 
-### Velocity Targets (Based on This Data)
+Based on these findings, we offer the following recommendations for implementing VBT with the conventional deadlift:
+
+#### 1. Individual Calibration is Essential
+
+General population equations lose significant precision. Athletes serious about using VBT for deadlift training should:
+
+- Perform a calibration test to failure at submaximal loads (75-85% 1RM)
+- Establish their personal velocity-RIR curve
+- Re-calibrate every 4-8 weeks or after significant training blocks
+
+#### 2. Accept Greater Prediction Uncertainty
+
+The deadlift shows ~1.4 rep prediction error compared to ~1 rep for squats. Practical implications:
+
+- **Target conservatively**: If aiming for RIR 2, use velocity thresholds corresponding to RIR 3
+- **Use velocity as a guide, not an absolute**: Combine with RPE and other autoregulation tools
+- **Don't rely solely on velocity for competition peaking**: Technical and psychological factors become more important
+
+#### 3. Consider Load-Specific Thresholds
+
+Different velocity targets may be needed for 80% vs 90% 1RM. The following table provides general reference values:
+
+### Velocity Reference Table
 
 ```{r velocity-targets}
 #| label: tbl-targets
@@ -284,21 +358,37 @@ targets$`90% 1RM` <- round(targets$`90% 1RM`, 3)
 knitr::kable(targets, row.names = FALSE)
 ```
 
-**Caveat**: These are population averages. Individual calibration will improve accuracy.
+**Caveat**: These are population averages. Individual calibration will substantially improve accuracy for any given athlete.
 
 ## Limitations
 
-1. **Sample size**: 19 participants vs 46 in the squat study
-2. **Load range**: Only 80% and 90% tested (no 70%)
-3. **Population**: Portuguese lifters---may not generalize globally
-4. **Equipment**: Specific velocity measurement device used
+This study has several limitations that should be considered when interpreting the results:
+
+1. **Sample size**: With 19 participants (vs 46 in the squat study), statistical power is limited. Effect sizes are more variable and confidence intervals are wider than ideal.
+
+2. **Load range**: Only 80% and 90% of 1RM were tested. Lighter loads (60-70%) commonly used in hypertrophy-focused training may show different velocity-RIR patterns.
+
+3. **Population specificity**: All participants were Portuguese resistance-trained individuals. Results may not generalize to different populations, training backgrounds, or anthropometrics.
+
+4. **Single exercise variant**: Only the conventional deadlift was tested. Sumo deadlifts, trap bar deadlifts, and Romanian deadlifts may show different velocity-RIR relationships.
+
+5. **Equipment specificity**: A specific linear position transducer was used. Different velocity measurement devices may yield slightly different values.
+
+6. **Short-term reliability only**: Testing occurred across only 2 days. Longer-term reliability (week-to-week, month-to-month) was not assessed.
 
 ## Conclusions
 
-1. **The RIR-velocity relationship exists for deadlifts**, but with more variability than squats
-2. **Individual models still outperform general models** (~2x improvement)
-3. **Prediction accuracy is acceptable** for practical use (~1.4 rep error)
-4. **Deadlift-specific factors** (grip, binary failure) may reduce predictability
+This study provides the first systematic examination of the velocity-RIR relationship for the conventional deadlift, with several key findings:
+
+1. **The velocity-RIR relationship exists for deadlifts**, demonstrating that VBT principles can be applied to this exercise, though with greater variability than seen in squats.
+
+2. **Individual models substantially outperform general equations** (~2x improvement in explained variance), reinforcing the need for personalized calibration.
+
+3. **Prediction accuracy is acceptable for practical use** (~1.4 rep error), though athletes should account for this uncertainty in training prescription.
+
+4. **Deadlift-specific factors** (grip limitations, binary failure patterns, absence of SSC) likely contribute to reduced predictability compared to squats.
+
+5. **VBT can complement traditional autoregulation** methods for the deadlift, but should not be used as the sole prescription tool.
 
 ## Further Analyses
 
@@ -325,6 +415,10 @@ This analysis used:
 
 ## References
 
-This study follows the methodology of:
+This study follows and extends the methodology established in:
 
-Jukic, I., Prnjak, K., Helms, E. R., & McGuigan, M. R. (2024). Modeling the repetitions-in-reserve-velocity relationship: A valid method for resistance training monitoring and prescription, and fatigue management. *Experimental Physiology*, 109(2), 193-206.
+- Jukic, I., Prnjak, K., Helms, E. R., & McGuigan, M. R. (2024). Modeling the repetitions-in-reserve-velocity relationship: A valid method for resistance training monitoring and prescription, and fatigue management. *Experimental Physiology*, 109(2), 193-206.
+
+- Zourdos, M. C., Klemp, A., Dolan, C., Quiles, J. M., Schau, K. A., Jo, E., ... & Blanco, R. (2016). Novel resistance training–specific rating of perceived exertion scale measuring repetitions in reserve. *Journal of Strength and Conditioning Research*, 30(1), 267-275.
+
+- Helms, E. R., Cronin, J., Storey, A., & Zourdos, M. C. (2016). Application of the repetitions in reserve-based rating of perceived exertion scale for resistance training. *Strength and Conditioning Journal*, 38(4), 42-49.

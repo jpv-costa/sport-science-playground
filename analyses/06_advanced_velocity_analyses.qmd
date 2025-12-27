@@ -1,7 +1,11 @@
 ---
 title: "Study 6: Advanced Velocity-RIR Analyses"
 subtitle: "Novel Analyses for Velocity-Based Training Prescription"
-author: "Deadlift RIR-Velocity Research Team"
+author:
+  - name: "João Costa"
+    affiliation: "Sport Science Research"
+  - name: "Filipe Braga"
+    affiliation: "MSc Thesis Research"
 date: today
 format:
   html:
@@ -46,7 +50,23 @@ prediction <- results$failure_prediction
 
 ## Executive Summary
 
-This study presents five novel analyses (H2-H6) that extend our understanding of the deadlift velocity-RIR relationship, addressing key gaps in the velocity-based training literature.
+This study presents five novel analyses (H2-H6) that extend our understanding of the deadlift velocity-RIR relationship, addressing key gaps in the velocity-based training literature that have practical implications for coaches and athletes.
+
+### Background and Motivation
+
+Studies 4 and 5 established the fundamental velocity-RIR relationship for deadlifts and provided practical velocity tables. However, several questions remain unanswered:
+
+1. **How variable is the failure velocity across individuals?** If everyone fails at the same velocity, a universal threshold works. If not, individual calibration is essential.
+
+2. **How stable are individual velocity profiles across days?** This determines how often athletes need to recalibrate their velocity zones.
+
+3. **Is the velocity-RIR relationship linear or curved?** This affects the mathematical model we should use.
+
+4. **Does velocity loss accelerate within a set?** This has implications for when to stop a set to preserve rep quality.
+
+5. **Can we predict set capacity from the first rep?** This would enable real-time autoregulation without counting reps.
+
+This study addresses each of these questions with dedicated analyses.
 
 ### Key Findings
 
@@ -99,20 +119,26 @@ kable(head(data[, c("id", "day", "load_percentage", "set_id", "rep_number", "rir
 
 **How variable is the velocity at muscular failure (RIR=0) across individuals?**
 
-### Why This Matters
+### Theoretical Background
 
-The Minimum Velocity Threshold (MVT) is the velocity at which an athlete reaches muscular failure. Understanding MVT variability has critical implications:
+The **Minimum Velocity Threshold (MVT)** represents the velocity at which an athlete can no longer complete a repetition---essentially, their "failure velocity." This concept was introduced by González-Badillo & Sánchez-Medina (2010) for the bench press, where they observed relatively consistent MVT values across individuals (~0.17 m/s).
 
-- If MVT is consistent across individuals (~0.15-0.20 m/s for all), it could serve as a **universal failure indicator**
-- If MVT varies widely, **individual calibration is essential** before using velocity-based prescriptions
-- Practical question: Can coaches use a single "stop velocity" for all athletes?
+If MVT is consistent across individuals, it could serve as a **universal failure indicator**---coaches could prescribe a "stop velocity" that works for all athletes. However, if MVT varies substantially, **individual calibration becomes essential**.
+
+### Why This Matters for Deadlifts
+
+The deadlift may show different MVT patterns than other exercises because:
+
+1. **No stretch-shortening cycle**: Failure occurs from a dead stop, potentially affecting the velocity profile
+2. **Grip as a limiter**: Some athletes may fail due to grip rather than posterior chain exhaustion
+3. **Binary failure pattern**: Unlike grinding through a squat, deadlifts either leave the floor or they don't
 
 ### Methods
 
 1. Extracted all observations at RIR = 0 (failure reps)
 2. Calculated population-level MVT statistics (mean, SD, CV, IQR)
 3. Calculated individual MVT for each participant
-4. Tested for sex differences using Mann-Whitney U test
+4. Tested for sex differences using Mann-Whitney U test (non-parametric due to small groups)
 5. Tested for load differences (80% vs 90%) using paired comparison
 
 ### Results
@@ -199,15 +225,28 @@ The coefficient of variation (CV = `r round(mvt_result$population_stats$cv_perce
 
 **Are individual velocity-RIR relationships stable across testing days?**
 
+### Theoretical Background
+
+The practical utility of VBT depends critically on the **reliability** of individual velocity profiles. Reliability refers to the consistency of measurements across repeated testing occasions. In the context of VBT:
+
+- **High reliability** means an athlete's velocity-RIR curve is stable---once calibrated, the velocity zones remain valid for an extended period
+- **Low reliability** means the curve shifts substantially between sessions, requiring frequent recalibration
+
+The **Intraclass Correlation Coefficient (ICC)** is the standard metric for assessing reliability of continuous measures. We use ICC(2,1)---a two-way random effects model assuming both raters (days) and subjects are random samples from larger populations (Shrout & Fleiss, 1979).
+
 ### Why This Matters
 
 If velocity profiles are reliable day-to-day:
+
 - A **single calibration session is sufficient** to establish individual velocity zones
 - Athletes don't need frequent retesting
+- Coaches can trust that velocity thresholds remain valid
 
 If velocity profiles are unreliable:
+
 - Athletes need **frequent recalibration** (perhaps weekly or monthly)
 - Session-to-session factors (fatigue, recovery, motivation) may affect velocity targets
+- VBT becomes less practical for day-to-day training prescription
 
 ### Methods
 
@@ -225,6 +264,8 @@ If velocity profiles are unreliable:
 | 0.50-0.75 | Moderate |
 | 0.75-0.90 | Good |
 | > 0.90 | Excellent |
+
+The **SEM** represents the typical measurement error, while **MDC95** is the minimum change needed to be 95% confident that a true change has occurred (rather than measurement error).
 
 ### Results
 
@@ -289,15 +330,26 @@ ggplot(day_params, aes(x = mvt_day1, y = mvt_day2)) +
 
 **Does a quadratic model fit the velocity-RIR relationship better than linear?**
 
-### Why This Matters
+### Theoretical Background
 
-- **Linear assumption**: Velocity decreases at a constant rate with each rep (each rep costs the same velocity)
-- **Quadratic model**: Velocity loss accelerates near failure (fatigue compounds)
+The simplest model of the velocity-RIR relationship assumes **linear decay**---each additional rep costs the same amount of velocity. However, physiological fatigue often follows non-linear patterns:
 
-If quadratic is substantially better, this suggests:
-- The velocity-RIR relationship is non-linear
-- Simple linear velocity zones may underestimate proximity to failure in the final reps
-- Coaches should use curvilinear charts or adjust expectations near failure
+- **Metabolic fatigue** (e.g., lactate accumulation, ATP depletion) may compound near failure
+- **Neural fatigue** (motor unit dropout, decreased firing rates) may accelerate in later reps
+- **Technical breakdown** often becomes more pronounced as fatigue accumulates
+
+These factors suggest the velocity-RIR relationship might be **curvilinear**, with velocity dropping more rapidly near failure (small RIR values) than earlier in the set.
+
+### Model Comparison Framework
+
+We compare two models:
+
+- **Linear**: velocity = β₀ + β₁(RIR) + ε
+- **Quadratic**: velocity = β₀ + β₁(RIR) + β₂(RIR²) + ε
+
+The quadratic model adds a curvature term. If β₂ < 0, velocity drops more rapidly near failure (accelerating decay). If β₂ ≈ 0, the relationship is approximately linear.
+
+We use information criteria (AIC, BIC) rather than raw R² because they penalize model complexity---a quadratic model should only be preferred if the improvement justifies the added parameter.
 
 ### Methods
 
@@ -371,19 +423,37 @@ Only `r round(poly_result$best_model_summary$pct_quad_best, 1)`% of participants
 
 **How does velocity loss per rep change as a set progresses?**
 
-### Why This Matters
+### Theoretical Background
 
-Understanding velocity decay patterns informs:
-- **When to stop a set** - if decay accelerates, stopping earlier preserves movement quality
-- **Model selection** - constant decay supports linear models; accelerating decay suggests non-linear approaches
-- **Fatigue thresholds** - identifying the rep where decay sharply increases
+While H4 examined the overall shape of the velocity-RIR curve, this analysis focuses on the **within-set dynamics**---specifically, whether velocity loss per rep is constant or accelerates as the set progresses.
+
+Two competing hypotheses exist:
+
+1. **Constant decay hypothesis**: Each rep costs approximately the same velocity, regardless of position in the set. This would suggest fatigue accumulates linearly.
+
+2. **Accelerating decay hypothesis**: Later reps cost more velocity than earlier reps. This would suggest fatigue compounds---possibly due to metabolite accumulation, motor unit fatigue, or technique degradation.
+
+The practical implications are significant:
+
+- **Constant decay**: Simple rep-counting or fixed velocity loss thresholds work well
+- **Accelerating decay**: Athletes should stop sets earlier than velocity loss alone might suggest, as the final reps represent disproportionate fatigue
+
+### Why This Matters for Training Quality
+
+If velocity decay accelerates near failure:
+
+- **Rep quality deteriorates non-linearly**: The last 1-2 reps may be substantially lower quality than earlier reps
+- **Technical breakdown risk increases**: Form often degrades as fatigue compounds
+- **Recovery cost may be disproportionate**: The final grinding reps may cost more in recovery than they contribute to adaptation
+
+Understanding decay patterns helps coaches make informed decisions about set termination criteria.
 
 ### Methods
 
 1. Calculate rep-to-rep velocity change (Δv = v_n - v_{n-1})
 2. Model decay rate vs rep number: Δv ~ rep_number
 3. Test if decay accelerates (negative slope = accelerating fatigue)
-4. Detect breakpoint where decay notably increases
+4. Compare early reps (1-3) vs late reps (4+) decay rates
 
 ### Results
 
@@ -452,12 +522,35 @@ This `r round(abs(decay$decay_summary$decay_acceleration) * 1000, 1)` mm/s accel
 
 **Can the first 1-3 rep velocities predict when failure will occur?**
 
-### Why This Matters
+### Theoretical Background
 
-This is perhaps the most practically valuable analysis:
-- **Real-time autoregulation**: Predict total reps from the first rep velocity
-- **No rep counting needed**: Know when to stop based on velocity alone
-- **Pre-set planning**: Estimate how many reps are possible before starting
+The concept of using early-rep velocity to predict set capacity builds on the **load-velocity relationship** established in the VBT literature (González-Badillo & Sánchez-Medina, 2010). The fundamental insight is that first-rep velocity reflects:
+
+1. **Relative intensity**: Faster first reps indicate lighter relative loads → more reps available
+2. **Daily readiness**: Day-to-day fluctuations in strength affect first-rep velocity
+3. **Fatigue state**: Accumulated fatigue reduces first-rep velocity
+
+By combining first-rep velocity with the known velocity-RIR relationship, we can theoretically predict total set capacity before completing the set.
+
+### Why This Matters for Practical Training
+
+This analysis addresses the most practically valuable question for coaches and athletes:
+
+1. **Real-time autoregulation**: Instead of counting reps or guessing RIR, athletes can use first-rep velocity to know approximately how many quality reps are available.
+
+2. **Pre-set planning**: Before starting, athletes can perform a "velocity check" with the first rep to decide on set termination strategy.
+
+3. **Daily autoregulation**: On days when first-rep velocity is unexpectedly low, athletes can adjust expectations and avoid overreaching.
+
+### Leave-One-Set-Out Cross-Validation
+
+We use leave-one-set-out cross-validation (LOOCV) to estimate prediction accuracy. For each set:
+
+1. Fit the prediction model on all other sets
+2. Predict the excluded set's total reps from its first-rep velocity
+3. Calculate prediction error
+
+This approach provides an honest estimate of how well the model generalizes to new data.
 
 ### Methods
 
@@ -554,21 +647,52 @@ Use the lookup table to estimate available reps from your first rep velocity. Fo
 
 ## Limitations
 
-1. **Sample size**: 19 participants limits generalizability
-2. **Exercise specificity**: Results apply to deadlift; other exercises may differ
-3. **Load range**: Only 80% and 90% 1RM tested; lighter loads may show different patterns
-4. **Training status**: Participants were resistance-trained; novices may differ
-5. **Day-to-day factors**: Only 2 testing days; longer-term reliability unknown
+This study has several limitations that should be considered:
+
+1. **Sample size**: With 19 participants, statistical power is limited, particularly for subgroup analyses (e.g., sex differences). Effect sizes may be imprecise.
+
+2. **Exercise specificity**: All findings apply specifically to the conventional deadlift. Sumo deadlifts, trap bar deadlifts, and other exercises may show different patterns.
+
+3. **Load range**: Only 80% and 90% 1RM were tested. Lighter loads commonly used in hypertrophy training (60-75% 1RM) may exhibit different velocity dynamics.
+
+4. **Short-term reliability only**: With only 2 testing days, we cannot assess longer-term reliability (week-to-week, month-to-month) or the effects of training adaptations on velocity profiles.
+
+5. **Population specificity**: All participants were Portuguese resistance-trained individuals. Results may not generalize to different populations, training backgrounds, or skill levels (e.g., novice lifters).
+
+6. **Prediction intervals**: The failure prediction lookup table is based on this sample only. Individual athletes may show systematic deviations from these population averages.
+
+## Conclusions
+
+This study provides novel insights into the velocity-RIR relationship for the conventional deadlift:
+
+1. **MVT is highly variable** (CV ~31%), confirming that individual calibration is essential for accurate velocity-based prescriptions.
+
+2. **Day-to-day reliability is moderate** for velocity-RIR slopes, suggesting periodic recalibration (every 2-4 weeks) is advisable.
+
+3. **Linear models are generally adequate**, with only a minority of individuals showing meaningfully better fit with quadratic models.
+
+4. **Velocity decay accelerates near failure**, supporting the practice of stopping sets 1-2 reps before failure to preserve rep quality.
+
+5. **First-rep velocity predicts set capacity** with reasonable accuracy (~1-2 rep error), enabling practical real-time autoregulation.
+
+These findings extend the evidence base for velocity-based training to the deadlift, while highlighting the importance of individualization and the limitations of universal velocity thresholds.
 
 ## References
 
-- Jukic, I., et al. (2024). Velocity-Based Training. *Sports Medicine*.
-- Zourdos, M. C., et al. (2016). Novel Resistance Training-Specific RPE Scale. *Journal of Strength and Conditioning Research*.
-- Pelland, J. C., et al. (2022). Using Load-Velocity Profiling. *Sports Medicine*.
-- Koo, T. K., & Li, M. Y. (2016). A Guideline of Selecting and Reporting ICC. *Journal of Chiropractic Medicine*.
+- González-Badillo, J. J., & Sánchez-Medina, L. (2010). Movement velocity as a measure of loading intensity in resistance training. *International Journal of Sports Medicine*, 31(5), 347-352.
+
+- Jukic, I., Prnjak, K., Helms, E. R., & McGuigan, M. R. (2024). Modeling the repetitions-in-reserve-velocity relationship: A valid method for resistance training monitoring and prescription, and fatigue management. *Experimental Physiology*, 109(2), 193-206.
+
+- Koo, T. K., & Li, M. Y. (2016). A guideline of selecting and reporting intraclass correlation coefficients for reliability research. *Journal of Chiropractic Medicine*, 15(2), 155-163.
+
+- Shrout, P. E., & Fleiss, J. L. (1979). Intraclass correlations: Uses in assessing rater reliability. *Psychological Bulletin*, 86(2), 420-428.
+
+- Zourdos, M. C., Klemp, A., Dolan, C., Quiles, J. M., Schau, K. A., Jo, E., ... & Blanco, R. (2016). Novel resistance training–specific rating of perceived exertion scale measuring repetitions in reserve. *Journal of Strength and Conditioning Research*, 30(1), 267-275.
 
 ---
 
 *Study 6 of the Deadlift RIR-Velocity Research Project*
+
+*Part of Filipe Braga's MSc thesis research*
 
 *Analysis performed using R `r R.version.string` with custom R6 classes following SOLID principles*

@@ -6,7 +6,8 @@
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
-<meta name="author" content="Deadlift RIR-Velocity Research Team">
+<meta name="author" content="João Costa">
+<meta name="author" content="Filipe Braga">
 <meta name="dcterms.date" content="2025-12-27">
 
 <title>RIR &amp; Training Outcomes - Study 6: Advanced Velocity-RIR Analyses</title>
@@ -176,6 +177,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <ul>
   <li><a href="#executive-summary" id="toc-executive-summary" class="nav-link active" data-scroll-target="#executive-summary">Executive Summary</a>
   <ul class="collapse">
+  <li><a href="#background-and-motivation" id="toc-background-and-motivation" class="nav-link" data-scroll-target="#background-and-motivation">Background and Motivation</a></li>
   <li><a href="#key-findings" id="toc-key-findings" class="nav-link" data-scroll-target="#key-findings">Key Findings</a></li>
   </ul></li>
   <li><a href="#experimental-setup" id="toc-experimental-setup" class="nav-link" data-scroll-target="#experimental-setup">Experimental Setup</a>
@@ -185,7 +187,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <li><a href="#h2-minimum-velocity-threshold-mvt-variability" id="toc-h2-minimum-velocity-threshold-mvt-variability" class="nav-link" data-scroll-target="#h2-minimum-velocity-threshold-mvt-variability">H2: Minimum Velocity Threshold (MVT) Variability</a>
   <ul class="collapse">
   <li><a href="#research-question" id="toc-research-question" class="nav-link" data-scroll-target="#research-question">Research Question</a></li>
-  <li><a href="#why-this-matters" id="toc-why-this-matters" class="nav-link" data-scroll-target="#why-this-matters">Why This Matters</a></li>
+  <li><a href="#theoretical-background" id="toc-theoretical-background" class="nav-link" data-scroll-target="#theoretical-background">Theoretical Background</a></li>
+  <li><a href="#why-this-matters-for-deadlifts" id="toc-why-this-matters-for-deadlifts" class="nav-link" data-scroll-target="#why-this-matters-for-deadlifts">Why This Matters for Deadlifts</a></li>
   <li><a href="#methods" id="toc-methods" class="nav-link" data-scroll-target="#methods">Methods</a></li>
   <li><a href="#results" id="toc-results" class="nav-link" data-scroll-target="#results">Results</a></li>
   <li><a href="#interpretation" id="toc-interpretation" class="nav-link" data-scroll-target="#interpretation">Interpretation</a></li>
@@ -193,7 +196,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <li><a href="#h3-day-to-day-reliability" id="toc-h3-day-to-day-reliability" class="nav-link" data-scroll-target="#h3-day-to-day-reliability">H3: Day-to-Day Reliability</a>
   <ul class="collapse">
   <li><a href="#research-question-1" id="toc-research-question-1" class="nav-link" data-scroll-target="#research-question-1">Research Question</a></li>
-  <li><a href="#why-this-matters-1" id="toc-why-this-matters-1" class="nav-link" data-scroll-target="#why-this-matters-1">Why This Matters</a></li>
+  <li><a href="#theoretical-background-1" id="toc-theoretical-background-1" class="nav-link" data-scroll-target="#theoretical-background-1">Theoretical Background</a></li>
+  <li><a href="#why-this-matters" id="toc-why-this-matters" class="nav-link" data-scroll-target="#why-this-matters">Why This Matters</a></li>
   <li><a href="#methods-1" id="toc-methods-1" class="nav-link" data-scroll-target="#methods-1">Methods</a></li>
   <li><a href="#results-1" id="toc-results-1" class="nav-link" data-scroll-target="#results-1">Results</a></li>
   <li><a href="#interpretation-1" id="toc-interpretation-1" class="nav-link" data-scroll-target="#interpretation-1">Interpretation</a></li>
@@ -201,7 +205,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <li><a href="#h4-polynomial-vs-linear-model-comparison" id="toc-h4-polynomial-vs-linear-model-comparison" class="nav-link" data-scroll-target="#h4-polynomial-vs-linear-model-comparison">H4: Polynomial vs Linear Model Comparison</a>
   <ul class="collapse">
   <li><a href="#research-question-2" id="toc-research-question-2" class="nav-link" data-scroll-target="#research-question-2">Research Question</a></li>
-  <li><a href="#why-this-matters-2" id="toc-why-this-matters-2" class="nav-link" data-scroll-target="#why-this-matters-2">Why This Matters</a></li>
+  <li><a href="#theoretical-background-2" id="toc-theoretical-background-2" class="nav-link" data-scroll-target="#theoretical-background-2">Theoretical Background</a></li>
+  <li><a href="#model-comparison-framework" id="toc-model-comparison-framework" class="nav-link" data-scroll-target="#model-comparison-framework">Model Comparison Framework</a></li>
   <li><a href="#methods-2" id="toc-methods-2" class="nav-link" data-scroll-target="#methods-2">Methods</a></li>
   <li><a href="#results-2" id="toc-results-2" class="nav-link" data-scroll-target="#results-2">Results</a></li>
   <li><a href="#interpretation-2" id="toc-interpretation-2" class="nav-link" data-scroll-target="#interpretation-2">Interpretation</a></li>
@@ -209,7 +214,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <li><a href="#h5-velocity-decay-rate-within-sets" id="toc-h5-velocity-decay-rate-within-sets" class="nav-link" data-scroll-target="#h5-velocity-decay-rate-within-sets">H5: Velocity Decay Rate Within Sets</a>
   <ul class="collapse">
   <li><a href="#research-question-3" id="toc-research-question-3" class="nav-link" data-scroll-target="#research-question-3">Research Question</a></li>
-  <li><a href="#why-this-matters-3" id="toc-why-this-matters-3" class="nav-link" data-scroll-target="#why-this-matters-3">Why This Matters</a></li>
+  <li><a href="#theoretical-background-3" id="toc-theoretical-background-3" class="nav-link" data-scroll-target="#theoretical-background-3">Theoretical Background</a></li>
+  <li><a href="#why-this-matters-for-training-quality" id="toc-why-this-matters-for-training-quality" class="nav-link" data-scroll-target="#why-this-matters-for-training-quality">Why This Matters for Training Quality</a></li>
   <li><a href="#methods-3" id="toc-methods-3" class="nav-link" data-scroll-target="#methods-3">Methods</a></li>
   <li><a href="#results-3" id="toc-results-3" class="nav-link" data-scroll-target="#results-3">Results</a></li>
   <li><a href="#interpretation-3" id="toc-interpretation-3" class="nav-link" data-scroll-target="#interpretation-3">Interpretation</a></li>
@@ -217,7 +223,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <li><a href="#h6-early-rep-velocity-for-failure-prediction" id="toc-h6-early-rep-velocity-for-failure-prediction" class="nav-link" data-scroll-target="#h6-early-rep-velocity-for-failure-prediction">H6: Early Rep Velocity for Failure Prediction</a>
   <ul class="collapse">
   <li><a href="#research-question-4" id="toc-research-question-4" class="nav-link" data-scroll-target="#research-question-4">Research Question</a></li>
-  <li><a href="#why-this-matters-4" id="toc-why-this-matters-4" class="nav-link" data-scroll-target="#why-this-matters-4">Why This Matters</a></li>
+  <li><a href="#theoretical-background-4" id="toc-theoretical-background-4" class="nav-link" data-scroll-target="#theoretical-background-4">Theoretical Background</a></li>
+  <li><a href="#why-this-matters-for-practical-training" id="toc-why-this-matters-for-practical-training" class="nav-link" data-scroll-target="#why-this-matters-for-practical-training">Why This Matters for Practical Training</a></li>
+  <li><a href="#leave-one-set-out-cross-validation" id="toc-leave-one-set-out-cross-validation" class="nav-link" data-scroll-target="#leave-one-set-out-cross-validation">Leave-One-Set-Out Cross-Validation</a></li>
   <li><a href="#methods-4" id="toc-methods-4" class="nav-link" data-scroll-target="#methods-4">Methods</a></li>
   <li><a href="#results-4" id="toc-results-4" class="nav-link" data-scroll-target="#results-4">Results</a></li>
   <li><a href="#interpretation-4" id="toc-interpretation-4" class="nav-link" data-scroll-target="#interpretation-4">Interpretation</a></li>
@@ -228,6 +236,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <li><a href="#implementation-steps" id="toc-implementation-steps" class="nav-link" data-scroll-target="#implementation-steps">Implementation Steps</a></li>
   </ul></li>
   <li><a href="#limitations" id="toc-limitations" class="nav-link" data-scroll-target="#limitations">Limitations</a></li>
+  <li><a href="#conclusions" id="toc-conclusions" class="nav-link" data-scroll-target="#conclusions">Conclusions</a></li>
   <li><a href="#references" id="toc-references" class="nav-link" data-scroll-target="#references">References</a></li>
   </ul>
 </nav>
@@ -242,16 +251,31 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 
 
+<div class="quarto-title-meta-author">
+  <div class="quarto-title-meta-heading">Authors</div>
+  <div class="quarto-title-meta-heading">Affiliations</div>
+  
+    <div class="quarto-title-meta-contents">
+    <p class="author">João Costa </p>
+  </div>
+  <div class="quarto-title-meta-contents">
+        <p class="affiliation">
+            Sport Science Research
+          </p>
+      </div>
+    <div class="quarto-title-meta-contents">
+    <p class="author">Filipe Braga </p>
+  </div>
+  <div class="quarto-title-meta-contents">
+        <p class="affiliation">
+            MSc Thesis Research
+          </p>
+      </div>
+  </div>
 
 <div class="quarto-title-meta">
 
-    <div>
-    <div class="quarto-title-meta-heading">Author</div>
-    <div class="quarto-title-meta-contents">
-             <p>Deadlift RIR-Velocity Research Team </p>
-          </div>
-  </div>
-    
+      
     <div>
     <div class="quarto-title-meta-heading">Published</div>
     <div class="quarto-title-meta-contents">
@@ -269,7 +293,19 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 <section id="executive-summary" class="level2">
 <h2 class="anchored" data-anchor-id="executive-summary">Executive Summary</h2>
-<p>This study presents five novel analyses (H2-H6) that extend our understanding of the deadlift velocity-RIR relationship, addressing key gaps in the velocity-based training literature.</p>
+<p>This study presents five novel analyses (H2-H6) that extend our understanding of the deadlift velocity-RIR relationship, addressing key gaps in the velocity-based training literature that have practical implications for coaches and athletes.</p>
+<section id="background-and-motivation" class="level3">
+<h3 class="anchored" data-anchor-id="background-and-motivation">Background and Motivation</h3>
+<p>Studies 4 and 5 established the fundamental velocity-RIR relationship for deadlifts and provided practical velocity tables. However, several questions remain unanswered:</p>
+<ol type="1">
+<li><p><strong>How variable is the failure velocity across individuals?</strong> If everyone fails at the same velocity, a universal threshold works. If not, individual calibration is essential.</p></li>
+<li><p><strong>How stable are individual velocity profiles across days?</strong> This determines how often athletes need to recalibrate their velocity zones.</p></li>
+<li><p><strong>Is the velocity-RIR relationship linear or curved?</strong> This affects the mathematical model we should use.</p></li>
+<li><p><strong>Does velocity loss accelerate within a set?</strong> This has implications for when to stop a set to preserve rep quality.</p></li>
+<li><p><strong>Can we predict set capacity from the first rep?</strong> This would enable real-time autoregulation without counting reps.</p></li>
+</ol>
+<p>This study addresses each of these questions with dedicated analyses.</p>
+</section>
 <section id="key-findings" class="level3">
 <h3 class="anchored" data-anchor-id="key-findings">Key Findings</h3>
 <table class="table">
@@ -483,14 +519,19 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <h3 class="anchored" data-anchor-id="research-question">Research Question</h3>
 <p><strong>How variable is the velocity at muscular failure (RIR=0) across individuals?</strong></p>
 </section>
-<section id="why-this-matters" class="level3">
-<h3 class="anchored" data-anchor-id="why-this-matters">Why This Matters</h3>
-<p>The Minimum Velocity Threshold (MVT) is the velocity at which an athlete reaches muscular failure. Understanding MVT variability has critical implications:</p>
-<ul>
-<li>If MVT is consistent across individuals (~0.15-0.20 m/s for all), it could serve as a <strong>universal failure indicator</strong></li>
-<li>If MVT varies widely, <strong>individual calibration is essential</strong> before using velocity-based prescriptions</li>
-<li>Practical question: Can coaches use a single “stop velocity” for all athletes?</li>
-</ul>
+<section id="theoretical-background" class="level3">
+<h3 class="anchored" data-anchor-id="theoretical-background">Theoretical Background</h3>
+<p>The <strong>Minimum Velocity Threshold (MVT)</strong> represents the velocity at which an athlete can no longer complete a repetition—essentially, their “failure velocity.” This concept was introduced by González-Badillo &amp; Sánchez-Medina (2010) for the bench press, where they observed relatively consistent MVT values across individuals (~0.17 m/s).</p>
+<p>If MVT is consistent across individuals, it could serve as a <strong>universal failure indicator</strong>—coaches could prescribe a “stop velocity” that works for all athletes. However, if MVT varies substantially, <strong>individual calibration becomes essential</strong>.</p>
+</section>
+<section id="why-this-matters-for-deadlifts" class="level3">
+<h3 class="anchored" data-anchor-id="why-this-matters-for-deadlifts">Why This Matters for Deadlifts</h3>
+<p>The deadlift may show different MVT patterns than other exercises because:</p>
+<ol type="1">
+<li><strong>No stretch-shortening cycle</strong>: Failure occurs from a dead stop, potentially affecting the velocity profile</li>
+<li><strong>Grip as a limiter</strong>: Some athletes may fail due to grip rather than posterior chain exhaustion</li>
+<li><strong>Binary failure pattern</strong>: Unlike grinding through a squat, deadlifts either leave the floor or they don’t</li>
+</ol>
 </section>
 <section id="methods" class="level3">
 <h3 class="anchored" data-anchor-id="methods">Methods</h3>
@@ -498,7 +539,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <li>Extracted all observations at RIR = 0 (failure reps)</li>
 <li>Calculated population-level MVT statistics (mean, SD, CV, IQR)</li>
 <li>Calculated individual MVT for each participant</li>
-<li>Tested for sex differences using Mann-Whitney U test</li>
+<li>Tested for sex differences using Mann-Whitney U test (non-parametric due to small groups)</li>
 <li>Tested for load differences (80% vs 90%) using paired comparison</li>
 </ol>
 </section>
@@ -617,10 +658,29 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <h3 class="anchored" data-anchor-id="research-question-1">Research Question</h3>
 <p><strong>Are individual velocity-RIR relationships stable across testing days?</strong></p>
 </section>
-<section id="why-this-matters-1" class="level3">
-<h3 class="anchored" data-anchor-id="why-this-matters-1">Why This Matters</h3>
-<p>If velocity profiles are reliable day-to-day: - A <strong>single calibration session is sufficient</strong> to establish individual velocity zones - Athletes don’t need frequent retesting</p>
-<p>If velocity profiles are unreliable: - Athletes need <strong>frequent recalibration</strong> (perhaps weekly or monthly) - Session-to-session factors (fatigue, recovery, motivation) may affect velocity targets</p>
+<section id="theoretical-background-1" class="level3">
+<h3 class="anchored" data-anchor-id="theoretical-background-1">Theoretical Background</h3>
+<p>The practical utility of VBT depends critically on the <strong>reliability</strong> of individual velocity profiles. Reliability refers to the consistency of measurements across repeated testing occasions. In the context of VBT:</p>
+<ul>
+<li><strong>High reliability</strong> means an athlete’s velocity-RIR curve is stable—once calibrated, the velocity zones remain valid for an extended period</li>
+<li><strong>Low reliability</strong> means the curve shifts substantially between sessions, requiring frequent recalibration</li>
+</ul>
+<p>The <strong>Intraclass Correlation Coefficient (ICC)</strong> is the standard metric for assessing reliability of continuous measures. We use ICC(2,1)—a two-way random effects model assuming both raters (days) and subjects are random samples from larger populations (Shrout &amp; Fleiss, 1979).</p>
+</section>
+<section id="why-this-matters" class="level3">
+<h3 class="anchored" data-anchor-id="why-this-matters">Why This Matters</h3>
+<p>If velocity profiles are reliable day-to-day:</p>
+<ul>
+<li>A <strong>single calibration session is sufficient</strong> to establish individual velocity zones</li>
+<li>Athletes don’t need frequent retesting</li>
+<li>Coaches can trust that velocity thresholds remain valid</li>
+</ul>
+<p>If velocity profiles are unreliable:</p>
+<ul>
+<li>Athletes need <strong>frequent recalibration</strong> (perhaps weekly or monthly)</li>
+<li>Session-to-session factors (fatigue, recovery, motivation) may affect velocity targets</li>
+<li>VBT becomes less practical for day-to-day training prescription</li>
+</ul>
 </section>
 <section id="methods-1" class="level3">
 <h3 class="anchored" data-anchor-id="methods-1">Methods</h3>
@@ -658,6 +718,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </tr>
 </tbody>
 </table>
+<p>The <strong>SEM</strong> represents the typical measurement error, while <strong>MDC95</strong> is the minimum change needed to be 95% confident that a true change has occurred (rather than measurement error).</p>
 </section>
 <section id="results-1" class="level3">
 <h3 class="anchored" data-anchor-id="results-1">Results</h3>
@@ -755,13 +816,25 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <h3 class="anchored" data-anchor-id="research-question-2">Research Question</h3>
 <p><strong>Does a quadratic model fit the velocity-RIR relationship better than linear?</strong></p>
 </section>
-<section id="why-this-matters-2" class="level3">
-<h3 class="anchored" data-anchor-id="why-this-matters-2">Why This Matters</h3>
+<section id="theoretical-background-2" class="level3">
+<h3 class="anchored" data-anchor-id="theoretical-background-2">Theoretical Background</h3>
+<p>The simplest model of the velocity-RIR relationship assumes <strong>linear decay</strong>—each additional rep costs the same amount of velocity. However, physiological fatigue often follows non-linear patterns:</p>
 <ul>
-<li><strong>Linear assumption</strong>: Velocity decreases at a constant rate with each rep (each rep costs the same velocity)</li>
-<li><strong>Quadratic model</strong>: Velocity loss accelerates near failure (fatigue compounds)</li>
+<li><strong>Metabolic fatigue</strong> (e.g., lactate accumulation, ATP depletion) may compound near failure</li>
+<li><strong>Neural fatigue</strong> (motor unit dropout, decreased firing rates) may accelerate in later reps</li>
+<li><strong>Technical breakdown</strong> often becomes more pronounced as fatigue accumulates</li>
 </ul>
-<p>If quadratic is substantially better, this suggests: - The velocity-RIR relationship is non-linear - Simple linear velocity zones may underestimate proximity to failure in the final reps - Coaches should use curvilinear charts or adjust expectations near failure</p>
+<p>These factors suggest the velocity-RIR relationship might be <strong>curvilinear</strong>, with velocity dropping more rapidly near failure (small RIR values) than earlier in the set.</p>
+</section>
+<section id="model-comparison-framework" class="level3">
+<h3 class="anchored" data-anchor-id="model-comparison-framework">Model Comparison Framework</h3>
+<p>We compare two models:</p>
+<ul>
+<li><strong>Linear</strong>: velocity = β₀ + β₁(RIR) + ε</li>
+<li><strong>Quadratic</strong>: velocity = β₀ + β₁(RIR) + β₂(RIR²) + ε</li>
+</ul>
+<p>The quadratic model adds a curvature term. If β₂ &lt; 0, velocity drops more rapidly near failure (accelerating decay). If β₂ ≈ 0, the relationship is approximately linear.</p>
+<p>We use information criteria (AIC, BIC) rather than raw R² because they penalize model complexity—a quadratic model should only be preferred if the improvement justifies the added parameter.</p>
 </section>
 <section id="methods-2" class="level3">
 <h3 class="anchored" data-anchor-id="methods-2">Methods</h3>
@@ -862,9 +935,29 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <h3 class="anchored" data-anchor-id="research-question-3">Research Question</h3>
 <p><strong>How does velocity loss per rep change as a set progresses?</strong></p>
 </section>
-<section id="why-this-matters-3" class="level3">
-<h3 class="anchored" data-anchor-id="why-this-matters-3">Why This Matters</h3>
-<p>Understanding velocity decay patterns informs: - <strong>When to stop a set</strong> - if decay accelerates, stopping earlier preserves movement quality - <strong>Model selection</strong> - constant decay supports linear models; accelerating decay suggests non-linear approaches - <strong>Fatigue thresholds</strong> - identifying the rep where decay sharply increases</p>
+<section id="theoretical-background-3" class="level3">
+<h3 class="anchored" data-anchor-id="theoretical-background-3">Theoretical Background</h3>
+<p>While H4 examined the overall shape of the velocity-RIR curve, this analysis focuses on the <strong>within-set dynamics</strong>—specifically, whether velocity loss per rep is constant or accelerates as the set progresses.</p>
+<p>Two competing hypotheses exist:</p>
+<ol type="1">
+<li><p><strong>Constant decay hypothesis</strong>: Each rep costs approximately the same velocity, regardless of position in the set. This would suggest fatigue accumulates linearly.</p></li>
+<li><p><strong>Accelerating decay hypothesis</strong>: Later reps cost more velocity than earlier reps. This would suggest fatigue compounds—possibly due to metabolite accumulation, motor unit fatigue, or technique degradation.</p></li>
+</ol>
+<p>The practical implications are significant:</p>
+<ul>
+<li><strong>Constant decay</strong>: Simple rep-counting or fixed velocity loss thresholds work well</li>
+<li><strong>Accelerating decay</strong>: Athletes should stop sets earlier than velocity loss alone might suggest, as the final reps represent disproportionate fatigue</li>
+</ul>
+</section>
+<section id="why-this-matters-for-training-quality" class="level3">
+<h3 class="anchored" data-anchor-id="why-this-matters-for-training-quality">Why This Matters for Training Quality</h3>
+<p>If velocity decay accelerates near failure:</p>
+<ul>
+<li><strong>Rep quality deteriorates non-linearly</strong>: The last 1-2 reps may be substantially lower quality than earlier reps</li>
+<li><strong>Technical breakdown risk increases</strong>: Form often degrades as fatigue compounds</li>
+<li><strong>Recovery cost may be disproportionate</strong>: The final grinding reps may cost more in recovery than they contribute to adaptation</li>
+</ul>
+<p>Understanding decay patterns helps coaches make informed decisions about set termination criteria.</p>
 </section>
 <section id="methods-3" class="level3">
 <h3 class="anchored" data-anchor-id="methods-3">Methods</h3>
@@ -872,7 +965,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <li>Calculate rep-to-rep velocity change (Δv = v_n - v_{n-1})</li>
 <li>Model decay rate vs rep number: Δv ~ rep_number</li>
 <li>Test if decay accelerates (negative slope = accelerating fatigue)</li>
-<li>Detect breakpoint where decay notably increases</li>
+<li>Compare early reps (1-3) vs late reps (4+) decay rates</li>
 </ol>
 </section>
 <section id="results-3" class="level3">
@@ -975,9 +1068,34 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <h3 class="anchored" data-anchor-id="research-question-4">Research Question</h3>
 <p><strong>Can the first 1-3 rep velocities predict when failure will occur?</strong></p>
 </section>
-<section id="why-this-matters-4" class="level3">
-<h3 class="anchored" data-anchor-id="why-this-matters-4">Why This Matters</h3>
-<p>This is perhaps the most practically valuable analysis: - <strong>Real-time autoregulation</strong>: Predict total reps from the first rep velocity - <strong>No rep counting needed</strong>: Know when to stop based on velocity alone - <strong>Pre-set planning</strong>: Estimate how many reps are possible before starting</p>
+<section id="theoretical-background-4" class="level3">
+<h3 class="anchored" data-anchor-id="theoretical-background-4">Theoretical Background</h3>
+<p>The concept of using early-rep velocity to predict set capacity builds on the <strong>load-velocity relationship</strong> established in the VBT literature (González-Badillo &amp; Sánchez-Medina, 2010). The fundamental insight is that first-rep velocity reflects:</p>
+<ol type="1">
+<li><strong>Relative intensity</strong>: Faster first reps indicate lighter relative loads → more reps available</li>
+<li><strong>Daily readiness</strong>: Day-to-day fluctuations in strength affect first-rep velocity</li>
+<li><strong>Fatigue state</strong>: Accumulated fatigue reduces first-rep velocity</li>
+</ol>
+<p>By combining first-rep velocity with the known velocity-RIR relationship, we can theoretically predict total set capacity before completing the set.</p>
+</section>
+<section id="why-this-matters-for-practical-training" class="level3">
+<h3 class="anchored" data-anchor-id="why-this-matters-for-practical-training">Why This Matters for Practical Training</h3>
+<p>This analysis addresses the most practically valuable question for coaches and athletes:</p>
+<ol type="1">
+<li><p><strong>Real-time autoregulation</strong>: Instead of counting reps or guessing RIR, athletes can use first-rep velocity to know approximately how many quality reps are available.</p></li>
+<li><p><strong>Pre-set planning</strong>: Before starting, athletes can perform a “velocity check” with the first rep to decide on set termination strategy.</p></li>
+<li><p><strong>Daily autoregulation</strong>: On days when first-rep velocity is unexpectedly low, athletes can adjust expectations and avoid overreaching.</p></li>
+</ol>
+</section>
+<section id="leave-one-set-out-cross-validation" class="level3">
+<h3 class="anchored" data-anchor-id="leave-one-set-out-cross-validation">Leave-One-Set-Out Cross-Validation</h3>
+<p>We use leave-one-set-out cross-validation (LOOCV) to estimate prediction accuracy. For each set:</p>
+<ol type="1">
+<li>Fit the prediction model on all other sets</li>
+<li>Predict the excluded set’s total reps from its first-rep velocity</li>
+<li>Calculate prediction error</li>
+</ol>
+<p>This approach provides an honest estimate of how well the model generalizes to new data.</p>
 </section>
 <section id="methods-4" class="level3">
 <h3 class="anchored" data-anchor-id="methods-4">Methods</h3>
@@ -1188,24 +1306,40 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </section>
 <section id="limitations" class="level2">
 <h2 class="anchored" data-anchor-id="limitations">Limitations</h2>
+<p>This study has several limitations that should be considered:</p>
 <ol type="1">
-<li><strong>Sample size</strong>: 19 participants limits generalizability</li>
-<li><strong>Exercise specificity</strong>: Results apply to deadlift; other exercises may differ</li>
-<li><strong>Load range</strong>: Only 80% and 90% 1RM tested; lighter loads may show different patterns</li>
-<li><strong>Training status</strong>: Participants were resistance-trained; novices may differ</li>
-<li><strong>Day-to-day factors</strong>: Only 2 testing days; longer-term reliability unknown</li>
+<li><p><strong>Sample size</strong>: With 19 participants, statistical power is limited, particularly for subgroup analyses (e.g., sex differences). Effect sizes may be imprecise.</p></li>
+<li><p><strong>Exercise specificity</strong>: All findings apply specifically to the conventional deadlift. Sumo deadlifts, trap bar deadlifts, and other exercises may show different patterns.</p></li>
+<li><p><strong>Load range</strong>: Only 80% and 90% 1RM were tested. Lighter loads commonly used in hypertrophy training (60-75% 1RM) may exhibit different velocity dynamics.</p></li>
+<li><p><strong>Short-term reliability only</strong>: With only 2 testing days, we cannot assess longer-term reliability (week-to-week, month-to-month) or the effects of training adaptations on velocity profiles.</p></li>
+<li><p><strong>Population specificity</strong>: All participants were Portuguese resistance-trained individuals. Results may not generalize to different populations, training backgrounds, or skill levels (e.g., novice lifters).</p></li>
+<li><p><strong>Prediction intervals</strong>: The failure prediction lookup table is based on this sample only. Individual athletes may show systematic deviations from these population averages.</p></li>
 </ol>
+</section>
+<section id="conclusions" class="level2">
+<h2 class="anchored" data-anchor-id="conclusions">Conclusions</h2>
+<p>This study provides novel insights into the velocity-RIR relationship for the conventional deadlift:</p>
+<ol type="1">
+<li><p><strong>MVT is highly variable</strong> (CV ~31%), confirming that individual calibration is essential for accurate velocity-based prescriptions.</p></li>
+<li><p><strong>Day-to-day reliability is moderate</strong> for velocity-RIR slopes, suggesting periodic recalibration (every 2-4 weeks) is advisable.</p></li>
+<li><p><strong>Linear models are generally adequate</strong>, with only a minority of individuals showing meaningfully better fit with quadratic models.</p></li>
+<li><p><strong>Velocity decay accelerates near failure</strong>, supporting the practice of stopping sets 1-2 reps before failure to preserve rep quality.</p></li>
+<li><p><strong>First-rep velocity predicts set capacity</strong> with reasonable accuracy (~1-2 rep error), enabling practical real-time autoregulation.</p></li>
+</ol>
+<p>These findings extend the evidence base for velocity-based training to the deadlift, while highlighting the importance of individualization and the limitations of universal velocity thresholds.</p>
 </section>
 <section id="references" class="level2">
 <h2 class="anchored" data-anchor-id="references">References</h2>
 <ul>
-<li>Jukic, I., et al.&nbsp;(2024). Velocity-Based Training. <em>Sports Medicine</em>.</li>
-<li>Zourdos, M. C., et al.&nbsp;(2016). Novel Resistance Training-Specific RPE Scale. <em>Journal of Strength and Conditioning Research</em>.</li>
-<li>Pelland, J. C., et al.&nbsp;(2022). Using Load-Velocity Profiling. <em>Sports Medicine</em>.</li>
-<li>Koo, T. K., &amp; Li, M. Y. (2016). A Guideline of Selecting and Reporting ICC. <em>Journal of Chiropractic Medicine</em>.</li>
+<li><p>González-Badillo, J. J., &amp; Sánchez-Medina, L. (2010). Movement velocity as a measure of loading intensity in resistance training. <em>International Journal of Sports Medicine</em>, 31(5), 347-352.</p></li>
+<li><p>Jukic, I., Prnjak, K., Helms, E. R., &amp; McGuigan, M. R. (2024). Modeling the repetitions-in-reserve-velocity relationship: A valid method for resistance training monitoring and prescription, and fatigue management. <em>Experimental Physiology</em>, 109(2), 193-206.</p></li>
+<li><p>Koo, T. K., &amp; Li, M. Y. (2016). A guideline of selecting and reporting intraclass correlation coefficients for reliability research. <em>Journal of Chiropractic Medicine</em>, 15(2), 155-163.</p></li>
+<li><p>Shrout, P. E., &amp; Fleiss, J. L. (1979). Intraclass correlations: Uses in assessing rater reliability. <em>Psychological Bulletin</em>, 86(2), 420-428.</p></li>
+<li><p>Zourdos, M. C., Klemp, A., Dolan, C., Quiles, J. M., Schau, K. A., Jo, E., … &amp; Blanco, R. (2016). Novel resistance training–specific rating of perceived exertion scale measuring repetitions in reserve. <em>Journal of Strength and Conditioning Research</em>, 30(1), 267-275.</p></li>
 </ul>
 <hr>
 <p><em>Study 6 of the Deadlift RIR-Velocity Research Project</em></p>
+<p><em>Part of Filipe Braga’s MSc thesis research</em></p>
 <p><em>Analysis performed using R R version 4.3.3 (2024-02-29) with custom R6 classes following SOLID principles</em></p>
 
 
