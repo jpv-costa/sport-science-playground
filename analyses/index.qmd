@@ -284,7 +284,7 @@ The project follows SOLID principles with R6 classes:
 
 - Paulsen K, Seynnes O, van den Tillaar R. (2025). Exercise type, training load, velocity loss threshold, and sets affect the relationship between lifting velocity and perceived repetitions in reserve. *PeerJ*, 13:e19797.
 
-- Jukic I, Prnjak K, Helms ER, McGuigan MR. (2024). Modeling the repetitions-in-reserve-velocity relationship: A valid method for resistance training monitoring and prescription, and fatigue management. *Experimental Physiology*, 109(2), 193-206.
+- Jukic I, Prnjak K, Helms ER, McGuigan MR. (2024). Modeling the repetitions-in-reserve-velocity relationship: A valid method for resistance training monitoring and prescription, and fatigue management. *Physiological Reports*, 12(5), e15955.
 
 ### Additional References
 

@@ -255,4 +255,4 @@ Data source: [OSF Repository](https://osf.io/5ejcp/)
 
 ## References
 
-Jukic, I., Prnjak, K., Helms, E. R., & McGuigan, M. R. (2024). Modeling the repetitions-in-reserve-velocity relationship: A valid method for resistance training monitoring and prescription, and fatigue management. *Experimental Physiology*, 109(2), 193-206.
+Jukic, I., Prnjak, K., Helms, E. R., & McGuigan, M. R. (2024). Modeling the repetitions-in-reserve-velocity relationship: A valid method for resistance training monitoring and prescription, and fatigue management. *Physiological Reports*, 12(5), e15955.

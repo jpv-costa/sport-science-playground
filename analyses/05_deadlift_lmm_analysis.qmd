@@ -970,6 +970,6 @@ This analysis builds on established methodology from several fields:
 
 **Velocity-Based Training:**
 
-- Jukic, I., Prnjak, K., Helms, E. R., & McGuigan, M. R. (2024). Modeling the repetitions-in-reserve-velocity relationship: A valid method for resistance training monitoring and prescription, and fatigue management. *Experimental Physiology*, 109(2), 193-206.
+- Jukic, I., Prnjak, K., Helms, E. R., & McGuigan, M. R. (2024). Modeling the repetitions-in-reserve-velocity relationship: A valid method for resistance training monitoring and prescription, and fatigue management. *Physiological Reports*, 12(5), e15955.
 
 - González-Badillo, J. J., & Sánchez-Medina, L. (2010). Movement velocity as a measure of loading intensity in resistance training. *International Journal of Sports Medicine*, 31(5), 347-352.
