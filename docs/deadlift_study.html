@@ -210,7 +210,9 @@ div.csl-indent {
   <li><a href="#the-velocity-rir-relationship" id="toc-the-velocity-rir-relationship" class="nav-link" data-scroll-target="#the-velocity-rir-relationship">3.1 The Velocity-RIR Relationship</a></li>
   <li><a href="#general-vs-individual-models" id="toc-general-vs-individual-models" class="nav-link" data-scroll-target="#general-vs-individual-models">3.2 General vs Individual Models</a></li>
   <li><a href="#exercise-comparison-deadlift-vs-squat" id="toc-exercise-comparison-deadlift-vs-squat" class="nav-link" data-scroll-target="#exercise-comparison-deadlift-vs-squat">3.3 Exercise Comparison: Deadlift vs Squat</a></li>
-  <li><a href="#load-effects" id="toc-load-effects" class="nav-link" data-scroll-target="#load-effects">3.4 Load Effects</a></li>
+  <li><a href="#cross-day-prediction-accuracy" id="toc-cross-day-prediction-accuracy" class="nav-link" data-scroll-target="#cross-day-prediction-accuracy">3.4 Cross-Day Prediction Accuracy</a></li>
+  <li><a href="#velocity-distribution-by-load" id="toc-velocity-distribution-by-load" class="nav-link" data-scroll-target="#velocity-distribution-by-load">3.5 Velocity Distribution by Load</a></li>
+  <li><a href="#load-effects-lmm-analysis" id="toc-load-effects-lmm-analysis" class="nav-link" data-scroll-target="#load-effects-lmm-analysis">3.6 Load Effects (LMM Analysis)</a></li>
   <li><a href="#velocity-stop-tables" id="toc-velocity-stop-tables" class="nav-link" data-scroll-target="#velocity-stop-tables">3.5 Velocity Stop Tables</a></li>
   <li><a href="#individual-vs-general-table-accuracy" id="toc-individual-vs-general-table-accuracy" class="nav-link" data-scroll-target="#individual-vs-general-table-accuracy">3.6 Individual vs General Table Accuracy</a></li>
   <li><a href="#conformal-prediction-intervals" id="toc-conformal-prediction-intervals" class="nav-link" data-scroll-target="#conformal-prediction-intervals">3.7 Conformal Prediction Intervals</a></li>
@@ -654,8 +656,121 @@ Table&nbsp;3: Deadlift vs Squat RIR-Velocity Relationship
 <li><strong>Technical breakdown</strong>: May affect velocity differently than pure muscular fatigue</li>
 </ol>
 </section>
-<section id="load-effects" class="level3">
-<h3 class="anchored" data-anchor-id="load-effects">3.4 Load Effects</h3>
+<section id="cross-day-prediction-accuracy" class="level3">
+<h3 class="anchored" data-anchor-id="cross-day-prediction-accuracy">3.4 Cross-Day Prediction Accuracy</h3>
+<p>A critical test of any VBT model is its ability to predict performance on novel occasions. We tested Day 1 models on Day 2 data:</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Show code</summary>
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (<span class="sc">!</span><span class="fu">is.null</span>(deadlift_results<span class="sc">$</span>general_prediction_accuracy)) {</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>  accuracy <span class="ot">&lt;-</span> deadlift_results<span class="sc">$</span>general_prediction_accuracy</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>  prediction_df <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(</span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">Metric =</span> <span class="fu">c</span>(</span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>      <span class="st">"Mean Absolute Error"</span>,</span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>      <span class="st">"Median Absolute Error"</span>,</span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>      <span class="st">"Within 1 rep"</span>,</span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>      <span class="st">"Within 2 reps"</span></span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>    ),</span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>    <span class="at">Value =</span> <span class="fu">c</span>(</span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a>      <span class="fu">paste</span>(<span class="fu">round</span>(<span class="fu">mean</span>(accuracy<span class="sc">$</span>absolute_error, <span class="at">na.rm =</span> <span class="cn">TRUE</span>), <span class="dv">2</span>), <span class="st">"reps"</span>),</span>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a>      <span class="fu">paste</span>(<span class="fu">round</span>(<span class="fu">median</span>(accuracy<span class="sc">$</span>absolute_error, <span class="at">na.rm =</span> <span class="cn">TRUE</span>), <span class="dv">2</span>), <span class="st">"reps"</span>),</span>
+<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a>      <span class="fu">paste0</span>(<span class="fu">round</span>(<span class="fu">mean</span>(accuracy<span class="sc">$</span>absolute_error <span class="sc">&lt;=</span> <span class="dv">1</span>, <span class="at">na.rm =</span> <span class="cn">TRUE</span>) <span class="sc">*</span> <span class="dv">100</span>, <span class="dv">1</span>), <span class="st">"%"</span>),</span>
+<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a>      <span class="fu">paste0</span>(<span class="fu">round</span>(<span class="fu">mean</span>(accuracy<span class="sc">$</span>absolute_error <span class="sc">&lt;=</span> <span class="dv">2</span>, <span class="at">na.rm =</span> <span class="cn">TRUE</span>) <span class="sc">*</span> <span class="dv">100</span>, <span class="dv">1</span>), <span class="st">"%"</span>)</span>
+<span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb5-17"><a href="#cb5-17" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb5-18"><a href="#cb5-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-19"><a href="#cb5-19" aria-hidden="true" tabindex="-1"></a>  <span class="fu">format_table</span>(prediction_df, <span class="at">col.names =</span> <span class="fu">c</span>(<span class="st">"Metric"</span>, <span class="st">"Value"</span>))</span>
+<span id="cb5-20"><a href="#cb5-20" aria-hidden="true" tabindex="-1"></a>} <span class="cf">else</span> {</span>
+<span id="cb5-21"><a href="#cb5-21" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">"*Cross-day prediction accuracy will be available after running the analysis pipeline.*</span><span class="sc">\n</span><span class="st">"</span>)</span>
+<span id="cb5-22"><a href="#cb5-22" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div id="tbl-prediction" class="cell quarto-float anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-prediction-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;4: Cross-Day Prediction Accuracy
+</figcaption>
+<div aria-describedby="tbl-prediction-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="cell-output-display">
+<table class="do-not-create-environment cell table table-sm table-striped small">
+<thead>
+<tr class="header">
+<th style="text-align: left;">Metric</th>
+<th style="text-align: left;">Value</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">Mean Absolute Error</td>
+<td style="text-align: left;">1.39 reps</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Median Absolute Error</td>
+<td style="text-align: left;">1.15 reps</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Within 1 rep</td>
+<td style="text-align: left;">46.8%</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Within 2 reps</td>
+<td style="text-align: left;">72.2%</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</figure>
+</div>
+</div>
+<p>These prediction errors (~1.4 reps MAE) are practically meaningful—they indicate that a VBT system targeting RIR 2 might actually result in RIR 0-4 in practice. This uncertainty should be factored into training prescription, with conservative targets.</p>
+</section>
+<section id="velocity-distribution-by-load" class="level3">
+<h3 class="anchored" data-anchor-id="velocity-distribution-by-load">3.5 Velocity Distribution by Load</h3>
+<div class="cell">
+<details class="code-fold">
+<summary>Show code</summary>
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(data, <span class="fu">aes</span>(<span class="at">x =</span> <span class="fu">factor</span>(rir), <span class="at">y =</span> mean_velocity, <span class="at">fill =</span> load_percentage)) <span class="sc">+</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_boxplot</span>(<span class="at">alpha =</span> <span class="fl">0.5</span>, <span class="at">outlier.shape =</span> <span class="cn">NA</span>, <span class="at">width =</span> <span class="fl">0.7</span>) <span class="sc">+</span></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">aes</span>(<span class="at">color =</span> load_percentage),</span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">position =</span> <span class="fu">position_jitterdodge</span>(<span class="at">jitter.width =</span> <span class="fl">0.15</span>, <span class="at">dodge.width =</span> <span class="fl">0.7</span>),</span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">alpha =</span> <span class="fl">0.6</span>, <span class="at">size =</span> <span class="fl">1.5</span></span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(</span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>    <span class="at">x =</span> <span class="st">"Repetitions in Reserve"</span>,</span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a>    <span class="at">y =</span> <span class="st">"Mean Velocity (m/s)"</span>,</span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a>    <span class="at">fill =</span> <span class="st">"Load"</span>,</span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a>    <span class="at">color =</span> <span class="st">"Load"</span></span>
+<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
+<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_fill_load</span>() <span class="sc">+</span></span>
+<span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_color_manual</span>(<span class="at">values =</span> <span class="fu">c</span>(<span class="st">"80%"</span> <span class="ot">=</span> <span class="st">"#CC7A00"</span>, <span class="st">"90%"</span> <span class="ot">=</span> <span class="st">"#007A5E"</span>)) <span class="sc">+</span></span>
+<span id="cb6-16"><a href="#cb6-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">legend.position =</span> <span class="st">"bottom"</span>) <span class="sc">+</span></span>
+<span id="cb6-17"><a href="#cb6-17" aria-hidden="true" tabindex="-1"></a>  <span class="fu">guides</span>(<span class="at">fill =</span> <span class="fu">guide_legend</span>(<span class="at">override.aes =</span> <span class="fu">list</span>(<span class="at">alpha =</span> <span class="fl">0.7</span>)),</span>
+<span id="cb6-18"><a href="#cb6-18" aria-hidden="true" tabindex="-1"></a>         <span class="at">color =</span> <span class="st">"none"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<div id="fig-velocity-load" class="quarto-figure quarto-figure-center quarto-float anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-velocity-load-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="deadlift_study_files/figure-html/fig-velocity-load-1.png" class="img-fluid figure-img" style="width:100.0%">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-velocity-load-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;2: Velocity distribution by load and RIR
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<p><strong>Observations:</strong></p>
+<ul>
+<li>Higher load (90%) = lower velocities overall</li>
+<li>Clear velocity decrease as RIR approaches 0</li>
+<li>Wide variability between individuals at the same RIR</li>
+</ul>
+</section>
+<section id="load-effects-lmm-analysis" class="level3">
+<h3 class="anchored" data-anchor-id="load-effects-lmm-analysis">3.6 Load Effects (LMM Analysis)</h3>
 <section id="the-question" class="level4">
 <h4 class="anchored" data-anchor-id="the-question">The Question</h4>
 <p>When prescribing VBT for deadlifts, should coaches use <strong>one velocity table for all loads</strong>, or do they need <strong>separate tables for each load percentage</strong>? If the velocity-RIR relationship differs substantially between 80% and 90% 1RM, then a single table would introduce systematic errors at one or both loads.</p>
@@ -680,26 +795,26 @@ Table&nbsp;3: Deadlift vs Squat RIR-Velocity Relationship
 <h4 class="anchored" data-anchor-id="the-finding">The Finding</h4>
 <details class="code-fold">
 <summary>Show code</summary>
-<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (<span class="sc">!</span><span class="fu">is.null</span>(lmm_results) <span class="sc">&amp;&amp;</span> <span class="sc">!</span><span class="fu">is.null</span>(lmm_results<span class="sc">$</span>load_importance_result)) {</span>
-<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>  load_result <span class="ot">&lt;-</span> lmm_results<span class="sc">$</span>load_importance_result</span>
-<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (<span class="fu">isTRUE</span>(load_result<span class="sc">$</span>recommendation <span class="sc">==</span> <span class="st">"global"</span>)) {</span>
-<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">cat</span>(<span class="st">"**Result**: Load percentage does NOT significantly affect the velocity-RIR relationship.</span><span class="sc">\n\n</span><span class="st">"</span>)</span>
-<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> (<span class="sc">!</span><span class="fu">is.null</span>(load_result<span class="sc">$</span>lr_stat) <span class="sc">&amp;&amp;</span> <span class="fu">is.numeric</span>(load_result<span class="sc">$</span>lr_stat)) {</span>
-<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>      <span class="fu">cat</span>(<span class="st">"- Likelihood ratio test: χ² ="</span>, <span class="fu">round</span>(<span class="fu">as.numeric</span>(load_result<span class="sc">$</span>lr_stat), <span class="dv">2</span>), <span class="st">", p ="</span>, <span class="fu">format_p</span>(<span class="fu">as.numeric</span>(load_result<span class="sc">$</span>p_value)), <span class="st">"</span><span class="sc">\n</span><span class="st">"</span>)</span>
-<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>    }</span>
-<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>    <span class="fu">cat</span>(<span class="st">"- The interaction between RIR and load percentage was not statistically significant</span><span class="sc">\n\n</span><span class="st">"</span>)</span>
-<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>    <span class="fu">cat</span>(<span class="st">"**Practical Implication**: Coaches can use a **single global velocity table** regardless of whether athletes are lifting at 80% or 90% 1RM. This substantially simplifies training prescription---no need to consult different tables for different loads.</span><span class="sc">\n</span><span class="st">"</span>)</span>
-<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>  } <span class="cf">else</span> {</span>
-<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a>    <span class="fu">cat</span>(<span class="st">"**Result**: Load percentage significantly affects the velocity-RIR relationship.</span><span class="sc">\n\n</span><span class="st">"</span>)</span>
-<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> (<span class="sc">!</span><span class="fu">is.null</span>(load_result<span class="sc">$</span>lr_stat) <span class="sc">&amp;&amp;</span> <span class="fu">is.numeric</span>(load_result<span class="sc">$</span>lr_stat)) {</span>
-<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a>      <span class="fu">cat</span>(<span class="st">"- Likelihood ratio test: χ² ="</span>, <span class="fu">round</span>(<span class="fu">as.numeric</span>(load_result<span class="sc">$</span>lr_stat), <span class="dv">2</span>), <span class="st">", p ="</span>, <span class="fu">format_p</span>(<span class="fu">as.numeric</span>(load_result<span class="sc">$</span>p_value)), <span class="st">"</span><span class="sc">\n\n</span><span class="st">"</span>)</span>
-<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a>    }</span>
-<span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a>    <span class="fu">cat</span>(<span class="st">"**Practical Implication**: **Load-specific tables** are recommended. Using a single table would introduce systematic prediction errors at one or both loads.</span><span class="sc">\n</span><span class="st">"</span>)</span>
-<span id="cb5-17"><a href="#cb5-17" aria-hidden="true" tabindex="-1"></a>  }</span>
-<span id="cb5-18"><a href="#cb5-18" aria-hidden="true" tabindex="-1"></a>} <span class="cf">else</span> {</span>
-<span id="cb5-19"><a href="#cb5-19" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">"*Load effect analysis will be available after running the LMM analysis pipeline.*</span><span class="sc">\n</span><span class="st">"</span>)</span>
-<span id="cb5-20"><a href="#cb5-20" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (<span class="sc">!</span><span class="fu">is.null</span>(lmm_results) <span class="sc">&amp;&amp;</span> <span class="sc">!</span><span class="fu">is.null</span>(lmm_results<span class="sc">$</span>load_importance_result)) {</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>  load_result <span class="ot">&lt;-</span> lmm_results<span class="sc">$</span>load_importance_result</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (<span class="fu">isTRUE</span>(load_result<span class="sc">$</span>recommendation <span class="sc">==</span> <span class="st">"global"</span>)) {</span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">cat</span>(<span class="st">"**Result**: Load percentage does NOT significantly affect the velocity-RIR relationship.</span><span class="sc">\n\n</span><span class="st">"</span>)</span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> (<span class="sc">!</span><span class="fu">is.null</span>(load_result<span class="sc">$</span>lr_stat) <span class="sc">&amp;&amp;</span> <span class="fu">is.numeric</span>(load_result<span class="sc">$</span>lr_stat)) {</span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>      <span class="fu">cat</span>(<span class="st">"- Likelihood ratio test: χ² ="</span>, <span class="fu">round</span>(<span class="fu">as.numeric</span>(load_result<span class="sc">$</span>lr_stat), <span class="dv">2</span>), <span class="st">", p ="</span>, <span class="fu">format_p</span>(<span class="fu">as.numeric</span>(load_result<span class="sc">$</span>p_value)), <span class="st">"</span><span class="sc">\n</span><span class="st">"</span>)</span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>    <span class="fu">cat</span>(<span class="st">"- The interaction between RIR and load percentage was not statistically significant</span><span class="sc">\n\n</span><span class="st">"</span>)</span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a>    <span class="fu">cat</span>(<span class="st">"**Practical Implication**: Coaches can use a **single global velocity table** regardless of whether athletes are lifting at 80% or 90% 1RM. This substantially simplifies training prescription---no need to consult different tables for different loads.</span><span class="sc">\n</span><span class="st">"</span>)</span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a>  } <span class="cf">else</span> {</span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a>    <span class="fu">cat</span>(<span class="st">"**Result**: Load percentage significantly affects the velocity-RIR relationship.</span><span class="sc">\n\n</span><span class="st">"</span>)</span>
+<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> (<span class="sc">!</span><span class="fu">is.null</span>(load_result<span class="sc">$</span>lr_stat) <span class="sc">&amp;&amp;</span> <span class="fu">is.numeric</span>(load_result<span class="sc">$</span>lr_stat)) {</span>
+<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a>      <span class="fu">cat</span>(<span class="st">"- Likelihood ratio test: χ² ="</span>, <span class="fu">round</span>(<span class="fu">as.numeric</span>(load_result<span class="sc">$</span>lr_stat), <span class="dv">2</span>), <span class="st">", p ="</span>, <span class="fu">format_p</span>(<span class="fu">as.numeric</span>(load_result<span class="sc">$</span>p_value)), <span class="st">"</span><span class="sc">\n\n</span><span class="st">"</span>)</span>
+<span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb7-16"><a href="#cb7-16" aria-hidden="true" tabindex="-1"></a>    <span class="fu">cat</span>(<span class="st">"**Practical Implication**: **Load-specific tables** are recommended. Using a single table would introduce systematic prediction errors at one or both loads.</span><span class="sc">\n</span><span class="st">"</span>)</span>
+<span id="cb7-17"><a href="#cb7-17" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb7-18"><a href="#cb7-18" aria-hidden="true" tabindex="-1"></a>} <span class="cf">else</span> {</span>
+<span id="cb7-19"><a href="#cb7-19" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">"*Load effect analysis will be available after running the LMM analysis pipeline.*</span><span class="sc">\n</span><span class="st">"</span>)</span>
+<span id="cb7-20"><a href="#cb7-20" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <p><strong>Result</strong>: Load percentage does NOT significantly affect the velocity-RIR relationship.</p>
 <ul>
@@ -740,28 +855,28 @@ Table&nbsp;3: Deadlift vs Squat RIR-Velocity Relationship
 <div class="cell">
 <details class="code-fold">
 <summary>Show code</summary>
-<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (<span class="sc">!</span><span class="fu">is.null</span>(lmm_results)) {</span>
-<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>  vt <span class="ot">&lt;-</span> lmm_results<span class="sc">$</span>velocity_table<span class="sc">$</span>table</span>
-<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (<span class="st">"load_percentage"</span> <span class="sc">%in%</span> <span class="fu">names</span>(vt)) {</span>
-<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>    vt<span class="sc">$</span>velocity <span class="ot">&lt;-</span> <span class="fu">round</span>(vt<span class="sc">$</span>velocity, <span class="dv">3</span>)</span>
-<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>    vt<span class="sc">$</span>lower_95 <span class="ot">&lt;-</span> <span class="fu">round</span>(vt<span class="sc">$</span>lower_95, <span class="dv">3</span>)</span>
-<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>    vt<span class="sc">$</span>upper_95 <span class="ot">&lt;-</span> <span class="fu">round</span>(vt<span class="sc">$</span>upper_95, <span class="dv">3</span>)</span>
-<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>    <span class="fu">format_table</span>(vt[, <span class="fu">c</span>(<span class="st">"rir"</span>, <span class="st">"load_percentage"</span>, <span class="st">"velocity"</span>, <span class="st">"lower_95"</span>, <span class="st">"upper_95"</span>)],</span>
-<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>          <span class="at">col.names =</span> <span class="fu">c</span>(<span class="st">"RIR"</span>, <span class="st">"Load"</span>, <span class="st">"Velocity (m/s)"</span>, <span class="st">"Lower 95%"</span>, <span class="st">"Upper 95%"</span>))</span>
-<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a>  } <span class="cf">else</span> {</span>
-<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a>    vt<span class="sc">$</span>velocity <span class="ot">&lt;-</span> <span class="fu">round</span>(vt<span class="sc">$</span>velocity, <span class="dv">3</span>)</span>
-<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a>    vt<span class="sc">$</span>lower_95 <span class="ot">&lt;-</span> <span class="fu">round</span>(vt<span class="sc">$</span>lower_95, <span class="dv">3</span>)</span>
-<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a>    vt<span class="sc">$</span>upper_95 <span class="ot">&lt;-</span> <span class="fu">round</span>(vt<span class="sc">$</span>upper_95, <span class="dv">3</span>)</span>
-<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a>    <span class="fu">format_table</span>(vt[, <span class="fu">c</span>(<span class="st">"rir"</span>, <span class="st">"velocity"</span>, <span class="st">"lower_95"</span>, <span class="st">"upper_95"</span>)],</span>
-<span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a>          <span class="at">col.names =</span> <span class="fu">c</span>(<span class="st">"RIR"</span>, <span class="st">"Velocity (m/s)"</span>, <span class="st">"Lower 95%"</span>, <span class="st">"Upper 95%"</span>))</span>
-<span id="cb6-16"><a href="#cb6-16" aria-hidden="true" tabindex="-1"></a>  }</span>
-<span id="cb6-17"><a href="#cb6-17" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (<span class="sc">!</span><span class="fu">is.null</span>(lmm_results)) {</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>  vt <span class="ot">&lt;-</span> lmm_results<span class="sc">$</span>velocity_table<span class="sc">$</span>table</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (<span class="st">"load_percentage"</span> <span class="sc">%in%</span> <span class="fu">names</span>(vt)) {</span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>    vt<span class="sc">$</span>velocity <span class="ot">&lt;-</span> <span class="fu">round</span>(vt<span class="sc">$</span>velocity, <span class="dv">3</span>)</span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>    vt<span class="sc">$</span>lower_95 <span class="ot">&lt;-</span> <span class="fu">round</span>(vt<span class="sc">$</span>lower_95, <span class="dv">3</span>)</span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>    vt<span class="sc">$</span>upper_95 <span class="ot">&lt;-</span> <span class="fu">round</span>(vt<span class="sc">$</span>upper_95, <span class="dv">3</span>)</span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>    <span class="fu">format_table</span>(vt[, <span class="fu">c</span>(<span class="st">"rir"</span>, <span class="st">"load_percentage"</span>, <span class="st">"velocity"</span>, <span class="st">"lower_95"</span>, <span class="st">"upper_95"</span>)],</span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a>          <span class="at">col.names =</span> <span class="fu">c</span>(<span class="st">"RIR"</span>, <span class="st">"Load"</span>, <span class="st">"Velocity (m/s)"</span>, <span class="st">"Lower 95%"</span>, <span class="st">"Upper 95%"</span>))</span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a>  } <span class="cf">else</span> {</span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a>    vt<span class="sc">$</span>velocity <span class="ot">&lt;-</span> <span class="fu">round</span>(vt<span class="sc">$</span>velocity, <span class="dv">3</span>)</span>
+<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a>    vt<span class="sc">$</span>lower_95 <span class="ot">&lt;-</span> <span class="fu">round</span>(vt<span class="sc">$</span>lower_95, <span class="dv">3</span>)</span>
+<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a>    vt<span class="sc">$</span>upper_95 <span class="ot">&lt;-</span> <span class="fu">round</span>(vt<span class="sc">$</span>upper_95, <span class="dv">3</span>)</span>
+<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a>    <span class="fu">format_table</span>(vt[, <span class="fu">c</span>(<span class="st">"rir"</span>, <span class="st">"velocity"</span>, <span class="st">"lower_95"</span>, <span class="st">"upper_95"</span>)],</span>
+<span id="cb8-15"><a href="#cb8-15" aria-hidden="true" tabindex="-1"></a>          <span class="at">col.names =</span> <span class="fu">c</span>(<span class="st">"RIR"</span>, <span class="st">"Velocity (m/s)"</span>, <span class="st">"Lower 95%"</span>, <span class="st">"Upper 95%"</span>))</span>
+<span id="cb8-16"><a href="#cb8-16" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb8-17"><a href="#cb8-17" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div id="tbl-velocity-stop" class="cell quarto-float anchored">
 <figure class="quarto-float quarto-float-tbl figure">
 <figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-velocity-stop-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Table&nbsp;4: Velocity Stop Table: Target velocities for each RIR level
+Table&nbsp;5: Velocity Stop Table: Target velocities for each RIR level
 </figcaption>
 <div aria-describedby="tbl-velocity-stop-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <div class="cell-output-display">
@@ -839,27 +954,27 @@ Table&nbsp;4: Velocity Stop Table: Target velocities for each RIR level
 <div class="cell">
 <details class="code-fold">
 <summary>Show code</summary>
-<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (<span class="sc">!</span><span class="fu">is.null</span>(lmm_results)) {</span>
-<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>  vt <span class="ot">&lt;-</span> lmm_results<span class="sc">$</span>velocity_table<span class="sc">$</span>table</span>
-<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (<span class="st">"load_percentage"</span> <span class="sc">%in%</span> <span class="fu">names</span>(vt)) {</span>
-<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">ggplot</span>(vt, <span class="fu">aes</span>(<span class="at">x =</span> rir, <span class="at">y =</span> velocity, <span class="at">color =</span> load_percentage)) <span class="sc">+</span></span>
-<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>      <span class="fu">geom_line</span>(<span class="at">linewidth =</span> <span class="fl">1.2</span>) <span class="sc">+</span></span>
-<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>      <span class="fu">geom_point</span>(<span class="at">size =</span> <span class="dv">3</span>) <span class="sc">+</span></span>
-<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>      <span class="fu">geom_ribbon</span>(<span class="fu">aes</span>(<span class="at">ymin =</span> lower_95, <span class="at">ymax =</span> upper_95, <span class="at">fill =</span> load_percentage),</span>
-<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>                  <span class="at">alpha =</span> <span class="fl">0.2</span>, <span class="at">color =</span> <span class="cn">NA</span>) <span class="sc">+</span></span>
-<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a>      <span class="fu">scale_color_load</span>() <span class="sc">+</span> <span class="fu">scale_fill_load</span>() <span class="sc">+</span></span>
-<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a>      <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">"Repetitions in Reserve (RIR)"</span>, <span class="at">y =</span> <span class="st">"Mean Velocity (m/s)"</span>)</span>
-<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a>  } <span class="cf">else</span> {</span>
-<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a>    <span class="fu">ggplot</span>(vt, <span class="fu">aes</span>(<span class="at">x =</span> rir, <span class="at">y =</span> velocity)) <span class="sc">+</span></span>
-<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a>      <span class="fu">geom_line</span>(<span class="at">linewidth =</span> <span class="fl">1.2</span>, <span class="at">color =</span> COLORS<span class="sc">$</span>primary) <span class="sc">+</span></span>
-<span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a>      <span class="fu">geom_point</span>(<span class="at">size =</span> <span class="dv">3</span>, <span class="at">color =</span> COLORS<span class="sc">$</span>primary) <span class="sc">+</span></span>
-<span id="cb7-16"><a href="#cb7-16" aria-hidden="true" tabindex="-1"></a>      <span class="fu">geom_ribbon</span>(<span class="fu">aes</span>(<span class="at">ymin =</span> lower_95, <span class="at">ymax =</span> upper_95),</span>
-<span id="cb7-17"><a href="#cb7-17" aria-hidden="true" tabindex="-1"></a>                  <span class="at">alpha =</span> <span class="fl">0.2</span>, <span class="at">fill =</span> COLORS<span class="sc">$</span>primary) <span class="sc">+</span></span>
-<span id="cb7-18"><a href="#cb7-18" aria-hidden="true" tabindex="-1"></a>      <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">"Repetitions in Reserve (RIR)"</span>, <span class="at">y =</span> <span class="st">"Mean Velocity (m/s)"</span>,</span>
-<span id="cb7-19"><a href="#cb7-19" aria-hidden="true" tabindex="-1"></a>           <span class="at">title =</span> <span class="st">"Global Velocity Stop Table for Deadlift"</span>)</span>
-<span id="cb7-20"><a href="#cb7-20" aria-hidden="true" tabindex="-1"></a>  }</span>
-<span id="cb7-21"><a href="#cb7-21" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (<span class="sc">!</span><span class="fu">is.null</span>(lmm_results)) {</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>  vt <span class="ot">&lt;-</span> lmm_results<span class="sc">$</span>velocity_table<span class="sc">$</span>table</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (<span class="st">"load_percentage"</span> <span class="sc">%in%</span> <span class="fu">names</span>(vt)) {</span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">ggplot</span>(vt, <span class="fu">aes</span>(<span class="at">x =</span> rir, <span class="at">y =</span> velocity, <span class="at">color =</span> load_percentage)) <span class="sc">+</span></span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>      <span class="fu">geom_line</span>(<span class="at">linewidth =</span> <span class="fl">1.2</span>) <span class="sc">+</span></span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>      <span class="fu">geom_point</span>(<span class="at">size =</span> <span class="dv">3</span>) <span class="sc">+</span></span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>      <span class="fu">geom_ribbon</span>(<span class="fu">aes</span>(<span class="at">ymin =</span> lower_95, <span class="at">ymax =</span> upper_95, <span class="at">fill =</span> load_percentage),</span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a>                  <span class="at">alpha =</span> <span class="fl">0.2</span>, <span class="at">color =</span> <span class="cn">NA</span>) <span class="sc">+</span></span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a>      <span class="fu">scale_color_load</span>() <span class="sc">+</span> <span class="fu">scale_fill_load</span>() <span class="sc">+</span></span>
+<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a>      <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">"Repetitions in Reserve (RIR)"</span>, <span class="at">y =</span> <span class="st">"Mean Velocity (m/s)"</span>)</span>
+<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a>  } <span class="cf">else</span> {</span>
+<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a>    <span class="fu">ggplot</span>(vt, <span class="fu">aes</span>(<span class="at">x =</span> rir, <span class="at">y =</span> velocity)) <span class="sc">+</span></span>
+<span id="cb9-14"><a href="#cb9-14" aria-hidden="true" tabindex="-1"></a>      <span class="fu">geom_line</span>(<span class="at">linewidth =</span> <span class="fl">1.2</span>, <span class="at">color =</span> COLORS<span class="sc">$</span>primary) <span class="sc">+</span></span>
+<span id="cb9-15"><a href="#cb9-15" aria-hidden="true" tabindex="-1"></a>      <span class="fu">geom_point</span>(<span class="at">size =</span> <span class="dv">3</span>, <span class="at">color =</span> COLORS<span class="sc">$</span>primary) <span class="sc">+</span></span>
+<span id="cb9-16"><a href="#cb9-16" aria-hidden="true" tabindex="-1"></a>      <span class="fu">geom_ribbon</span>(<span class="fu">aes</span>(<span class="at">ymin =</span> lower_95, <span class="at">ymax =</span> upper_95),</span>
+<span id="cb9-17"><a href="#cb9-17" aria-hidden="true" tabindex="-1"></a>                  <span class="at">alpha =</span> <span class="fl">0.2</span>, <span class="at">fill =</span> COLORS<span class="sc">$</span>primary) <span class="sc">+</span></span>
+<span id="cb9-18"><a href="#cb9-18" aria-hidden="true" tabindex="-1"></a>      <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">"Repetitions in Reserve (RIR)"</span>, <span class="at">y =</span> <span class="st">"Mean Velocity (m/s)"</span>,</span>
+<span id="cb9-19"><a href="#cb9-19" aria-hidden="true" tabindex="-1"></a>           <span class="at">title =</span> <span class="st">"Global Velocity Stop Table for Deadlift"</span>)</span>
+<span id="cb9-20"><a href="#cb9-20" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb9-21"><a href="#cb9-21" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output-display">
 <div id="fig-velocity-table" class="quarto-figure quarto-figure-center quarto-float anchored">
@@ -868,7 +983,7 @@ Table&nbsp;4: Velocity Stop Table: Target velocities for each RIR level
 <img src="deadlift_study_files/figure-html/fig-velocity-table-1.png" class="img-fluid figure-img" style="width:100.0%">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-velocity-table-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;2: Velocity Stop Thresholds by RIR
+Figure&nbsp;3: Velocity Stop Thresholds by RIR
 </figcaption>
 </figure>
 </div>
@@ -896,24 +1011,24 @@ Figure&nbsp;2: Velocity Stop Thresholds by RIR
 </ul>
 <details class="code-fold">
 <summary>Show code</summary>
-<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (<span class="sc">!</span><span class="fu">is.null</span>(lmm_results)) {</span>
-<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>  ic <span class="ot">&lt;-</span> lmm_results<span class="sc">$</span>individual_comparison</span>
-<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>  comparison_df <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(</span>
-<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">Approach =</span> <span class="fu">c</span>(<span class="st">"General (Population)"</span>, <span class="st">"Individual (Calibrated)"</span>),</span>
-<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">MAE =</span> <span class="fu">c</span>(<span class="fu">round</span>(ic<span class="sc">$</span>global_mae <span class="sc">*</span> <span class="dv">1000</span>, <span class="dv">2</span>), <span class="fu">round</span>(ic<span class="sc">$</span>individual_mae <span class="sc">*</span> <span class="dv">1000</span>, <span class="dv">2</span>)),</span>
-<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">RMSE =</span> <span class="fu">c</span>(<span class="fu">round</span>(ic<span class="sc">$</span>global_rmse <span class="sc">*</span> <span class="dv">1000</span>, <span class="dv">2</span>), <span class="fu">round</span>(ic<span class="sc">$</span>individual_rmse <span class="sc">*</span> <span class="dv">1000</span>, <span class="dv">2</span>))</span>
-<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>  )</span>
-<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">format_table</span>(comparison_df, <span class="at">col.names =</span> <span class="fu">c</span>(<span class="st">"Approach"</span>, <span class="st">"MAE (mm/s)"</span>, <span class="st">"RMSE (mm/s)"</span>))</span>
-<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">"</span><span class="sc">\n</span><span class="st">**Improvement from individualization**:"</span>, <span class="fu">round</span>(ic<span class="sc">$</span>mae_improvement_pct, <span class="dv">1</span>), <span class="st">"%</span><span class="sc">\n</span><span class="st">"</span>)</span>
-<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (<span class="sc">!</span><span class="fu">is.null</span>(lmm_results)) {</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>  ic <span class="ot">&lt;-</span> lmm_results<span class="sc">$</span>individual_comparison</span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>  comparison_df <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(</span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">Approach =</span> <span class="fu">c</span>(<span class="st">"General (Population)"</span>, <span class="st">"Individual (Calibrated)"</span>),</span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">MAE =</span> <span class="fu">c</span>(<span class="fu">round</span>(ic<span class="sc">$</span>global_mae <span class="sc">*</span> <span class="dv">1000</span>, <span class="dv">2</span>), <span class="fu">round</span>(ic<span class="sc">$</span>individual_mae <span class="sc">*</span> <span class="dv">1000</span>, <span class="dv">2</span>)),</span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">RMSE =</span> <span class="fu">c</span>(<span class="fu">round</span>(ic<span class="sc">$</span>global_rmse <span class="sc">*</span> <span class="dv">1000</span>, <span class="dv">2</span>), <span class="fu">round</span>(ic<span class="sc">$</span>individual_rmse <span class="sc">*</span> <span class="dv">1000</span>, <span class="dv">2</span>))</span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">format_table</span>(comparison_df, <span class="at">col.names =</span> <span class="fu">c</span>(<span class="st">"Approach"</span>, <span class="st">"MAE (mm/s)"</span>, <span class="st">"RMSE (mm/s)"</span>))</span>
+<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-12"><a href="#cb10-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">"</span><span class="sc">\n</span><span class="st">**Improvement from individualization**:"</span>, <span class="fu">round</span>(ic<span class="sc">$</span>mae_improvement_pct, <span class="dv">1</span>), <span class="st">"%</span><span class="sc">\n</span><span class="st">"</span>)</span>
+<span id="cb10-13"><a href="#cb10-13" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div id="tbl-individual-comparison" class="cell quarto-float anchored">
 <figure class="quarto-float quarto-float-tbl figure">
 <figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-individual-comparison-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Table&nbsp;5: General vs Individual Table Accuracy
+Table&nbsp;6: General vs Individual Table Accuracy
 </figcaption>
 <div aria-describedby="tbl-individual-comparison-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <div class="cell-output cell-output-stdout">
@@ -947,27 +1062,27 @@ Table&nbsp;5: General vs Individual Table Accuracy
 <p><strong>Why conformal prediction?</strong> Traditional 95% CI from LMMs estimate uncertainty in the <em>mean</em> response. Conformal intervals estimate uncertainty for <em>individual</em> observations—more relevant for practical training prescription.</p>
 <details class="code-fold">
 <summary>Show code</summary>
-<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (<span class="sc">!</span><span class="fu">is.null</span>(lmm_results) <span class="sc">&amp;&amp;</span> <span class="sc">!</span><span class="fu">is.null</span>(lmm_results<span class="sc">$</span>conformal)) {</span>
-<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>  conf <span class="ot">&lt;-</span> lmm_results<span class="sc">$</span>conformal</span>
-<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">"**Conformal Prediction Results:**</span><span class="sc">\n\n</span><span class="st">"</span>)</span>
-<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">"- Target coverage:"</span>, conf<span class="sc">$</span>target_coverage <span class="sc">*</span> <span class="dv">100</span>, <span class="st">"%</span><span class="sc">\n</span><span class="st">"</span>)</span>
-<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">"- Empirical coverage:"</span>, <span class="fu">round</span>(conf<span class="sc">$</span>empirical_coverage <span class="sc">*</span> <span class="dv">100</span>, <span class="dv">1</span>), <span class="st">"%</span><span class="sc">\n</span><span class="st">"</span>)</span>
-<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">"- Mean interval width:"</span>, <span class="fu">round</span>(conf<span class="sc">$</span>mean_interval_width <span class="sc">*</span> <span class="dv">1000</span>, <span class="dv">1</span>), <span class="st">"mm/s</span><span class="sc">\n</span><span class="st">"</span>)</span>
-<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (<span class="sc">!</span><span class="fu">is.null</span>(conf<span class="sc">$</span>intervals)) {</span>
-<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a>    <span class="fu">cat</span>(<span class="st">"</span><span class="sc">\n</span><span class="st">**Velocity Intervals by RIR (90% Conformal):**</span><span class="sc">\n\n</span><span class="st">"</span>)</span>
-<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a>    <span class="fu">cat</span>(<span class="st">"| RIR | Point Estimate | Lower | Upper | Width |</span><span class="sc">\n</span><span class="st">"</span>)</span>
-<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a>    <span class="fu">cat</span>(<span class="st">"|-----|----------------|-------|-------|-------|</span><span class="sc">\n</span><span class="st">"</span>)</span>
-<span id="cb10-12"><a href="#cb10-12" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> (i <span class="cf">in</span> <span class="fu">seq_len</span>(<span class="fu">nrow</span>(conf<span class="sc">$</span>intervals))) {</span>
-<span id="cb10-13"><a href="#cb10-13" aria-hidden="true" tabindex="-1"></a>      row <span class="ot">&lt;-</span> conf<span class="sc">$</span>intervals[i, ]</span>
-<span id="cb10-14"><a href="#cb10-14" aria-hidden="true" tabindex="-1"></a>      <span class="fu">cat</span>(<span class="fu">sprintf</span>(<span class="st">"| %d | %.3f m/s | %.3f | %.3f | %.0f mm/s |</span><span class="sc">\n</span><span class="st">"</span>,</span>
-<span id="cb10-15"><a href="#cb10-15" aria-hidden="true" tabindex="-1"></a>                  row<span class="sc">$</span>rir, row<span class="sc">$</span>predicted, row<span class="sc">$</span>lower, row<span class="sc">$</span>upper,</span>
-<span id="cb10-16"><a href="#cb10-16" aria-hidden="true" tabindex="-1"></a>                  (row<span class="sc">$</span>upper <span class="sc">-</span> row<span class="sc">$</span>lower) <span class="sc">*</span> <span class="dv">1000</span>))</span>
-<span id="cb10-17"><a href="#cb10-17" aria-hidden="true" tabindex="-1"></a>    }</span>
-<span id="cb10-18"><a href="#cb10-18" aria-hidden="true" tabindex="-1"></a>  }</span>
-<span id="cb10-19"><a href="#cb10-19" aria-hidden="true" tabindex="-1"></a>} <span class="cf">else</span> {</span>
-<span id="cb10-20"><a href="#cb10-20" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">"*Conformal prediction intervals will be available after running the full analysis pipeline.*</span><span class="sc">\n</span><span class="st">"</span>)</span>
-<span id="cb10-21"><a href="#cb10-21" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (<span class="sc">!</span><span class="fu">is.null</span>(lmm_results) <span class="sc">&amp;&amp;</span> <span class="sc">!</span><span class="fu">is.null</span>(lmm_results<span class="sc">$</span>conformal)) {</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>  conf <span class="ot">&lt;-</span> lmm_results<span class="sc">$</span>conformal</span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">"**Conformal Prediction Results:**</span><span class="sc">\n\n</span><span class="st">"</span>)</span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">"- Target coverage:"</span>, conf<span class="sc">$</span>target_coverage <span class="sc">*</span> <span class="dv">100</span>, <span class="st">"%</span><span class="sc">\n</span><span class="st">"</span>)</span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">"- Empirical coverage:"</span>, <span class="fu">round</span>(conf<span class="sc">$</span>empirical_coverage <span class="sc">*</span> <span class="dv">100</span>, <span class="dv">1</span>), <span class="st">"%</span><span class="sc">\n</span><span class="st">"</span>)</span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">"- Mean interval width:"</span>, <span class="fu">round</span>(conf<span class="sc">$</span>mean_interval_width <span class="sc">*</span> <span class="dv">1000</span>, <span class="dv">1</span>), <span class="st">"mm/s</span><span class="sc">\n</span><span class="st">"</span>)</span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (<span class="sc">!</span><span class="fu">is.null</span>(conf<span class="sc">$</span>intervals)) {</span>
+<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a>    <span class="fu">cat</span>(<span class="st">"</span><span class="sc">\n</span><span class="st">**Velocity Intervals by RIR (90% Conformal):**</span><span class="sc">\n\n</span><span class="st">"</span>)</span>
+<span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a>    <span class="fu">cat</span>(<span class="st">"| RIR | Point Estimate | Lower | Upper | Width |</span><span class="sc">\n</span><span class="st">"</span>)</span>
+<span id="cb12-11"><a href="#cb12-11" aria-hidden="true" tabindex="-1"></a>    <span class="fu">cat</span>(<span class="st">"|-----|----------------|-------|-------|-------|</span><span class="sc">\n</span><span class="st">"</span>)</span>
+<span id="cb12-12"><a href="#cb12-12" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> (i <span class="cf">in</span> <span class="fu">seq_len</span>(<span class="fu">nrow</span>(conf<span class="sc">$</span>intervals))) {</span>
+<span id="cb12-13"><a href="#cb12-13" aria-hidden="true" tabindex="-1"></a>      row <span class="ot">&lt;-</span> conf<span class="sc">$</span>intervals[i, ]</span>
+<span id="cb12-14"><a href="#cb12-14" aria-hidden="true" tabindex="-1"></a>      <span class="fu">cat</span>(<span class="fu">sprintf</span>(<span class="st">"| %d | %.3f m/s | %.3f | %.3f | %.0f mm/s |</span><span class="sc">\n</span><span class="st">"</span>,</span>
+<span id="cb12-15"><a href="#cb12-15" aria-hidden="true" tabindex="-1"></a>                  row<span class="sc">$</span>rir, row<span class="sc">$</span>predicted, row<span class="sc">$</span>lower, row<span class="sc">$</span>upper,</span>
+<span id="cb12-16"><a href="#cb12-16" aria-hidden="true" tabindex="-1"></a>                  (row<span class="sc">$</span>upper <span class="sc">-</span> row<span class="sc">$</span>lower) <span class="sc">*</span> <span class="dv">1000</span>))</span>
+<span id="cb12-17"><a href="#cb12-17" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb12-18"><a href="#cb12-18" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb12-19"><a href="#cb12-19" aria-hidden="true" tabindex="-1"></a>} <span class="cf">else</span> {</span>
+<span id="cb12-20"><a href="#cb12-20" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">"*Conformal prediction intervals will be available after running the full analysis pipeline.*</span><span class="sc">\n</span><span class="st">"</span>)</span>
+<span id="cb12-21"><a href="#cb12-21" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <p><strong>Conformal Prediction Results:</strong></p>
 <ul>
@@ -1011,14 +1126,14 @@ Table&nbsp;5: General vs Individual Table Accuracy
 <h4 class="anchored" data-anchor-id="the-finding-3">The Finding</h4>
 <details class="code-fold">
 <summary>Show code</summary>
-<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (<span class="sc">!</span><span class="fu">is.null</span>(advanced_results)) {</span>
-<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>  mvt <span class="ot">&lt;-</span> advanced_results<span class="sc">$</span>mvt</span>
-<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">"**Population MVT Statistics:**</span><span class="sc">\n\n</span><span class="st">"</span>)</span>
-<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">"- Mean:"</span>, <span class="fu">round</span>(mvt<span class="sc">$</span>population_stats<span class="sc">$</span>mean, <span class="dv">3</span>), <span class="st">"m/s</span><span class="sc">\n</span><span class="st">"</span>)</span>
-<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">"- SD:"</span>, <span class="fu">round</span>(mvt<span class="sc">$</span>population_stats<span class="sc">$</span>sd, <span class="dv">3</span>), <span class="st">"m/s</span><span class="sc">\n</span><span class="st">"</span>)</span>
-<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">"- **CV:**"</span>, <span class="fu">round</span>(mvt<span class="sc">$</span>population_stats<span class="sc">$</span>cv_percent, <span class="dv">1</span>), <span class="st">"%</span><span class="sc">\n</span><span class="st">"</span>)</span>
-<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">"- Range:"</span>, <span class="fu">round</span>(mvt<span class="sc">$</span>population_stats<span class="sc">$</span>min, <span class="dv">3</span>), <span class="st">"-"</span>, <span class="fu">round</span>(mvt<span class="sc">$</span>population_stats<span class="sc">$</span>max, <span class="dv">3</span>), <span class="st">"m/s</span><span class="sc">\n</span><span class="st">"</span>)</span>
-<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (<span class="sc">!</span><span class="fu">is.null</span>(advanced_results)) {</span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>  mvt <span class="ot">&lt;-</span> advanced_results<span class="sc">$</span>mvt</span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">"**Population MVT Statistics:**</span><span class="sc">\n\n</span><span class="st">"</span>)</span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">"- Mean:"</span>, <span class="fu">round</span>(mvt<span class="sc">$</span>population_stats<span class="sc">$</span>mean, <span class="dv">3</span>), <span class="st">"m/s</span><span class="sc">\n</span><span class="st">"</span>)</span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">"- SD:"</span>, <span class="fu">round</span>(mvt<span class="sc">$</span>population_stats<span class="sc">$</span>sd, <span class="dv">3</span>), <span class="st">"m/s</span><span class="sc">\n</span><span class="st">"</span>)</span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">"- **CV:**"</span>, <span class="fu">round</span>(mvt<span class="sc">$</span>population_stats<span class="sc">$</span>cv_percent, <span class="dv">1</span>), <span class="st">"%</span><span class="sc">\n</span><span class="st">"</span>)</span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">"- Range:"</span>, <span class="fu">round</span>(mvt<span class="sc">$</span>population_stats<span class="sc">$</span>min, <span class="dv">3</span>), <span class="st">"-"</span>, <span class="fu">round</span>(mvt<span class="sc">$</span>population_stats<span class="sc">$</span>max, <span class="dv">3</span>), <span class="st">"m/s</span><span class="sc">\n</span><span class="st">"</span>)</span>
+<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <p><strong>Population MVT Statistics:</strong></p>
 <ul>
@@ -1030,17 +1145,17 @@ Table&nbsp;5: General vs Individual Table Accuracy
 <div class="cell">
 <details class="code-fold">
 <summary>Show code</summary>
-<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (<span class="sc">!</span><span class="fu">is.null</span>(advanced_results)) {</span>
-<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>  failure_data <span class="ot">&lt;-</span> data[data<span class="sc">$</span>rir <span class="sc">==</span> <span class="dv">0</span>, ]</span>
-<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>  mvt <span class="ot">&lt;-</span> advanced_results<span class="sc">$</span>mvt</span>
-<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(failure_data, <span class="fu">aes</span>(<span class="at">x =</span> mean_velocity)) <span class="sc">+</span></span>
-<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_histogram</span>(<span class="fu">aes</span>(<span class="at">y =</span> <span class="fu">after_stat</span>(density)), <span class="at">bins =</span> <span class="dv">20</span>, <span class="at">fill =</span> COLORS<span class="sc">$</span>primary, <span class="at">alpha =</span> <span class="fl">0.7</span>) <span class="sc">+</span></span>
-<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_density</span>(<span class="at">color =</span> COLORS<span class="sc">$</span>secondary, <span class="at">linewidth =</span> <span class="dv">1</span>) <span class="sc">+</span></span>
-<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_vline</span>(<span class="at">xintercept =</span> mvt<span class="sc">$</span>population_stats<span class="sc">$</span>mean, <span class="at">linetype =</span> <span class="st">"dashed"</span>, <span class="at">linewidth =</span> <span class="dv">1</span>) <span class="sc">+</span></span>
-<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a>    <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">"Velocity at Failure (m/s)"</span>, <span class="at">y =</span> <span class="st">"Density"</span>,</span>
-<span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a>         <span class="at">title =</span> <span class="st">"MVT Distribution Across Failure Observations"</span>)</span>
-<span id="cb12-11"><a href="#cb12-11" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (<span class="sc">!</span><span class="fu">is.null</span>(advanced_results)) {</span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>  failure_data <span class="ot">&lt;-</span> data[data<span class="sc">$</span>rir <span class="sc">==</span> <span class="dv">0</span>, ]</span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>  mvt <span class="ot">&lt;-</span> advanced_results<span class="sc">$</span>mvt</span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(failure_data, <span class="fu">aes</span>(<span class="at">x =</span> mean_velocity)) <span class="sc">+</span></span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_histogram</span>(<span class="fu">aes</span>(<span class="at">y =</span> <span class="fu">after_stat</span>(density)), <span class="at">bins =</span> <span class="dv">20</span>, <span class="at">fill =</span> COLORS<span class="sc">$</span>primary, <span class="at">alpha =</span> <span class="fl">0.7</span>) <span class="sc">+</span></span>
+<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_density</span>(<span class="at">color =</span> COLORS<span class="sc">$</span>secondary, <span class="at">linewidth =</span> <span class="dv">1</span>) <span class="sc">+</span></span>
+<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_vline</span>(<span class="at">xintercept =</span> mvt<span class="sc">$</span>population_stats<span class="sc">$</span>mean, <span class="at">linetype =</span> <span class="st">"dashed"</span>, <span class="at">linewidth =</span> <span class="dv">1</span>) <span class="sc">+</span></span>
+<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a>    <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">"Velocity at Failure (m/s)"</span>, <span class="at">y =</span> <span class="st">"Density"</span>,</span>
+<span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a>         <span class="at">title =</span> <span class="st">"MVT Distribution Across Failure Observations"</span>)</span>
+<span id="cb14-11"><a href="#cb14-11" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output-display">
 <div id="fig-mvt" class="quarto-figure quarto-figure-center quarto-float anchored">
@@ -1049,12 +1164,69 @@ Table&nbsp;5: General vs Individual Table Accuracy
 <img src="deadlift_study_files/figure-html/fig-mvt-1.png" class="img-fluid figure-img" style="width:100.0%">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-mvt-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;3: Distribution of Minimum Velocity Threshold at failure
+Figure&nbsp;4: Distribution of Minimum Velocity Threshold at failure
 </figcaption>
 </figure>
 </div>
 </div>
 </div>
+<div class="cell">
+<details class="code-fold">
+<summary>Show code</summary>
+<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (<span class="sc">!</span><span class="fu">is.null</span>(advanced_results) <span class="sc">&amp;&amp;</span> <span class="sc">!</span><span class="fu">is.null</span>(advanced_results<span class="sc">$</span>mvt<span class="sc">$</span>individual_stats)) {</span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>  ind_mvt <span class="ot">&lt;-</span> advanced_results<span class="sc">$</span>mvt<span class="sc">$</span>individual_stats</span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>  ind_mvt <span class="ot">&lt;-</span> ind_mvt[<span class="fu">order</span>(ind_mvt<span class="sc">$</span>mean_mvt), ]</span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>  ind_mvt<span class="sc">$</span>id <span class="ot">&lt;-</span> <span class="fu">factor</span>(ind_mvt<span class="sc">$</span>id, <span class="at">levels =</span> ind_mvt<span class="sc">$</span>id)</span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(ind_mvt, <span class="fu">aes</span>(<span class="at">x =</span> id, <span class="at">y =</span> mean_mvt, <span class="at">color =</span> sex)) <span class="sc">+</span></span>
+<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_point</span>(<span class="at">size =</span> <span class="dv">3</span>) <span class="sc">+</span></span>
+<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_errorbar</span>(<span class="fu">aes</span>(<span class="at">ymin =</span> mean_mvt <span class="sc">-</span> sd_mvt, <span class="at">ymax =</span> mean_mvt <span class="sc">+</span> sd_mvt),</span>
+<span id="cb15-9"><a href="#cb15-9" aria-hidden="true" tabindex="-1"></a>                  <span class="at">width =</span> <span class="fl">0.3</span>) <span class="sc">+</span></span>
+<span id="cb15-10"><a href="#cb15-10" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_hline</span>(<span class="at">yintercept =</span> advanced_results<span class="sc">$</span>mvt<span class="sc">$</span>population_stats<span class="sc">$</span>mean,</span>
+<span id="cb15-11"><a href="#cb15-11" aria-hidden="true" tabindex="-1"></a>               <span class="at">linetype =</span> <span class="st">"dashed"</span>, <span class="at">color =</span> <span class="st">"gray50"</span>) <span class="sc">+</span></span>
+<span id="cb15-12"><a href="#cb15-12" aria-hidden="true" tabindex="-1"></a>    <span class="fu">coord_flip</span>() <span class="sc">+</span></span>
+<span id="cb15-13"><a href="#cb15-13" aria-hidden="true" tabindex="-1"></a>    <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">"Participant"</span>, <span class="at">y =</span> <span class="st">"MVT (m/s)"</span>,</span>
+<span id="cb15-14"><a href="#cb15-14" aria-hidden="true" tabindex="-1"></a>         <span class="at">title =</span> <span class="st">"Individual MVT with Standard Deviation"</span>,</span>
+<span id="cb15-15"><a href="#cb15-15" aria-hidden="true" tabindex="-1"></a>         <span class="at">color =</span> <span class="st">"Sex"</span>) <span class="sc">+</span></span>
+<span id="cb15-16"><a href="#cb15-16" aria-hidden="true" tabindex="-1"></a>    <span class="fu">scale_color_manual</span>(<span class="at">values =</span> <span class="fu">c</span>(<span class="st">"female"</span> <span class="ot">=</span> COLORS<span class="sc">$</span>secondary, <span class="st">"male"</span> <span class="ot">=</span> COLORS<span class="sc">$</span>primary))</span>
+<span id="cb15-17"><a href="#cb15-17" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<div id="fig-mvt-individual" class="quarto-figure quarto-figure-center quarto-float anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-mvt-individual-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="deadlift_study_files/figure-html/fig-mvt-individual-1.png" class="img-fluid figure-img" style="width:100.0%">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-mvt-individual-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;5: Individual MVT values showing between-participant variability
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<p><strong>Load Comparison:</strong></p>
+<details class="code-fold">
+<summary>Show code</summary>
+<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (<span class="sc">!</span><span class="fu">is.null</span>(advanced_results) <span class="sc">&amp;&amp;</span> <span class="sc">!</span><span class="fu">is.null</span>(advanced_results<span class="sc">$</span>mvt<span class="sc">$</span>load_comparison)) {</span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>  lc <span class="ot">&lt;-</span> advanced_results<span class="sc">$</span>mvt<span class="sc">$</span>load_comparison</span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">"- 80% 1RM MVT:"</span>, <span class="fu">round</span>(lc<span class="sc">$</span>load_80_mean, <span class="dv">3</span>), <span class="st">"±"</span>, <span class="fu">round</span>(lc<span class="sc">$</span>load_80_sd, <span class="dv">3</span>), <span class="st">"m/s</span><span class="sc">\n</span><span class="st">"</span>)</span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">"- 90% 1RM MVT:"</span>, <span class="fu">round</span>(lc<span class="sc">$</span>load_90_mean, <span class="dv">3</span>), <span class="st">"±"</span>, <span class="fu">round</span>(lc<span class="sc">$</span>load_90_sd, <span class="dv">3</span>), <span class="st">"m/s</span><span class="sc">\n</span><span class="st">"</span>)</span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">"- Difference:"</span>, <span class="fu">round</span>(lc<span class="sc">$</span>difference, <span class="dv">3</span>), <span class="st">"m/s</span><span class="sc">\n</span><span class="st">"</span>)</span>
+<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">"- p-value:"</span>, <span class="fu">format</span>(lc<span class="sc">$</span>wilcox_p, <span class="at">digits =</span> <span class="dv">4</span>), <span class="st">"</span><span class="sc">\n</span><span class="st">"</span>)</span>
+<span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (lc<span class="sc">$</span>significant) {</span>
+<span id="cb16-8"><a href="#cb16-8" aria-hidden="true" tabindex="-1"></a>    <span class="fu">cat</span>(<span class="st">"- **Significant difference** - MVT varies by load</span><span class="sc">\n</span><span class="st">"</span>)</span>
+<span id="cb16-9"><a href="#cb16-9" aria-hidden="true" tabindex="-1"></a>  } <span class="cf">else</span> {</span>
+<span id="cb16-10"><a href="#cb16-10" aria-hidden="true" tabindex="-1"></a>    <span class="fu">cat</span>(<span class="st">"- No significant load effect - MVT appears consistent across loads</span><span class="sc">\n</span><span class="st">"</span>)</span>
+<span id="cb16-11"><a href="#cb16-11" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb16-12"><a href="#cb16-12" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<ul>
+<li>80% 1RM MVT: 0.217 ± 0.066 m/s</li>
+<li>90% 1RM MVT: 0.196 ± 0.061 m/s</li>
+<li>Difference: 0.021 m/s</li>
+<li>p-value: 0.148</li>
+<li>No significant load effect - MVT appears consistent across loads</li>
+</ul>
 <p>The CV of 30.8% indicates <strong>high inter-individual variability</strong> (above the 25% threshold).</p>
 <p><strong>Practical Implication</strong>: A universal MVT threshold would misclassify many athletes—some would stop too early (false positive for failure), others too late (missed failure). Individual calibration is not optional for accurate VBT in deadlifts.</p>
 </section>
@@ -1093,20 +1265,20 @@ Figure&nbsp;3: Distribution of Minimum Velocity Threshold at failure
 <h4 class="anchored" data-anchor-id="the-finding-4">The Finding</h4>
 <details class="code-fold">
 <summary>Show code</summary>
-<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (<span class="sc">!</span><span class="fu">is.null</span>(advanced_results)) {</span>
-<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>  rel <span class="ot">&lt;-</span> advanced_results<span class="sc">$</span>reliability</span>
-<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">"**Reliability Results:**</span><span class="sc">\n\n</span><span class="st">"</span>)</span>
-<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">"| Parameter | ICC | 95% CI | Interpretation |</span><span class="sc">\n</span><span class="st">"</span>)</span>
-<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">"|-----------|-----|--------|----------------|</span><span class="sc">\n</span><span class="st">"</span>)</span>
-<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="fu">sprintf</span>(<span class="st">"| Velocity-RIR Slope | %.2f | [%.2f, %.2f] | %s |</span><span class="sc">\n</span><span class="st">"</span>,</span>
-<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a>              rel<span class="sc">$</span>slope_icc<span class="sc">$</span>icc, rel<span class="sc">$</span>slope_icc<span class="sc">$</span>ci_lower, rel<span class="sc">$</span>slope_icc<span class="sc">$</span>ci_upper, rel<span class="sc">$</span>slope_icc<span class="sc">$</span>interpretation))</span>
-<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="fu">sprintf</span>(<span class="st">"| MVT | %.2f | [%.2f, %.2f] | %s |</span><span class="sc">\n</span><span class="st">"</span>,</span>
-<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a>              rel<span class="sc">$</span>mvt_icc<span class="sc">$</span>icc, rel<span class="sc">$</span>mvt_icc<span class="sc">$</span>ci_lower, rel<span class="sc">$</span>mvt_icc<span class="sc">$</span>ci_upper, rel<span class="sc">$</span>mvt_icc<span class="sc">$</span>interpretation))</span>
-<span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">"</span><span class="sc">\n</span><span class="st">**Measurement Error:**</span><span class="sc">\n\n</span><span class="st">"</span>)</span>
-<span id="cb13-11"><a href="#cb13-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">"- SEM:"</span>, <span class="fu">round</span>(rel<span class="sc">$</span>mvt_icc<span class="sc">$</span>sem <span class="sc">*</span> <span class="dv">1000</span>, <span class="dv">1</span>), <span class="st">"mm/s</span><span class="sc">\n</span><span class="st">"</span>)</span>
-<span id="cb13-12"><a href="#cb13-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">"- MDC95:"</span>, <span class="fu">round</span>(rel<span class="sc">$</span>mvt_icc<span class="sc">$</span>mdc95 <span class="sc">*</span> <span class="dv">1000</span>, <span class="dv">1</span>), <span class="st">"mm/s</span><span class="sc">\n</span><span class="st">"</span>)</span>
-<span id="cb13-13"><a href="#cb13-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">"</span><span class="sc">\n</span><span class="st">*Interpretation: A velocity change of at least"</span>, <span class="fu">round</span>(rel<span class="sc">$</span>mvt_icc<span class="sc">$</span>mdc95 <span class="sc">*</span> <span class="dv">1000</span>, <span class="dv">1</span>), <span class="st">"mm/s is needed to be confident it's a real change, not measurement noise.*</span><span class="sc">\n</span><span class="st">"</span>)</span>
-<span id="cb13-14"><a href="#cb13-14" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (<span class="sc">!</span><span class="fu">is.null</span>(advanced_results)) {</span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>  rel <span class="ot">&lt;-</span> advanced_results<span class="sc">$</span>reliability</span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">"**Reliability Results:**</span><span class="sc">\n\n</span><span class="st">"</span>)</span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">"| Parameter | ICC | 95% CI | Interpretation |</span><span class="sc">\n</span><span class="st">"</span>)</span>
+<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">"|-----------|-----|--------|----------------|</span><span class="sc">\n</span><span class="st">"</span>)</span>
+<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="fu">sprintf</span>(<span class="st">"| Velocity-RIR Slope | %.2f | [%.2f, %.2f] | %s |</span><span class="sc">\n</span><span class="st">"</span>,</span>
+<span id="cb17-7"><a href="#cb17-7" aria-hidden="true" tabindex="-1"></a>              rel<span class="sc">$</span>slope_icc<span class="sc">$</span>icc, rel<span class="sc">$</span>slope_icc<span class="sc">$</span>ci_lower, rel<span class="sc">$</span>slope_icc<span class="sc">$</span>ci_upper, rel<span class="sc">$</span>slope_icc<span class="sc">$</span>interpretation))</span>
+<span id="cb17-8"><a href="#cb17-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="fu">sprintf</span>(<span class="st">"| MVT | %.2f | [%.2f, %.2f] | %s |</span><span class="sc">\n</span><span class="st">"</span>,</span>
+<span id="cb17-9"><a href="#cb17-9" aria-hidden="true" tabindex="-1"></a>              rel<span class="sc">$</span>mvt_icc<span class="sc">$</span>icc, rel<span class="sc">$</span>mvt_icc<span class="sc">$</span>ci_lower, rel<span class="sc">$</span>mvt_icc<span class="sc">$</span>ci_upper, rel<span class="sc">$</span>mvt_icc<span class="sc">$</span>interpretation))</span>
+<span id="cb17-10"><a href="#cb17-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">"</span><span class="sc">\n</span><span class="st">**Measurement Error:**</span><span class="sc">\n\n</span><span class="st">"</span>)</span>
+<span id="cb17-11"><a href="#cb17-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">"- SEM:"</span>, <span class="fu">round</span>(rel<span class="sc">$</span>mvt_icc<span class="sc">$</span>sem <span class="sc">*</span> <span class="dv">1000</span>, <span class="dv">1</span>), <span class="st">"mm/s</span><span class="sc">\n</span><span class="st">"</span>)</span>
+<span id="cb17-12"><a href="#cb17-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">"- MDC95:"</span>, <span class="fu">round</span>(rel<span class="sc">$</span>mvt_icc<span class="sc">$</span>mdc95 <span class="sc">*</span> <span class="dv">1000</span>, <span class="dv">1</span>), <span class="st">"mm/s</span><span class="sc">\n</span><span class="st">"</span>)</span>
+<span id="cb17-13"><a href="#cb17-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">"</span><span class="sc">\n</span><span class="st">*Interpretation: A velocity change of at least"</span>, <span class="fu">round</span>(rel<span class="sc">$</span>mvt_icc<span class="sc">$</span>mdc95 <span class="sc">*</span> <span class="dv">1000</span>, <span class="dv">1</span>), <span class="st">"mm/s is needed to be confident it's a real change, not measurement noise.*</span><span class="sc">\n</span><span class="st">"</span>)</span>
+<span id="cb17-14"><a href="#cb17-14" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <p><strong>Reliability Results:</strong></p>
 <table class="table">
@@ -1139,6 +1311,62 @@ Figure&nbsp;3: Distribution of Minimum Velocity Threshold at failure
 <li>MDC95: 66.6 mm/s</li>
 </ul>
 <p><em>Interpretation: A velocity change of at least 66.6 mm/s is needed to be confident it’s a real change, not measurement noise.</em></p>
+<div class="cell">
+<details class="code-fold">
+<summary>Show code</summary>
+<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (<span class="sc">!</span><span class="fu">is.null</span>(advanced_results) <span class="sc">&amp;&amp;</span> <span class="sc">!</span><span class="fu">is.null</span>(advanced_results<span class="sc">$</span>reliability<span class="sc">$</span>day_parameters)) {</span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>  day_params <span class="ot">&lt;-</span> advanced_results<span class="sc">$</span>reliability<span class="sc">$</span>day_parameters</span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(day_params, <span class="fu">aes</span>(<span class="at">x =</span> slope_day1, <span class="at">y =</span> slope_day2)) <span class="sc">+</span></span>
+<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_point</span>(<span class="at">size =</span> <span class="dv">3</span>, <span class="at">alpha =</span> <span class="fl">0.7</span>, <span class="at">color =</span> COLORS<span class="sc">$</span>primary) <span class="sc">+</span></span>
+<span id="cb18-6"><a href="#cb18-6" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_abline</span>(<span class="at">slope =</span> <span class="dv">1</span>, <span class="at">intercept =</span> <span class="dv">0</span>, <span class="at">linetype =</span> <span class="st">"dashed"</span>, <span class="at">color =</span> <span class="st">"gray50"</span>) <span class="sc">+</span></span>
+<span id="cb18-7"><a href="#cb18-7" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_smooth</span>(<span class="at">method =</span> <span class="st">"lm"</span>, <span class="at">se =</span> <span class="cn">TRUE</span>, <span class="at">color =</span> COLORS<span class="sc">$</span>secondary) <span class="sc">+</span></span>
+<span id="cb18-8"><a href="#cb18-8" aria-hidden="true" tabindex="-1"></a>    <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">"Slope Day 1 (m/s per RIR)"</span>, <span class="at">y =</span> <span class="st">"Slope Day 2 (m/s per RIR)"</span>,</span>
+<span id="cb18-9"><a href="#cb18-9" aria-hidden="true" tabindex="-1"></a>         <span class="at">title =</span> <span class="st">"Day-to-Day Reliability of Individual Slopes"</span>,</span>
+<span id="cb18-10"><a href="#cb18-10" aria-hidden="true" tabindex="-1"></a>         <span class="at">subtitle =</span> <span class="fu">paste</span>(<span class="st">"ICC ="</span>, <span class="fu">round</span>(advanced_results<span class="sc">$</span>reliability<span class="sc">$</span>slope_icc<span class="sc">$</span>icc, <span class="dv">2</span>)))</span>
+<span id="cb18-11"><a href="#cb18-11" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<div id="fig-reliability-slopes" class="quarto-figure quarto-figure-center quarto-float anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-reliability-slopes-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="deadlift_study_files/figure-html/fig-reliability-slopes-1.png" class="img-fluid figure-img" style="width:100.0%">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-reliability-slopes-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;6: Day 1 vs Day 2 comparison of individual velocity-RIR slopes
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<div class="cell">
+<details class="code-fold">
+<summary>Show code</summary>
+<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (<span class="sc">!</span><span class="fu">is.null</span>(advanced_results) <span class="sc">&amp;&amp;</span> <span class="sc">!</span><span class="fu">is.null</span>(advanced_results<span class="sc">$</span>reliability<span class="sc">$</span>day_parameters)) {</span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>  day_params <span class="ot">&lt;-</span> advanced_results<span class="sc">$</span>reliability<span class="sc">$</span>day_parameters</span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(day_params, <span class="fu">aes</span>(<span class="at">x =</span> mvt_day1, <span class="at">y =</span> mvt_day2)) <span class="sc">+</span></span>
+<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_point</span>(<span class="at">size =</span> <span class="dv">3</span>, <span class="at">alpha =</span> <span class="fl">0.7</span>, <span class="at">color =</span> COLORS<span class="sc">$</span>primary) <span class="sc">+</span></span>
+<span id="cb19-6"><a href="#cb19-6" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_abline</span>(<span class="at">slope =</span> <span class="dv">1</span>, <span class="at">intercept =</span> <span class="dv">0</span>, <span class="at">linetype =</span> <span class="st">"dashed"</span>, <span class="at">color =</span> <span class="st">"gray50"</span>) <span class="sc">+</span></span>
+<span id="cb19-7"><a href="#cb19-7" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_smooth</span>(<span class="at">method =</span> <span class="st">"lm"</span>, <span class="at">se =</span> <span class="cn">TRUE</span>, <span class="at">color =</span> COLORS<span class="sc">$</span>secondary) <span class="sc">+</span></span>
+<span id="cb19-8"><a href="#cb19-8" aria-hidden="true" tabindex="-1"></a>    <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">"MVT Day 1 (m/s)"</span>, <span class="at">y =</span> <span class="st">"MVT Day 2 (m/s)"</span>,</span>
+<span id="cb19-9"><a href="#cb19-9" aria-hidden="true" tabindex="-1"></a>         <span class="at">title =</span> <span class="st">"Day-to-Day Reliability of Predicted MVT"</span>,</span>
+<span id="cb19-10"><a href="#cb19-10" aria-hidden="true" tabindex="-1"></a>         <span class="at">subtitle =</span> <span class="fu">paste</span>(<span class="st">"ICC ="</span>, <span class="fu">round</span>(advanced_results<span class="sc">$</span>reliability<span class="sc">$</span>mvt_icc<span class="sc">$</span>icc, <span class="dv">2</span>)))</span>
+<span id="cb19-11"><a href="#cb19-11" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<div id="fig-reliability-mvt" class="quarto-figure quarto-figure-center quarto-float anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-reliability-mvt-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="deadlift_study_files/figure-html/fig-reliability-mvt-1.png" class="img-fluid figure-img" style="width:100.0%">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-reliability-mvt-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;7: Day 1 vs Day 2 comparison of predicted MVT
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
 <p><strong>Practical Recommendation</strong>: The moderate reliability suggests that velocity profiles are reasonably stable but not perfect. <strong>Recalibrate every 2-4 weeks</strong> or after significant training blocks, illness, or competition.</p>
 </section>
 </section>
@@ -1166,20 +1394,20 @@ Figure&nbsp;3: Distribution of Minimum Velocity Threshold at failure
 <h4 class="anchored" data-anchor-id="the-finding-5">The Finding</h4>
 <details class="code-fold">
 <summary>Show code</summary>
-<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (<span class="sc">!</span><span class="fu">is.null</span>(advanced_results)) {</span>
-<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>  poly <span class="ot">&lt;-</span> advanced_results<span class="sc">$</span>polynomial_comparison</span>
-<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">"**Model Comparison Results:**</span><span class="sc">\n\n</span><span class="st">"</span>)</span>
-<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">"| Metric | Value |</span><span class="sc">\n</span><span class="st">"</span>)</span>
-<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">"|--------|-------|</span><span class="sc">\n</span><span class="st">"</span>)</span>
-<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="fu">sprintf</span>(<span class="st">"| Participants analyzed | %d |</span><span class="sc">\n</span><span class="st">"</span>, poly<span class="sc">$</span>best_model_summary<span class="sc">$</span>n_participants))</span>
-<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="fu">sprintf</span>(<span class="st">"| Linear model preferred | %d (%.0f%%) |</span><span class="sc">\n</span><span class="st">"</span>,</span>
-<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a>              poly<span class="sc">$</span>best_model_summary<span class="sc">$</span>n_linear_best,</span>
-<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a>              <span class="dv">100</span> <span class="sc">-</span> poly<span class="sc">$</span>best_model_summary<span class="sc">$</span>pct_quad_best))</span>
-<span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="fu">sprintf</span>(<span class="st">"| Quadratic model preferred | %d (%.0f%%) |</span><span class="sc">\n</span><span class="st">"</span>,</span>
-<span id="cb14-11"><a href="#cb14-11" aria-hidden="true" tabindex="-1"></a>              poly<span class="sc">$</span>best_model_summary<span class="sc">$</span>n_quad_best,</span>
-<span id="cb14-12"><a href="#cb14-12" aria-hidden="true" tabindex="-1"></a>              poly<span class="sc">$</span>best_model_summary<span class="sc">$</span>pct_quad_best))</span>
-<span id="cb14-13"><a href="#cb14-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="fu">sprintf</span>(<span class="st">"| Average R² improvement (quadratic) | %.4f |</span><span class="sc">\n</span><span class="st">"</span>, poly<span class="sc">$</span>best_model_summary<span class="sc">$</span>avg_r2_improvement))</span>
-<span id="cb14-14"><a href="#cb14-14" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (<span class="sc">!</span><span class="fu">is.null</span>(advanced_results)) {</span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>  poly <span class="ot">&lt;-</span> advanced_results<span class="sc">$</span>polynomial_comparison</span>
+<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">"**Model Comparison Results:**</span><span class="sc">\n\n</span><span class="st">"</span>)</span>
+<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">"| Metric | Value |</span><span class="sc">\n</span><span class="st">"</span>)</span>
+<span id="cb20-5"><a href="#cb20-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">"|--------|-------|</span><span class="sc">\n</span><span class="st">"</span>)</span>
+<span id="cb20-6"><a href="#cb20-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="fu">sprintf</span>(<span class="st">"| Participants analyzed | %d |</span><span class="sc">\n</span><span class="st">"</span>, poly<span class="sc">$</span>best_model_summary<span class="sc">$</span>n_participants))</span>
+<span id="cb20-7"><a href="#cb20-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="fu">sprintf</span>(<span class="st">"| Linear model preferred | %d (%.0f%%) |</span><span class="sc">\n</span><span class="st">"</span>,</span>
+<span id="cb20-8"><a href="#cb20-8" aria-hidden="true" tabindex="-1"></a>              poly<span class="sc">$</span>best_model_summary<span class="sc">$</span>n_linear_best,</span>
+<span id="cb20-9"><a href="#cb20-9" aria-hidden="true" tabindex="-1"></a>              <span class="dv">100</span> <span class="sc">-</span> poly<span class="sc">$</span>best_model_summary<span class="sc">$</span>pct_quad_best))</span>
+<span id="cb20-10"><a href="#cb20-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="fu">sprintf</span>(<span class="st">"| Quadratic model preferred | %d (%.0f%%) |</span><span class="sc">\n</span><span class="st">"</span>,</span>
+<span id="cb20-11"><a href="#cb20-11" aria-hidden="true" tabindex="-1"></a>              poly<span class="sc">$</span>best_model_summary<span class="sc">$</span>n_quad_best,</span>
+<span id="cb20-12"><a href="#cb20-12" aria-hidden="true" tabindex="-1"></a>              poly<span class="sc">$</span>best_model_summary<span class="sc">$</span>pct_quad_best))</span>
+<span id="cb20-13"><a href="#cb20-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="fu">sprintf</span>(<span class="st">"| Average R² improvement (quadratic) | %.4f |</span><span class="sc">\n</span><span class="st">"</span>, poly<span class="sc">$</span>best_model_summary<span class="sc">$</span>avg_r2_improvement))</span>
+<span id="cb20-14"><a href="#cb20-14" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <p><strong>Model Comparison Results:</strong></p>
 <table class="table">
@@ -1208,6 +1436,37 @@ Figure&nbsp;3: Distribution of Minimum Velocity Threshold at failure
 </tr>
 </tbody>
 </table>
+<div class="cell">
+<details class="code-fold">
+<summary>Show code</summary>
+<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (<span class="sc">!</span><span class="fu">is.null</span>(advanced_results) <span class="sc">&amp;&amp;</span> <span class="sc">!</span><span class="fu">is.null</span>(advanced_results<span class="sc">$</span>polynomial_comparison<span class="sc">$</span>individual_results)) {</span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>  ind_results <span class="ot">&lt;-</span> advanced_results<span class="sc">$</span>polynomial_comparison<span class="sc">$</span>individual_results</span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(ind_results, <span class="fu">aes</span>(<span class="at">x =</span> <span class="fu">reorder</span>(id, delta_aic), <span class="at">y =</span> delta_aic, <span class="at">fill =</span> best_model)) <span class="sc">+</span></span>
+<span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_col</span>() <span class="sc">+</span></span>
+<span id="cb21-6"><a href="#cb21-6" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_hline</span>(<span class="at">yintercept =</span> <span class="sc">-</span><span class="dv">2</span>, <span class="at">linetype =</span> <span class="st">"dashed"</span>, <span class="at">color =</span> COLORS<span class="sc">$</span>secondary) <span class="sc">+</span></span>
+<span id="cb21-7"><a href="#cb21-7" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_hline</span>(<span class="at">yintercept =</span> <span class="dv">2</span>, <span class="at">linetype =</span> <span class="st">"dashed"</span>, <span class="at">color =</span> COLORS<span class="sc">$</span>secondary) <span class="sc">+</span></span>
+<span id="cb21-8"><a href="#cb21-8" aria-hidden="true" tabindex="-1"></a>    <span class="fu">coord_flip</span>() <span class="sc">+</span></span>
+<span id="cb21-9"><a href="#cb21-9" aria-hidden="true" tabindex="-1"></a>    <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">"Participant"</span>, <span class="at">y =</span> <span class="st">"ΔAIC (Quadratic - Linear)"</span>,</span>
+<span id="cb21-10"><a href="#cb21-10" aria-hidden="true" tabindex="-1"></a>         <span class="at">title =</span> <span class="st">"Model Comparison by Participant"</span>,</span>
+<span id="cb21-11"><a href="#cb21-11" aria-hidden="true" tabindex="-1"></a>         <span class="at">subtitle =</span> <span class="st">"Negative values favor quadratic model"</span>,</span>
+<span id="cb21-12"><a href="#cb21-12" aria-hidden="true" tabindex="-1"></a>         <span class="at">fill =</span> <span class="st">"Best Model"</span>) <span class="sc">+</span></span>
+<span id="cb21-13"><a href="#cb21-13" aria-hidden="true" tabindex="-1"></a>    <span class="fu">scale_fill_manual</span>(<span class="at">values =</span> <span class="fu">c</span>(<span class="st">"linear"</span> <span class="ot">=</span> COLORS<span class="sc">$</span>primary, <span class="st">"quadratic"</span> <span class="ot">=</span> COLORS<span class="sc">$</span>tertiary))</span>
+<span id="cb21-14"><a href="#cb21-14" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<div id="fig-model-aic" class="quarto-figure quarto-figure-center quarto-float anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-model-aic-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="deadlift_study_files/figure-html/fig-model-aic-1.png" class="img-fluid figure-img" style="width:100.0%">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-model-aic-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;8: AIC comparison between linear and quadratic models by participant
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
 <p><strong>Interpretation</strong>: For the majority of participants, the <strong>linear model is sufficient</strong>. The quadratic term provides only marginal improvement (&lt; 1% R² gain on average). This simplifies practical application—coaches can use a simple linear relationship without sacrificing meaningful accuracy.</p>
 <p><strong>Practical Implication</strong>: Use linear velocity tables. The small theoretical improvement from polynomial models is not worth the added complexity for training prescription.</p>
 </section>
@@ -1235,32 +1494,32 @@ Figure&nbsp;3: Distribution of Minimum Velocity Threshold at failure
 <h4 class="anchored" data-anchor-id="the-finding-6">The Finding</h4>
 <details class="code-fold">
 <summary>Show code</summary>
-<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (<span class="sc">!</span><span class="fu">is.null</span>(advanced_results) <span class="sc">&amp;&amp;</span> <span class="sc">!</span><span class="fu">is.null</span>(advanced_results<span class="sc">$</span>velocity_decay)) {</span>
-<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>  decay <span class="ot">&lt;-</span> advanced_results<span class="sc">$</span>velocity_decay</span>
-<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">"**Velocity Decay Results:**</span><span class="sc">\n\n</span><span class="st">"</span>)</span>
-<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (<span class="sc">!</span><span class="fu">is.null</span>(decay<span class="sc">$</span>phase_decay)) {</span>
-<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">cat</span>(<span class="st">"| Set Phase | Velocity Loss (m/s per rep) |</span><span class="sc">\n</span><span class="st">"</span>)</span>
-<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a>    <span class="fu">cat</span>(<span class="st">"|-----------|-----------------------------|</span><span class="sc">\n</span><span class="st">"</span>)</span>
-<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a>    <span class="fu">cat</span>(<span class="fu">sprintf</span>(<span class="st">"| First half | %.4f |</span><span class="sc">\n</span><span class="st">"</span>, <span class="fu">as.numeric</span>(decay<span class="sc">$</span>phase_decay<span class="sc">$</span>first_half_decay)))</span>
-<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a>    <span class="fu">cat</span>(<span class="fu">sprintf</span>(<span class="st">"| Second half | %.4f |</span><span class="sc">\n</span><span class="st">"</span>, <span class="fu">as.numeric</span>(decay<span class="sc">$</span>phase_decay<span class="sc">$</span>second_half_decay)))</span>
-<span id="cb15-9"><a href="#cb15-9" aria-hidden="true" tabindex="-1"></a>    <span class="fu">cat</span>(<span class="st">"</span><span class="sc">\n</span><span class="st">"</span>)</span>
-<span id="cb15-10"><a href="#cb15-10" aria-hidden="true" tabindex="-1"></a>  }</span>
-<span id="cb15-11"><a href="#cb15-11" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (<span class="sc">!</span><span class="fu">is.null</span>(decay<span class="sc">$</span>decay_acceleration)) {</span>
-<span id="cb15-12"><a href="#cb15-12" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> (<span class="fu">isTRUE</span>(decay<span class="sc">$</span>decay_acceleration<span class="sc">$</span>accelerating)) {</span>
-<span id="cb15-13"><a href="#cb15-13" aria-hidden="true" tabindex="-1"></a>      <span class="fu">cat</span>(<span class="fu">sprintf</span>(<span class="st">"**Statistical Test:** Decay significantly accelerates near failure (p = %s)</span><span class="sc">\n\n</span><span class="st">"</span>,</span>
-<span id="cb15-14"><a href="#cb15-14" aria-hidden="true" tabindex="-1"></a>                  <span class="fu">format</span>(decay<span class="sc">$</span>decay_acceleration<span class="sc">$</span>p_value, <span class="at">digits =</span> <span class="dv">3</span>)))</span>
-<span id="cb15-15"><a href="#cb15-15" aria-hidden="true" tabindex="-1"></a>      <span class="fu">cat</span>(<span class="st">"The velocity-fatigue curve is **exponential**, not linear. This means:</span><span class="sc">\n\n</span><span class="st">"</span>)</span>
-<span id="cb15-16"><a href="#cb15-16" aria-hidden="true" tabindex="-1"></a>      <span class="fu">cat</span>(<span class="st">"1. Early reps provide less warning of impending failure</span><span class="sc">\n</span><span class="st">"</span>)</span>
-<span id="cb15-17"><a href="#cb15-17" aria-hidden="true" tabindex="-1"></a>      <span class="fu">cat</span>(<span class="st">"2. The final 2-3 reps show rapid velocity decline</span><span class="sc">\n</span><span class="st">"</span>)</span>
-<span id="cb15-18"><a href="#cb15-18" aria-hidden="true" tabindex="-1"></a>      <span class="fu">cat</span>(<span class="st">"3. Conservative velocity thresholds are advisable</span><span class="sc">\n</span><span class="st">"</span>)</span>
-<span id="cb15-19"><a href="#cb15-19" aria-hidden="true" tabindex="-1"></a>    } <span class="cf">else</span> {</span>
-<span id="cb15-20"><a href="#cb15-20" aria-hidden="true" tabindex="-1"></a>      <span class="fu">cat</span>(<span class="st">"**Statistical Test:** Decay rate is approximately constant throughout the set.</span><span class="sc">\n\n</span><span class="st">"</span>)</span>
-<span id="cb15-21"><a href="#cb15-21" aria-hidden="true" tabindex="-1"></a>      <span class="fu">cat</span>(<span class="st">"The linear model adequately describes velocity loss across reps.</span><span class="sc">\n</span><span class="st">"</span>)</span>
-<span id="cb15-22"><a href="#cb15-22" aria-hidden="true" tabindex="-1"></a>    }</span>
-<span id="cb15-23"><a href="#cb15-23" aria-hidden="true" tabindex="-1"></a>  }</span>
-<span id="cb15-24"><a href="#cb15-24" aria-hidden="true" tabindex="-1"></a>} <span class="cf">else</span> {</span>
-<span id="cb15-25"><a href="#cb15-25" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">"*Velocity decay analysis will be available after running the advanced analysis pipeline.*</span><span class="sc">\n</span><span class="st">"</span>)</span>
-<span id="cb15-26"><a href="#cb15-26" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb22"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (<span class="sc">!</span><span class="fu">is.null</span>(advanced_results) <span class="sc">&amp;&amp;</span> <span class="sc">!</span><span class="fu">is.null</span>(advanced_results<span class="sc">$</span>velocity_decay)) {</span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a>  decay <span class="ot">&lt;-</span> advanced_results<span class="sc">$</span>velocity_decay</span>
+<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">"**Velocity Decay Results:**</span><span class="sc">\n\n</span><span class="st">"</span>)</span>
+<span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (<span class="sc">!</span><span class="fu">is.null</span>(decay<span class="sc">$</span>phase_decay)) {</span>
+<span id="cb22-5"><a href="#cb22-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">cat</span>(<span class="st">"| Set Phase | Velocity Loss (m/s per rep) |</span><span class="sc">\n</span><span class="st">"</span>)</span>
+<span id="cb22-6"><a href="#cb22-6" aria-hidden="true" tabindex="-1"></a>    <span class="fu">cat</span>(<span class="st">"|-----------|-----------------------------|</span><span class="sc">\n</span><span class="st">"</span>)</span>
+<span id="cb22-7"><a href="#cb22-7" aria-hidden="true" tabindex="-1"></a>    <span class="fu">cat</span>(<span class="fu">sprintf</span>(<span class="st">"| First half | %.4f |</span><span class="sc">\n</span><span class="st">"</span>, <span class="fu">as.numeric</span>(decay<span class="sc">$</span>phase_decay<span class="sc">$</span>first_half_decay)))</span>
+<span id="cb22-8"><a href="#cb22-8" aria-hidden="true" tabindex="-1"></a>    <span class="fu">cat</span>(<span class="fu">sprintf</span>(<span class="st">"| Second half | %.4f |</span><span class="sc">\n</span><span class="st">"</span>, <span class="fu">as.numeric</span>(decay<span class="sc">$</span>phase_decay<span class="sc">$</span>second_half_decay)))</span>
+<span id="cb22-9"><a href="#cb22-9" aria-hidden="true" tabindex="-1"></a>    <span class="fu">cat</span>(<span class="st">"</span><span class="sc">\n</span><span class="st">"</span>)</span>
+<span id="cb22-10"><a href="#cb22-10" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb22-11"><a href="#cb22-11" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (<span class="sc">!</span><span class="fu">is.null</span>(decay<span class="sc">$</span>decay_acceleration)) {</span>
+<span id="cb22-12"><a href="#cb22-12" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> (<span class="fu">isTRUE</span>(decay<span class="sc">$</span>decay_acceleration<span class="sc">$</span>accelerating)) {</span>
+<span id="cb22-13"><a href="#cb22-13" aria-hidden="true" tabindex="-1"></a>      <span class="fu">cat</span>(<span class="fu">sprintf</span>(<span class="st">"**Statistical Test:** Decay significantly accelerates near failure (p = %s)</span><span class="sc">\n\n</span><span class="st">"</span>,</span>
+<span id="cb22-14"><a href="#cb22-14" aria-hidden="true" tabindex="-1"></a>                  <span class="fu">format</span>(decay<span class="sc">$</span>decay_acceleration<span class="sc">$</span>p_value, <span class="at">digits =</span> <span class="dv">3</span>)))</span>
+<span id="cb22-15"><a href="#cb22-15" aria-hidden="true" tabindex="-1"></a>      <span class="fu">cat</span>(<span class="st">"The velocity-fatigue curve is **exponential**, not linear. This means:</span><span class="sc">\n\n</span><span class="st">"</span>)</span>
+<span id="cb22-16"><a href="#cb22-16" aria-hidden="true" tabindex="-1"></a>      <span class="fu">cat</span>(<span class="st">"1. Early reps provide less warning of impending failure</span><span class="sc">\n</span><span class="st">"</span>)</span>
+<span id="cb22-17"><a href="#cb22-17" aria-hidden="true" tabindex="-1"></a>      <span class="fu">cat</span>(<span class="st">"2. The final 2-3 reps show rapid velocity decline</span><span class="sc">\n</span><span class="st">"</span>)</span>
+<span id="cb22-18"><a href="#cb22-18" aria-hidden="true" tabindex="-1"></a>      <span class="fu">cat</span>(<span class="st">"3. Conservative velocity thresholds are advisable</span><span class="sc">\n</span><span class="st">"</span>)</span>
+<span id="cb22-19"><a href="#cb22-19" aria-hidden="true" tabindex="-1"></a>    } <span class="cf">else</span> {</span>
+<span id="cb22-20"><a href="#cb22-20" aria-hidden="true" tabindex="-1"></a>      <span class="fu">cat</span>(<span class="st">"**Statistical Test:** Decay rate is approximately constant throughout the set.</span><span class="sc">\n\n</span><span class="st">"</span>)</span>
+<span id="cb22-21"><a href="#cb22-21" aria-hidden="true" tabindex="-1"></a>      <span class="fu">cat</span>(<span class="st">"The linear model adequately describes velocity loss across reps.</span><span class="sc">\n</span><span class="st">"</span>)</span>
+<span id="cb22-22"><a href="#cb22-22" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb22-23"><a href="#cb22-23" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb22-24"><a href="#cb22-24" aria-hidden="true" tabindex="-1"></a>} <span class="cf">else</span> {</span>
+<span id="cb22-25"><a href="#cb22-25" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">"*Velocity decay analysis will be available after running the advanced analysis pipeline.*</span><span class="sc">\n</span><span class="st">"</span>)</span>
+<span id="cb22-26"><a href="#cb22-26" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <p><strong>Velocity Decay Results:</strong></p>
 <p><strong>Statistical Test:</strong> Decay significantly accelerates near failure (p = 0.035)</p>
@@ -1270,6 +1529,26 @@ Figure&nbsp;3: Distribution of Minimum Velocity Threshold at failure
 <li>The final 2-3 reps show rapid velocity decline</li>
 <li>Conservative velocity thresholds are advisable</li>
 </ol>
+<div class="cell">
+<details class="code-fold">
+<summary>Show code</summary>
+<div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (<span class="sc">!</span><span class="fu">is.null</span>(data) <span class="sc">&amp;&amp;</span> <span class="st">"set_id"</span> <span class="sc">%in%</span> <span class="fu">names</span>(data)) {</span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Calculate rep number within each set based on RIR</span></span>
+<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a>  traj_data <span class="ot">&lt;-</span> data</span>
+<span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a>  traj_data<span class="sc">$</span>rep_num <span class="ot">&lt;-</span> <span class="fu">ave</span>(traj_data<span class="sc">$</span>rir, traj_data<span class="sc">$</span>set_id, <span class="at">FUN =</span> <span class="cf">function</span>(x) <span class="fu">max</span>(x) <span class="sc">-</span> x <span class="sc">+</span> <span class="dv">1</span>)</span>
+<span id="cb23-5"><a href="#cb23-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-6"><a href="#cb23-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(traj_data, <span class="fu">aes</span>(<span class="at">x =</span> rep_num, <span class="at">y =</span> mean_velocity, <span class="at">group =</span> set_id)) <span class="sc">+</span></span>
+<span id="cb23-7"><a href="#cb23-7" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_line</span>(<span class="at">alpha =</span> <span class="fl">0.3</span>, <span class="at">color =</span> COLORS<span class="sc">$</span>primary) <span class="sc">+</span></span>
+<span id="cb23-8"><a href="#cb23-8" aria-hidden="true" tabindex="-1"></a>    <span class="fu">stat_summary</span>(<span class="fu">aes</span>(<span class="at">group =</span> <span class="dv">1</span>), <span class="at">fun =</span> mean, <span class="at">geom =</span> <span class="st">"line"</span>,</span>
+<span id="cb23-9"><a href="#cb23-9" aria-hidden="true" tabindex="-1"></a>                 <span class="at">color =</span> COLORS<span class="sc">$</span>secondary, <span class="at">linewidth =</span> <span class="fl">1.5</span>) <span class="sc">+</span></span>
+<span id="cb23-10"><a href="#cb23-10" aria-hidden="true" tabindex="-1"></a>    <span class="fu">stat_summary</span>(<span class="fu">aes</span>(<span class="at">group =</span> <span class="dv">1</span>), <span class="at">fun =</span> mean, <span class="at">geom =</span> <span class="st">"point"</span>,</span>
+<span id="cb23-11"><a href="#cb23-11" aria-hidden="true" tabindex="-1"></a>                 <span class="at">color =</span> COLORS<span class="sc">$</span>secondary, <span class="at">size =</span> <span class="dv">3</span>) <span class="sc">+</span></span>
+<span id="cb23-12"><a href="#cb23-12" aria-hidden="true" tabindex="-1"></a>    <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">"Rep Number"</span>, <span class="at">y =</span> <span class="st">"Mean Velocity (m/s)"</span>,</span>
+<span id="cb23-13"><a href="#cb23-13" aria-hidden="true" tabindex="-1"></a>         <span class="at">title =</span> <span class="st">"Velocity Trajectories Across Sets"</span>,</span>
+<span id="cb23-14"><a href="#cb23-14" aria-hidden="true" tabindex="-1"></a>         <span class="at">subtitle =</span> <span class="st">"Individual sets (blue) with population mean (red)"</span>)</span>
+<span id="cb23-15"><a href="#cb23-15" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
 <p><strong>Practical Implication</strong>: Because velocity loss accelerates near failure, athletes should use <strong>conservative stopping thresholds</strong>. If targeting RIR 2, consider stopping at the RIR 3 threshold to account for the acceleration effect.</p>
 </section>
 </section>
@@ -1300,15 +1579,15 @@ Figure&nbsp;3: Distribution of Minimum Velocity Threshold at failure
 <h4 class="anchored" data-anchor-id="the-finding-7">The Finding</h4>
 <details class="code-fold">
 <summary>Show code</summary>
-<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (<span class="sc">!</span><span class="fu">is.null</span>(advanced_results)) {</span>
-<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>  pred <span class="ot">&lt;-</span> advanced_results<span class="sc">$</span>failure_prediction</span>
-<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">"**Prediction Accuracy (Leave-One-Out CV):**</span><span class="sc">\n\n</span><span class="st">"</span>)</span>
-<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">"| Metric | Value | Interpretation |</span><span class="sc">\n</span><span class="st">"</span>)</span>
-<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">"|--------|-------|----------------|</span><span class="sc">\n</span><span class="st">"</span>)</span>
-<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="fu">sprintf</span>(<span class="st">"| MAE | %.2f reps | Average prediction error |</span><span class="sc">\n</span><span class="st">"</span>, pred<span class="sc">$</span>cv_results<span class="sc">$</span>mae))</span>
-<span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="fu">sprintf</span>(<span class="st">"| RMSE | %.2f reps | Error penalizing outliers |</span><span class="sc">\n</span><span class="st">"</span>, pred<span class="sc">$</span>cv_results<span class="sc">$</span>rmse))</span>
-<span id="cb16-8"><a href="#cb16-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="fu">sprintf</span>(<span class="st">"| R² | %.3f | Variance explained |</span><span class="sc">\n</span><span class="st">"</span>, pred<span class="sc">$</span>cv_results<span class="sc">$</span>r2))</span>
-<span id="cb16-9"><a href="#cb16-9" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb24"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (<span class="sc">!</span><span class="fu">is.null</span>(advanced_results)) {</span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a>  pred <span class="ot">&lt;-</span> advanced_results<span class="sc">$</span>failure_prediction</span>
+<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">"**Prediction Accuracy (Leave-One-Out CV):**</span><span class="sc">\n\n</span><span class="st">"</span>)</span>
+<span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">"| Metric | Value | Interpretation |</span><span class="sc">\n</span><span class="st">"</span>)</span>
+<span id="cb24-5"><a href="#cb24-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">"|--------|-------|----------------|</span><span class="sc">\n</span><span class="st">"</span>)</span>
+<span id="cb24-6"><a href="#cb24-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="fu">sprintf</span>(<span class="st">"| MAE | %.2f reps | Average prediction error |</span><span class="sc">\n</span><span class="st">"</span>, pred<span class="sc">$</span>cv_results<span class="sc">$</span>mae))</span>
+<span id="cb24-7"><a href="#cb24-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="fu">sprintf</span>(<span class="st">"| RMSE | %.2f reps | Error penalizing outliers |</span><span class="sc">\n</span><span class="st">"</span>, pred<span class="sc">$</span>cv_results<span class="sc">$</span>rmse))</span>
+<span id="cb24-8"><a href="#cb24-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="fu">sprintf</span>(<span class="st">"| R² | %.3f | Variance explained |</span><span class="sc">\n</span><span class="st">"</span>, pred<span class="sc">$</span>cv_results<span class="sc">$</span>r2))</span>
+<span id="cb24-9"><a href="#cb24-9" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <p><strong>Prediction Accuracy (Leave-One-Out CV):</strong></p>
 <table class="table">
@@ -1337,6 +1616,122 @@ Figure&nbsp;3: Distribution of Minimum Velocity Threshold at failure
 </tr>
 </tbody>
 </table>
+<div class="cell">
+<details class="code-fold">
+<summary>Show code</summary>
+<div class="sourceCode cell-code" id="cb25"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (<span class="sc">!</span><span class="fu">is.null</span>(advanced_results) <span class="sc">&amp;&amp;</span> <span class="sc">!</span><span class="fu">is.null</span>(advanced_results<span class="sc">$</span>failure_prediction<span class="sc">$</span>lookup_table)) {</span>
+<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a>  lookup <span class="ot">&lt;-</span> advanced_results<span class="sc">$</span>failure_prediction<span class="sc">$</span>lookup_table</span>
+<span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">format_table</span>(lookup, <span class="at">digits =</span> <span class="dv">1</span>,</span>
+<span id="cb25-4"><a href="#cb25-4" aria-hidden="true" tabindex="-1"></a>        <span class="at">col.names =</span> <span class="fu">c</span>(<span class="st">"First Rep Velocity (m/s)"</span>, <span class="st">"Predicted Reps"</span>, <span class="st">"Lower 95%"</span>, <span class="st">"Upper 95%"</span>))</span>
+<span id="cb25-5"><a href="#cb25-5" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div id="tbl-prediction-lookup" class="cell quarto-float anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-prediction-lookup-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;7: Practical Lookup Table: First Rep Velocity → Predicted Reps
+</figcaption>
+<div aria-describedby="tbl-prediction-lookup-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="cell-output-display">
+<table class="do-not-create-environment cell table table-sm table-striped small">
+<thead>
+<tr class="header">
+<th style="text-align: right;">First Rep Velocity (m/s)</th>
+<th style="text-align: right;">Predicted Reps</th>
+<th style="text-align: right;">Lower 95%</th>
+<th style="text-align: right;">Upper 95%</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: right;">0.1</td>
+<td style="text-align: right;">4.9</td>
+<td style="text-align: right;">1.8</td>
+<td style="text-align: right;">8.0</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">0.2</td>
+<td style="text-align: right;">5.2</td>
+<td style="text-align: right;">2.1</td>
+<td style="text-align: right;">8.3</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">0.2</td>
+<td style="text-align: right;">5.4</td>
+<td style="text-align: right;">2.4</td>
+<td style="text-align: right;">8.5</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">0.3</td>
+<td style="text-align: right;">5.7</td>
+<td style="text-align: right;">2.6</td>
+<td style="text-align: right;">8.7</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">0.3</td>
+<td style="text-align: right;">6.0</td>
+<td style="text-align: right;">2.9</td>
+<td style="text-align: right;">9.0</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">0.4</td>
+<td style="text-align: right;">6.2</td>
+<td style="text-align: right;">3.2</td>
+<td style="text-align: right;">9.3</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">0.5</td>
+<td style="text-align: right;">6.5</td>
+<td style="text-align: right;">3.4</td>
+<td style="text-align: right;">9.6</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">0.5</td>
+<td style="text-align: right;">6.8</td>
+<td style="text-align: right;">3.7</td>
+<td style="text-align: right;">9.9</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">0.6</td>
+<td style="text-align: right;">7.0</td>
+<td style="text-align: right;">3.9</td>
+<td style="text-align: right;">10.2</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</figure>
+</div>
+</div>
+<div class="cell">
+<details class="code-fold">
+<summary>Show code</summary>
+<div class="sourceCode cell-code" id="cb26"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (<span class="sc">!</span><span class="fu">is.null</span>(data)) {</span>
+<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Prepare set-level data</span></span>
+<span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a>  set_data <span class="ot">&lt;-</span> <span class="fu">do.call</span>(rbind, <span class="fu">lapply</span>(<span class="fu">unique</span>(data<span class="sc">$</span>set_id), <span class="cf">function</span>(sid) {</span>
+<span id="cb26-4"><a href="#cb26-4" aria-hidden="true" tabindex="-1"></a>    s <span class="ot">&lt;-</span> data[data<span class="sc">$</span>set_id <span class="sc">==</span> sid, ]</span>
+<span id="cb26-5"><a href="#cb26-5" aria-hidden="true" tabindex="-1"></a>    s <span class="ot">&lt;-</span> s[<span class="fu">order</span>(s<span class="sc">$</span>rep_number), ]</span>
+<span id="cb26-6"><a href="#cb26-6" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> (<span class="fu">nrow</span>(s) <span class="sc">&lt;</span> <span class="dv">1</span>) <span class="fu">return</span>(<span class="cn">NULL</span>)</span>
+<span id="cb26-7"><a href="#cb26-7" aria-hidden="true" tabindex="-1"></a>    <span class="fu">data.frame</span>(</span>
+<span id="cb26-8"><a href="#cb26-8" aria-hidden="true" tabindex="-1"></a>      <span class="at">set_id =</span> sid,</span>
+<span id="cb26-9"><a href="#cb26-9" aria-hidden="true" tabindex="-1"></a>      <span class="at">v1 =</span> s<span class="sc">$</span>mean_velocity[<span class="dv">1</span>],</span>
+<span id="cb26-10"><a href="#cb26-10" aria-hidden="true" tabindex="-1"></a>      <span class="at">reps_to_failure =</span> s<span class="sc">$</span>reps_to_failure[<span class="dv">1</span>],</span>
+<span id="cb26-11"><a href="#cb26-11" aria-hidden="true" tabindex="-1"></a>      <span class="at">load_percentage =</span> s<span class="sc">$</span>load_percentage[<span class="dv">1</span>]</span>
+<span id="cb26-12"><a href="#cb26-12" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb26-13"><a href="#cb26-13" aria-hidden="true" tabindex="-1"></a>  }))</span>
+<span id="cb26-14"><a href="#cb26-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-15"><a href="#cb26-15" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (<span class="sc">!</span><span class="fu">is.null</span>(set_data) <span class="sc">&amp;&amp;</span> <span class="fu">nrow</span>(set_data) <span class="sc">&gt;</span> <span class="dv">0</span>) {</span>
+<span id="cb26-16"><a href="#cb26-16" aria-hidden="true" tabindex="-1"></a>    <span class="fu">ggplot</span>(set_data, <span class="fu">aes</span>(<span class="at">x =</span> v1, <span class="at">y =</span> reps_to_failure, <span class="at">color =</span> load_percentage)) <span class="sc">+</span></span>
+<span id="cb26-17"><a href="#cb26-17" aria-hidden="true" tabindex="-1"></a>      <span class="fu">geom_point</span>(<span class="at">size =</span> <span class="dv">3</span>, <span class="at">alpha =</span> <span class="fl">0.7</span>) <span class="sc">+</span></span>
+<span id="cb26-18"><a href="#cb26-18" aria-hidden="true" tabindex="-1"></a>      <span class="fu">geom_smooth</span>(<span class="at">method =</span> <span class="st">"lm"</span>, <span class="at">se =</span> <span class="cn">TRUE</span>, <span class="fu">aes</span>(<span class="at">group =</span> <span class="dv">1</span>), <span class="at">color =</span> <span class="st">"black"</span>) <span class="sc">+</span></span>
+<span id="cb26-19"><a href="#cb26-19" aria-hidden="true" tabindex="-1"></a>      <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">"First Rep Velocity (m/s)"</span>, <span class="at">y =</span> <span class="st">"Total Reps to Failure"</span>,</span>
+<span id="cb26-20"><a href="#cb26-20" aria-hidden="true" tabindex="-1"></a>           <span class="at">title =</span> <span class="st">"Relationship Between First Rep Velocity and Set Capacity"</span>,</span>
+<span id="cb26-21"><a href="#cb26-21" aria-hidden="true" tabindex="-1"></a>           <span class="at">color =</span> <span class="st">"Load"</span>) <span class="sc">+</span></span>
+<span id="cb26-22"><a href="#cb26-22" aria-hidden="true" tabindex="-1"></a>      <span class="fu">scale_color_load</span>()</span>
+<span id="cb26-23"><a href="#cb26-23" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb26-24"><a href="#cb26-24" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
 <p><strong>Interpretation</strong>: A MAE of ~1-2 reps means that on average, first-rep velocity predicts failure within 1-2 repetitions. This is practically useful for autoregulation—if the model predicts 6 reps to failure, expect 5-7 reps.</p>
 <p><strong>Practical Application</strong>: After the first rep, check velocity against the prediction table. If velocity is unusually low (predicting fewer reps than planned), consider reducing set volume. If unusually high, you may have more capacity than expected.</p>
 <hr>
@@ -1378,32 +1773,32 @@ Figure&nbsp;3: Distribution of Minimum Velocity Threshold at failure
 <h4 class="anchored" data-anchor-id="the-finding-8">The Finding</h4>
 <details class="code-fold">
 <summary>Show code</summary>
-<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (<span class="sc">!</span><span class="fu">is.null</span>(lmm_results) <span class="sc">&amp;&amp;</span> <span class="sc">!</span><span class="fu">is.null</span>(lmm_results<span class="sc">$</span>model_comparison)) {</span>
-<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>  mc <span class="ot">&lt;-</span> lmm_results<span class="sc">$</span>model_comparison</span>
-<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">"**Model Comparison Results:**</span><span class="sc">\n\n</span><span class="st">"</span>)</span>
-<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">"| Model | AIC | BIC | R²m | R²c |</span><span class="sc">\n</span><span class="st">"</span>)</span>
-<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">"|-------|-----|-----|-----|-----|</span><span class="sc">\n</span><span class="st">"</span>)</span>
-<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (<span class="sc">!</span><span class="fu">is.null</span>(mc<span class="sc">$</span>intercept_only)) {</span>
-<span id="cb17-7"><a href="#cb17-7" aria-hidden="true" tabindex="-1"></a>    <span class="fu">cat</span>(<span class="fu">sprintf</span>(<span class="st">"| Random Intercept | %.1f | %.1f | %.3f | %.3f |</span><span class="sc">\n</span><span class="st">"</span>,</span>
-<span id="cb17-8"><a href="#cb17-8" aria-hidden="true" tabindex="-1"></a>                mc<span class="sc">$</span>intercept_only<span class="sc">$</span>AIC, mc<span class="sc">$</span>intercept_only<span class="sc">$</span>BIC,</span>
-<span id="cb17-9"><a href="#cb17-9" aria-hidden="true" tabindex="-1"></a>                mc<span class="sc">$</span>intercept_only<span class="sc">$</span>R2m, mc<span class="sc">$</span>intercept_only<span class="sc">$</span>R2c))</span>
-<span id="cb17-10"><a href="#cb17-10" aria-hidden="true" tabindex="-1"></a>  }</span>
-<span id="cb17-11"><a href="#cb17-11" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (<span class="sc">!</span><span class="fu">is.null</span>(mc<span class="sc">$</span>intercept_slope)) {</span>
-<span id="cb17-12"><a href="#cb17-12" aria-hidden="true" tabindex="-1"></a>    <span class="fu">cat</span>(<span class="fu">sprintf</span>(<span class="st">"| Random Intercept + Slope | %.1f | %.1f | %.3f | %.3f |</span><span class="sc">\n</span><span class="st">"</span>,</span>
-<span id="cb17-13"><a href="#cb17-13" aria-hidden="true" tabindex="-1"></a>                mc<span class="sc">$</span>intercept_slope<span class="sc">$</span>AIC, mc<span class="sc">$</span>intercept_slope<span class="sc">$</span>BIC,</span>
-<span id="cb17-14"><a href="#cb17-14" aria-hidden="true" tabindex="-1"></a>                mc<span class="sc">$</span>intercept_slope<span class="sc">$</span>R2m, mc<span class="sc">$</span>intercept_slope<span class="sc">$</span>R2c))</span>
-<span id="cb17-15"><a href="#cb17-15" aria-hidden="true" tabindex="-1"></a>  }</span>
-<span id="cb17-16"><a href="#cb17-16" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (<span class="sc">!</span><span class="fu">is.null</span>(mc<span class="sc">$</span>lrt)) {</span>
-<span id="cb17-17"><a href="#cb17-17" aria-hidden="true" tabindex="-1"></a>    <span class="fu">cat</span>(<span class="fu">sprintf</span>(<span class="st">"</span><span class="sc">\n</span><span class="st">**Likelihood Ratio Test:** χ² = %.2f, df = %d, p = %s</span><span class="sc">\n</span><span class="st">"</span>,</span>
-<span id="cb17-18"><a href="#cb17-18" aria-hidden="true" tabindex="-1"></a>                mc<span class="sc">$</span>lrt<span class="sc">$</span>statistic, mc<span class="sc">$</span>lrt<span class="sc">$</span>df, <span class="fu">format_p</span>(mc<span class="sc">$</span>lrt<span class="sc">$</span>p_value)))</span>
-<span id="cb17-19"><a href="#cb17-19" aria-hidden="true" tabindex="-1"></a>  }</span>
-<span id="cb17-20"><a href="#cb17-20" aria-hidden="true" tabindex="-1"></a>} <span class="cf">else</span> {</span>
-<span id="cb17-21"><a href="#cb17-21" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">"*Model comparison results will be available after running the full analysis pipeline.*</span><span class="sc">\n\n</span><span class="st">"</span>)</span>
-<span id="cb17-22"><a href="#cb17-22" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">"**Expected output:**</span><span class="sc">\n\n</span><span class="st">"</span>)</span>
-<span id="cb17-23"><a href="#cb17-23" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">"- Comparison of random intercept vs random slope models</span><span class="sc">\n</span><span class="st">"</span>)</span>
-<span id="cb17-24"><a href="#cb17-24" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">"- AIC/BIC for model selection</span><span class="sc">\n</span><span class="st">"</span>)</span>
-<span id="cb17-25"><a href="#cb17-25" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">"- Marginal and conditional R² values</span><span class="sc">\n</span><span class="st">"</span>)</span>
-<span id="cb17-26"><a href="#cb17-26" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb27"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (<span class="sc">!</span><span class="fu">is.null</span>(lmm_results) <span class="sc">&amp;&amp;</span> <span class="sc">!</span><span class="fu">is.null</span>(lmm_results<span class="sc">$</span>model_comparison)) {</span>
+<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a>  mc <span class="ot">&lt;-</span> lmm_results<span class="sc">$</span>model_comparison</span>
+<span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">"**Model Comparison Results:**</span><span class="sc">\n\n</span><span class="st">"</span>)</span>
+<span id="cb27-4"><a href="#cb27-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">"| Model | AIC | BIC | R²m | R²c |</span><span class="sc">\n</span><span class="st">"</span>)</span>
+<span id="cb27-5"><a href="#cb27-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">"|-------|-----|-----|-----|-----|</span><span class="sc">\n</span><span class="st">"</span>)</span>
+<span id="cb27-6"><a href="#cb27-6" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (<span class="sc">!</span><span class="fu">is.null</span>(mc<span class="sc">$</span>intercept_only)) {</span>
+<span id="cb27-7"><a href="#cb27-7" aria-hidden="true" tabindex="-1"></a>    <span class="fu">cat</span>(<span class="fu">sprintf</span>(<span class="st">"| Random Intercept | %.1f | %.1f | %.3f | %.3f |</span><span class="sc">\n</span><span class="st">"</span>,</span>
+<span id="cb27-8"><a href="#cb27-8" aria-hidden="true" tabindex="-1"></a>                mc<span class="sc">$</span>intercept_only<span class="sc">$</span>AIC, mc<span class="sc">$</span>intercept_only<span class="sc">$</span>BIC,</span>
+<span id="cb27-9"><a href="#cb27-9" aria-hidden="true" tabindex="-1"></a>                mc<span class="sc">$</span>intercept_only<span class="sc">$</span>R2m, mc<span class="sc">$</span>intercept_only<span class="sc">$</span>R2c))</span>
+<span id="cb27-10"><a href="#cb27-10" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb27-11"><a href="#cb27-11" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (<span class="sc">!</span><span class="fu">is.null</span>(mc<span class="sc">$</span>intercept_slope)) {</span>
+<span id="cb27-12"><a href="#cb27-12" aria-hidden="true" tabindex="-1"></a>    <span class="fu">cat</span>(<span class="fu">sprintf</span>(<span class="st">"| Random Intercept + Slope | %.1f | %.1f | %.3f | %.3f |</span><span class="sc">\n</span><span class="st">"</span>,</span>
+<span id="cb27-13"><a href="#cb27-13" aria-hidden="true" tabindex="-1"></a>                mc<span class="sc">$</span>intercept_slope<span class="sc">$</span>AIC, mc<span class="sc">$</span>intercept_slope<span class="sc">$</span>BIC,</span>
+<span id="cb27-14"><a href="#cb27-14" aria-hidden="true" tabindex="-1"></a>                mc<span class="sc">$</span>intercept_slope<span class="sc">$</span>R2m, mc<span class="sc">$</span>intercept_slope<span class="sc">$</span>R2c))</span>
+<span id="cb27-15"><a href="#cb27-15" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb27-16"><a href="#cb27-16" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (<span class="sc">!</span><span class="fu">is.null</span>(mc<span class="sc">$</span>lrt)) {</span>
+<span id="cb27-17"><a href="#cb27-17" aria-hidden="true" tabindex="-1"></a>    <span class="fu">cat</span>(<span class="fu">sprintf</span>(<span class="st">"</span><span class="sc">\n</span><span class="st">**Likelihood Ratio Test:** χ² = %.2f, df = %d, p = %s</span><span class="sc">\n</span><span class="st">"</span>,</span>
+<span id="cb27-18"><a href="#cb27-18" aria-hidden="true" tabindex="-1"></a>                mc<span class="sc">$</span>lrt<span class="sc">$</span>statistic, mc<span class="sc">$</span>lrt<span class="sc">$</span>df, <span class="fu">format_p</span>(mc<span class="sc">$</span>lrt<span class="sc">$</span>p_value)))</span>
+<span id="cb27-19"><a href="#cb27-19" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb27-20"><a href="#cb27-20" aria-hidden="true" tabindex="-1"></a>} <span class="cf">else</span> {</span>
+<span id="cb27-21"><a href="#cb27-21" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">"*Model comparison results will be available after running the full analysis pipeline.*</span><span class="sc">\n\n</span><span class="st">"</span>)</span>
+<span id="cb27-22"><a href="#cb27-22" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">"**Expected output:**</span><span class="sc">\n\n</span><span class="st">"</span>)</span>
+<span id="cb27-23"><a href="#cb27-23" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">"- Comparison of random intercept vs random slope models</span><span class="sc">\n</span><span class="st">"</span>)</span>
+<span id="cb27-24"><a href="#cb27-24" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">"- AIC/BIC for model selection</span><span class="sc">\n</span><span class="st">"</span>)</span>
+<span id="cb27-25"><a href="#cb27-25" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">"- Marginal and conditional R² values</span><span class="sc">\n</span><span class="st">"</span>)</span>
+<span id="cb27-26"><a href="#cb27-26" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <p><strong>Model Comparison Results:</strong></p>
 <table>
@@ -1439,53 +1834,53 @@ Figure&nbsp;3: Distribution of Minimum Velocity Threshold at failure
 <p>We identified potentially influential data points using: - Cook’s distance (threshold: 4/n) - Leverage (threshold: 2p/n) - DFBETAS (threshold: 2/√n)</p>
 <details class="code-fold">
 <summary>Show code</summary>
-<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (<span class="sc">!</span><span class="fu">is.null</span>(lmm_results) <span class="sc">&amp;&amp;</span> <span class="sc">!</span><span class="fu">is.null</span>(lmm_results<span class="sc">$</span>robustness)) {</span>
-<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>  rob <span class="ot">&lt;-</span> lmm_results<span class="sc">$</span>robustness</span>
-<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">"**Robustness Check Results:**</span><span class="sc">\n\n</span><span class="st">"</span>)</span>
-<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb18-6"><a href="#cb18-6" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Heteroscedasticity</span></span>
-<span id="cb18-7"><a href="#cb18-7" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (<span class="sc">!</span><span class="fu">is.null</span>(rob<span class="sc">$</span>heteroscedasticity)) {</span>
-<span id="cb18-8"><a href="#cb18-8" aria-hidden="true" tabindex="-1"></a>    <span class="fu">cat</span>(<span class="st">"**Heteroscedasticity (Breusch-Pagan):**</span><span class="sc">\n</span><span class="st">"</span>)</span>
-<span id="cb18-9"><a href="#cb18-9" aria-hidden="true" tabindex="-1"></a>    <span class="fu">cat</span>(<span class="fu">sprintf</span>(<span class="st">"- Test statistic: %.2f, p = %s</span><span class="sc">\n</span><span class="st">"</span>,</span>
-<span id="cb18-10"><a href="#cb18-10" aria-hidden="true" tabindex="-1"></a>                rob<span class="sc">$</span>heteroscedasticity<span class="sc">$</span>statistic,</span>
-<span id="cb18-11"><a href="#cb18-11" aria-hidden="true" tabindex="-1"></a>                <span class="fu">format_p</span>(rob<span class="sc">$</span>heteroscedasticity<span class="sc">$</span>p_value)))</span>
-<span id="cb18-12"><a href="#cb18-12" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> (rob<span class="sc">$</span>heteroscedasticity<span class="sc">$</span>p_value <span class="sc">&gt;</span> <span class="fl">0.05</span>) {</span>
-<span id="cb18-13"><a href="#cb18-13" aria-hidden="true" tabindex="-1"></a>      <span class="fu">cat</span>(<span class="st">"- ✓ No significant heteroscedasticity detected</span><span class="sc">\n\n</span><span class="st">"</span>)</span>
-<span id="cb18-14"><a href="#cb18-14" aria-hidden="true" tabindex="-1"></a>    } <span class="cf">else</span> {</span>
-<span id="cb18-15"><a href="#cb18-15" aria-hidden="true" tabindex="-1"></a>      <span class="fu">cat</span>(<span class="st">"- ⚠ Potential heteroscedasticity; consider robust standard errors</span><span class="sc">\n\n</span><span class="st">"</span>)</span>
-<span id="cb18-16"><a href="#cb18-16" aria-hidden="true" tabindex="-1"></a>    }</span>
-<span id="cb18-17"><a href="#cb18-17" aria-hidden="true" tabindex="-1"></a>  }</span>
-<span id="cb18-18"><a href="#cb18-18" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb18-19"><a href="#cb18-19" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Normality</span></span>
-<span id="cb18-20"><a href="#cb18-20" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (<span class="sc">!</span><span class="fu">is.null</span>(rob<span class="sc">$</span>normality)) {</span>
-<span id="cb18-21"><a href="#cb18-21" aria-hidden="true" tabindex="-1"></a>    <span class="fu">cat</span>(<span class="st">"**Normality of Random Effects (Shapiro-Wilk):**</span><span class="sc">\n</span><span class="st">"</span>)</span>
-<span id="cb18-22"><a href="#cb18-22" aria-hidden="true" tabindex="-1"></a>    <span class="fu">cat</span>(<span class="fu">sprintf</span>(<span class="st">"- Intercepts: W = %.3f, p = %s</span><span class="sc">\n</span><span class="st">"</span>,</span>
-<span id="cb18-23"><a href="#cb18-23" aria-hidden="true" tabindex="-1"></a>                rob<span class="sc">$</span>normality<span class="sc">$</span>intercepts<span class="sc">$</span>statistic,</span>
-<span id="cb18-24"><a href="#cb18-24" aria-hidden="true" tabindex="-1"></a>                <span class="fu">format_p</span>(rob<span class="sc">$</span>normality<span class="sc">$</span>intercepts<span class="sc">$</span>p_value)))</span>
-<span id="cb18-25"><a href="#cb18-25" aria-hidden="true" tabindex="-1"></a>    <span class="fu">cat</span>(<span class="fu">sprintf</span>(<span class="st">"- Slopes: W = %.3f, p = %s</span><span class="sc">\n</span><span class="st">"</span>,</span>
-<span id="cb18-26"><a href="#cb18-26" aria-hidden="true" tabindex="-1"></a>                rob<span class="sc">$</span>normality<span class="sc">$</span>slopes<span class="sc">$</span>statistic,</span>
-<span id="cb18-27"><a href="#cb18-27" aria-hidden="true" tabindex="-1"></a>                <span class="fu">format_p</span>(rob<span class="sc">$</span>normality<span class="sc">$</span>slopes<span class="sc">$</span>p_value)))</span>
-<span id="cb18-28"><a href="#cb18-28" aria-hidden="true" tabindex="-1"></a>    <span class="fu">cat</span>(<span class="st">"</span><span class="sc">\n</span><span class="st">"</span>)</span>
-<span id="cb18-29"><a href="#cb18-29" aria-hidden="true" tabindex="-1"></a>  }</span>
-<span id="cb18-30"><a href="#cb18-30" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb18-31"><a href="#cb18-31" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Influential observations</span></span>
-<span id="cb18-32"><a href="#cb18-32" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (<span class="sc">!</span><span class="fu">is.null</span>(rob<span class="sc">$</span>influential)) {</span>
-<span id="cb18-33"><a href="#cb18-33" aria-hidden="true" tabindex="-1"></a>    <span class="fu">cat</span>(<span class="st">"**Influential Observations:**</span><span class="sc">\n</span><span class="st">"</span>)</span>
-<span id="cb18-34"><a href="#cb18-34" aria-hidden="true" tabindex="-1"></a>    <span class="fu">cat</span>(<span class="fu">sprintf</span>(<span class="st">"- High Cook's D (&gt;%.3f): %d observations</span><span class="sc">\n</span><span class="st">"</span>,</span>
-<span id="cb18-35"><a href="#cb18-35" aria-hidden="true" tabindex="-1"></a>                rob<span class="sc">$</span>influential<span class="sc">$</span>cooks_threshold,</span>
-<span id="cb18-36"><a href="#cb18-36" aria-hidden="true" tabindex="-1"></a>                rob<span class="sc">$</span>influential<span class="sc">$</span>n_high_cooks))</span>
-<span id="cb18-37"><a href="#cb18-37" aria-hidden="true" tabindex="-1"></a>    <span class="fu">cat</span>(<span class="fu">sprintf</span>(<span class="st">"- High leverage: %d observations</span><span class="sc">\n</span><span class="st">"</span>,</span>
-<span id="cb18-38"><a href="#cb18-38" aria-hidden="true" tabindex="-1"></a>                rob<span class="sc">$</span>influential<span class="sc">$</span>n_high_leverage))</span>
-<span id="cb18-39"><a href="#cb18-39" aria-hidden="true" tabindex="-1"></a>    <span class="fu">cat</span>(<span class="st">"</span><span class="sc">\n</span><span class="st">"</span>)</span>
-<span id="cb18-40"><a href="#cb18-40" aria-hidden="true" tabindex="-1"></a>  }</span>
-<span id="cb18-41"><a href="#cb18-41" aria-hidden="true" tabindex="-1"></a>} <span class="cf">else</span> {</span>
-<span id="cb18-42"><a href="#cb18-42" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">"*Robustness checks will be available after running the full analysis pipeline.*</span><span class="sc">\n\n</span><span class="st">"</span>)</span>
-<span id="cb18-43"><a href="#cb18-43" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">"**Planned checks:**</span><span class="sc">\n\n</span><span class="st">"</span>)</span>
-<span id="cb18-44"><a href="#cb18-44" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">"1. Heteroscedasticity (Breusch-Pagan test)</span><span class="sc">\n</span><span class="st">"</span>)</span>
-<span id="cb18-45"><a href="#cb18-45" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">"2. Normality of random effects (Shapiro-Wilk)</span><span class="sc">\n</span><span class="st">"</span>)</span>
-<span id="cb18-46"><a href="#cb18-46" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">"3. Influential observations (Cook's D, leverage)</span><span class="sc">\n</span><span class="st">"</span>)</span>
-<span id="cb18-47"><a href="#cb18-47" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb28"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (<span class="sc">!</span><span class="fu">is.null</span>(lmm_results) <span class="sc">&amp;&amp;</span> <span class="sc">!</span><span class="fu">is.null</span>(lmm_results<span class="sc">$</span>robustness)) {</span>
+<span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a>  rob <span class="ot">&lt;-</span> lmm_results<span class="sc">$</span>robustness</span>
+<span id="cb28-3"><a href="#cb28-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb28-4"><a href="#cb28-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">"**Robustness Check Results:**</span><span class="sc">\n\n</span><span class="st">"</span>)</span>
+<span id="cb28-5"><a href="#cb28-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb28-6"><a href="#cb28-6" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Heteroscedasticity</span></span>
+<span id="cb28-7"><a href="#cb28-7" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (<span class="sc">!</span><span class="fu">is.null</span>(rob<span class="sc">$</span>heteroscedasticity)) {</span>
+<span id="cb28-8"><a href="#cb28-8" aria-hidden="true" tabindex="-1"></a>    <span class="fu">cat</span>(<span class="st">"**Heteroscedasticity (Breusch-Pagan):**</span><span class="sc">\n</span><span class="st">"</span>)</span>
+<span id="cb28-9"><a href="#cb28-9" aria-hidden="true" tabindex="-1"></a>    <span class="fu">cat</span>(<span class="fu">sprintf</span>(<span class="st">"- Test statistic: %.2f, p = %s</span><span class="sc">\n</span><span class="st">"</span>,</span>
+<span id="cb28-10"><a href="#cb28-10" aria-hidden="true" tabindex="-1"></a>                rob<span class="sc">$</span>heteroscedasticity<span class="sc">$</span>statistic,</span>
+<span id="cb28-11"><a href="#cb28-11" aria-hidden="true" tabindex="-1"></a>                <span class="fu">format_p</span>(rob<span class="sc">$</span>heteroscedasticity<span class="sc">$</span>p_value)))</span>
+<span id="cb28-12"><a href="#cb28-12" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> (rob<span class="sc">$</span>heteroscedasticity<span class="sc">$</span>p_value <span class="sc">&gt;</span> <span class="fl">0.05</span>) {</span>
+<span id="cb28-13"><a href="#cb28-13" aria-hidden="true" tabindex="-1"></a>      <span class="fu">cat</span>(<span class="st">"- ✓ No significant heteroscedasticity detected</span><span class="sc">\n\n</span><span class="st">"</span>)</span>
+<span id="cb28-14"><a href="#cb28-14" aria-hidden="true" tabindex="-1"></a>    } <span class="cf">else</span> {</span>
+<span id="cb28-15"><a href="#cb28-15" aria-hidden="true" tabindex="-1"></a>      <span class="fu">cat</span>(<span class="st">"- ⚠ Potential heteroscedasticity; consider robust standard errors</span><span class="sc">\n\n</span><span class="st">"</span>)</span>
+<span id="cb28-16"><a href="#cb28-16" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb28-17"><a href="#cb28-17" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb28-18"><a href="#cb28-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb28-19"><a href="#cb28-19" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Normality</span></span>
+<span id="cb28-20"><a href="#cb28-20" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (<span class="sc">!</span><span class="fu">is.null</span>(rob<span class="sc">$</span>normality)) {</span>
+<span id="cb28-21"><a href="#cb28-21" aria-hidden="true" tabindex="-1"></a>    <span class="fu">cat</span>(<span class="st">"**Normality of Random Effects (Shapiro-Wilk):**</span><span class="sc">\n</span><span class="st">"</span>)</span>
+<span id="cb28-22"><a href="#cb28-22" aria-hidden="true" tabindex="-1"></a>    <span class="fu">cat</span>(<span class="fu">sprintf</span>(<span class="st">"- Intercepts: W = %.3f, p = %s</span><span class="sc">\n</span><span class="st">"</span>,</span>
+<span id="cb28-23"><a href="#cb28-23" aria-hidden="true" tabindex="-1"></a>                rob<span class="sc">$</span>normality<span class="sc">$</span>intercepts<span class="sc">$</span>statistic,</span>
+<span id="cb28-24"><a href="#cb28-24" aria-hidden="true" tabindex="-1"></a>                <span class="fu">format_p</span>(rob<span class="sc">$</span>normality<span class="sc">$</span>intercepts<span class="sc">$</span>p_value)))</span>
+<span id="cb28-25"><a href="#cb28-25" aria-hidden="true" tabindex="-1"></a>    <span class="fu">cat</span>(<span class="fu">sprintf</span>(<span class="st">"- Slopes: W = %.3f, p = %s</span><span class="sc">\n</span><span class="st">"</span>,</span>
+<span id="cb28-26"><a href="#cb28-26" aria-hidden="true" tabindex="-1"></a>                rob<span class="sc">$</span>normality<span class="sc">$</span>slopes<span class="sc">$</span>statistic,</span>
+<span id="cb28-27"><a href="#cb28-27" aria-hidden="true" tabindex="-1"></a>                <span class="fu">format_p</span>(rob<span class="sc">$</span>normality<span class="sc">$</span>slopes<span class="sc">$</span>p_value)))</span>
+<span id="cb28-28"><a href="#cb28-28" aria-hidden="true" tabindex="-1"></a>    <span class="fu">cat</span>(<span class="st">"</span><span class="sc">\n</span><span class="st">"</span>)</span>
+<span id="cb28-29"><a href="#cb28-29" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb28-30"><a href="#cb28-30" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb28-31"><a href="#cb28-31" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Influential observations</span></span>
+<span id="cb28-32"><a href="#cb28-32" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (<span class="sc">!</span><span class="fu">is.null</span>(rob<span class="sc">$</span>influential)) {</span>
+<span id="cb28-33"><a href="#cb28-33" aria-hidden="true" tabindex="-1"></a>    <span class="fu">cat</span>(<span class="st">"**Influential Observations:**</span><span class="sc">\n</span><span class="st">"</span>)</span>
+<span id="cb28-34"><a href="#cb28-34" aria-hidden="true" tabindex="-1"></a>    <span class="fu">cat</span>(<span class="fu">sprintf</span>(<span class="st">"- High Cook's D (&gt;%.3f): %d observations</span><span class="sc">\n</span><span class="st">"</span>,</span>
+<span id="cb28-35"><a href="#cb28-35" aria-hidden="true" tabindex="-1"></a>                rob<span class="sc">$</span>influential<span class="sc">$</span>cooks_threshold,</span>
+<span id="cb28-36"><a href="#cb28-36" aria-hidden="true" tabindex="-1"></a>                rob<span class="sc">$</span>influential<span class="sc">$</span>n_high_cooks))</span>
+<span id="cb28-37"><a href="#cb28-37" aria-hidden="true" tabindex="-1"></a>    <span class="fu">cat</span>(<span class="fu">sprintf</span>(<span class="st">"- High leverage: %d observations</span><span class="sc">\n</span><span class="st">"</span>,</span>
+<span id="cb28-38"><a href="#cb28-38" aria-hidden="true" tabindex="-1"></a>                rob<span class="sc">$</span>influential<span class="sc">$</span>n_high_leverage))</span>
+<span id="cb28-39"><a href="#cb28-39" aria-hidden="true" tabindex="-1"></a>    <span class="fu">cat</span>(<span class="st">"</span><span class="sc">\n</span><span class="st">"</span>)</span>
+<span id="cb28-40"><a href="#cb28-40" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb28-41"><a href="#cb28-41" aria-hidden="true" tabindex="-1"></a>} <span class="cf">else</span> {</span>
+<span id="cb28-42"><a href="#cb28-42" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">"*Robustness checks will be available after running the full analysis pipeline.*</span><span class="sc">\n\n</span><span class="st">"</span>)</span>
+<span id="cb28-43"><a href="#cb28-43" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">"**Planned checks:**</span><span class="sc">\n\n</span><span class="st">"</span>)</span>
+<span id="cb28-44"><a href="#cb28-44" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">"1. Heteroscedasticity (Breusch-Pagan test)</span><span class="sc">\n</span><span class="st">"</span>)</span>
+<span id="cb28-45"><a href="#cb28-45" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">"2. Normality of random effects (Shapiro-Wilk)</span><span class="sc">\n</span><span class="st">"</span>)</span>
+<span id="cb28-46"><a href="#cb28-46" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">"3. Influential observations (Cook's D, leverage)</span><span class="sc">\n</span><span class="st">"</span>)</span>
+<span id="cb28-47"><a href="#cb28-47" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <p><em>Robustness checks will be available after running the full analysis pipeline.</em></p>
 <p><strong>Planned checks:</strong></p>
@@ -1514,41 +1909,41 @@ Figure&nbsp;3: Distribution of Minimum Velocity Threshold at failure
 <p>We examined whether the velocity-RIR relationship differs by: - Sex (male vs female) - Experience level (if available) - Load percentage (80% vs 90% separately)</p>
 <details class="code-fold">
 <summary>Show code</summary>
-<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (<span class="sc">!</span><span class="fu">is.null</span>(lmm_results) <span class="sc">&amp;&amp;</span> <span class="sc">!</span><span class="fu">is.null</span>(lmm_results<span class="sc">$</span>sensitivity)) {</span>
-<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>  sens <span class="ot">&lt;-</span> lmm_results<span class="sc">$</span>sensitivity</span>
-<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">"**Sensitivity Analysis Results:**</span><span class="sc">\n\n</span><span class="st">"</span>)</span>
-<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb19-6"><a href="#cb19-6" aria-hidden="true" tabindex="-1"></a>  <span class="co"># LOPO analysis</span></span>
-<span id="cb19-7"><a href="#cb19-7" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (<span class="sc">!</span><span class="fu">is.null</span>(sens<span class="sc">$</span>lopo)) {</span>
-<span id="cb19-8"><a href="#cb19-8" aria-hidden="true" tabindex="-1"></a>    <span class="fu">cat</span>(<span class="st">"**Leave-One-Participant-Out Analysis:**</span><span class="sc">\n\n</span><span class="st">"</span>)</span>
-<span id="cb19-9"><a href="#cb19-9" aria-hidden="true" tabindex="-1"></a>    <span class="fu">cat</span>(<span class="st">"| Statistic | Full Model | LOPO Mean | LOPO Range |</span><span class="sc">\n</span><span class="st">"</span>)</span>
-<span id="cb19-10"><a href="#cb19-10" aria-hidden="true" tabindex="-1"></a>    <span class="fu">cat</span>(<span class="st">"|-----------|------------|-----------|------------|</span><span class="sc">\n</span><span class="st">"</span>)</span>
-<span id="cb19-11"><a href="#cb19-11" aria-hidden="true" tabindex="-1"></a>    <span class="fu">cat</span>(<span class="fu">sprintf</span>(<span class="st">"| RIR coefficient | %.4f | %.4f | [%.4f, %.4f] |</span><span class="sc">\n</span><span class="st">"</span>,</span>
-<span id="cb19-12"><a href="#cb19-12" aria-hidden="true" tabindex="-1"></a>                sens<span class="sc">$</span>lopo<span class="sc">$</span>full_estimate,</span>
-<span id="cb19-13"><a href="#cb19-13" aria-hidden="true" tabindex="-1"></a>                sens<span class="sc">$</span>lopo<span class="sc">$</span>mean_estimate,</span>
-<span id="cb19-14"><a href="#cb19-14" aria-hidden="true" tabindex="-1"></a>                sens<span class="sc">$</span>lopo<span class="sc">$</span>min_estimate,</span>
-<span id="cb19-15"><a href="#cb19-15" aria-hidden="true" tabindex="-1"></a>                sens<span class="sc">$</span>lopo<span class="sc">$</span>max_estimate))</span>
-<span id="cb19-16"><a href="#cb19-16" aria-hidden="true" tabindex="-1"></a>    <span class="fu">cat</span>(<span class="fu">sprintf</span>(<span class="st">"</span><span class="sc">\n</span><span class="st">**CV of estimates:** %.1f%% (values &lt;10%% indicate robust results)</span><span class="sc">\n\n</span><span class="st">"</span>,</span>
-<span id="cb19-17"><a href="#cb19-17" aria-hidden="true" tabindex="-1"></a>                sens<span class="sc">$</span>lopo<span class="sc">$</span>cv_percent))</span>
-<span id="cb19-18"><a href="#cb19-18" aria-hidden="true" tabindex="-1"></a>  }</span>
-<span id="cb19-19"><a href="#cb19-19" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb19-20"><a href="#cb19-20" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Subgroup analysis</span></span>
-<span id="cb19-21"><a href="#cb19-21" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (<span class="sc">!</span><span class="fu">is.null</span>(sens<span class="sc">$</span>subgroups)) {</span>
-<span id="cb19-22"><a href="#cb19-22" aria-hidden="true" tabindex="-1"></a>    <span class="fu">cat</span>(<span class="st">"**Subgroup Analysis (if applicable):**</span><span class="sc">\n\n</span><span class="st">"</span>)</span>
-<span id="cb19-23"><a href="#cb19-23" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> (group_name <span class="cf">in</span> <span class="fu">names</span>(sens<span class="sc">$</span>subgroups)) {</span>
-<span id="cb19-24"><a href="#cb19-24" aria-hidden="true" tabindex="-1"></a>      group <span class="ot">&lt;-</span> sens<span class="sc">$</span>subgroups[[group_name]]</span>
-<span id="cb19-25"><a href="#cb19-25" aria-hidden="true" tabindex="-1"></a>      <span class="fu">cat</span>(<span class="fu">sprintf</span>(<span class="st">"- %s: coefficient = %.4f [%.4f, %.4f]</span><span class="sc">\n</span><span class="st">"</span>,</span>
-<span id="cb19-26"><a href="#cb19-26" aria-hidden="true" tabindex="-1"></a>                  group_name, group<span class="sc">$</span>estimate, group<span class="sc">$</span>ci_lower, group<span class="sc">$</span>ci_upper))</span>
-<span id="cb19-27"><a href="#cb19-27" aria-hidden="true" tabindex="-1"></a>    }</span>
-<span id="cb19-28"><a href="#cb19-28" aria-hidden="true" tabindex="-1"></a>  }</span>
-<span id="cb19-29"><a href="#cb19-29" aria-hidden="true" tabindex="-1"></a>} <span class="cf">else</span> {</span>
-<span id="cb19-30"><a href="#cb19-30" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">"*Sensitivity analysis will be available after running the full analysis pipeline.*</span><span class="sc">\n\n</span><span class="st">"</span>)</span>
-<span id="cb19-31"><a href="#cb19-31" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">"**Planned analyses:**</span><span class="sc">\n\n</span><span class="st">"</span>)</span>
-<span id="cb19-32"><a href="#cb19-32" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">"1. Leave-one-participant-out analysis</span><span class="sc">\n</span><span class="st">"</span>)</span>
-<span id="cb19-33"><a href="#cb19-33" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">"2. Subgroup comparisons (sex, load percentage)</span><span class="sc">\n</span><span class="st">"</span>)</span>
-<span id="cb19-34"><a href="#cb19-34" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">"3. Coefficient stability assessment</span><span class="sc">\n</span><span class="st">"</span>)</span>
-<span id="cb19-35"><a href="#cb19-35" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb29"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (<span class="sc">!</span><span class="fu">is.null</span>(lmm_results) <span class="sc">&amp;&amp;</span> <span class="sc">!</span><span class="fu">is.null</span>(lmm_results<span class="sc">$</span>sensitivity)) {</span>
+<span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a>  sens <span class="ot">&lt;-</span> lmm_results<span class="sc">$</span>sensitivity</span>
+<span id="cb29-3"><a href="#cb29-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-4"><a href="#cb29-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">"**Sensitivity Analysis Results:**</span><span class="sc">\n\n</span><span class="st">"</span>)</span>
+<span id="cb29-5"><a href="#cb29-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-6"><a href="#cb29-6" aria-hidden="true" tabindex="-1"></a>  <span class="co"># LOPO analysis</span></span>
+<span id="cb29-7"><a href="#cb29-7" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (<span class="sc">!</span><span class="fu">is.null</span>(sens<span class="sc">$</span>lopo)) {</span>
+<span id="cb29-8"><a href="#cb29-8" aria-hidden="true" tabindex="-1"></a>    <span class="fu">cat</span>(<span class="st">"**Leave-One-Participant-Out Analysis:**</span><span class="sc">\n\n</span><span class="st">"</span>)</span>
+<span id="cb29-9"><a href="#cb29-9" aria-hidden="true" tabindex="-1"></a>    <span class="fu">cat</span>(<span class="st">"| Statistic | Full Model | LOPO Mean | LOPO Range |</span><span class="sc">\n</span><span class="st">"</span>)</span>
+<span id="cb29-10"><a href="#cb29-10" aria-hidden="true" tabindex="-1"></a>    <span class="fu">cat</span>(<span class="st">"|-----------|------------|-----------|------------|</span><span class="sc">\n</span><span class="st">"</span>)</span>
+<span id="cb29-11"><a href="#cb29-11" aria-hidden="true" tabindex="-1"></a>    <span class="fu">cat</span>(<span class="fu">sprintf</span>(<span class="st">"| RIR coefficient | %.4f | %.4f | [%.4f, %.4f] |</span><span class="sc">\n</span><span class="st">"</span>,</span>
+<span id="cb29-12"><a href="#cb29-12" aria-hidden="true" tabindex="-1"></a>                sens<span class="sc">$</span>lopo<span class="sc">$</span>full_estimate,</span>
+<span id="cb29-13"><a href="#cb29-13" aria-hidden="true" tabindex="-1"></a>                sens<span class="sc">$</span>lopo<span class="sc">$</span>mean_estimate,</span>
+<span id="cb29-14"><a href="#cb29-14" aria-hidden="true" tabindex="-1"></a>                sens<span class="sc">$</span>lopo<span class="sc">$</span>min_estimate,</span>
+<span id="cb29-15"><a href="#cb29-15" aria-hidden="true" tabindex="-1"></a>                sens<span class="sc">$</span>lopo<span class="sc">$</span>max_estimate))</span>
+<span id="cb29-16"><a href="#cb29-16" aria-hidden="true" tabindex="-1"></a>    <span class="fu">cat</span>(<span class="fu">sprintf</span>(<span class="st">"</span><span class="sc">\n</span><span class="st">**CV of estimates:** %.1f%% (values &lt;10%% indicate robust results)</span><span class="sc">\n\n</span><span class="st">"</span>,</span>
+<span id="cb29-17"><a href="#cb29-17" aria-hidden="true" tabindex="-1"></a>                sens<span class="sc">$</span>lopo<span class="sc">$</span>cv_percent))</span>
+<span id="cb29-18"><a href="#cb29-18" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb29-19"><a href="#cb29-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-20"><a href="#cb29-20" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Subgroup analysis</span></span>
+<span id="cb29-21"><a href="#cb29-21" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (<span class="sc">!</span><span class="fu">is.null</span>(sens<span class="sc">$</span>subgroups)) {</span>
+<span id="cb29-22"><a href="#cb29-22" aria-hidden="true" tabindex="-1"></a>    <span class="fu">cat</span>(<span class="st">"**Subgroup Analysis (if applicable):**</span><span class="sc">\n\n</span><span class="st">"</span>)</span>
+<span id="cb29-23"><a href="#cb29-23" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> (group_name <span class="cf">in</span> <span class="fu">names</span>(sens<span class="sc">$</span>subgroups)) {</span>
+<span id="cb29-24"><a href="#cb29-24" aria-hidden="true" tabindex="-1"></a>      group <span class="ot">&lt;-</span> sens<span class="sc">$</span>subgroups[[group_name]]</span>
+<span id="cb29-25"><a href="#cb29-25" aria-hidden="true" tabindex="-1"></a>      <span class="fu">cat</span>(<span class="fu">sprintf</span>(<span class="st">"- %s: coefficient = %.4f [%.4f, %.4f]</span><span class="sc">\n</span><span class="st">"</span>,</span>
+<span id="cb29-26"><a href="#cb29-26" aria-hidden="true" tabindex="-1"></a>                  group_name, group<span class="sc">$</span>estimate, group<span class="sc">$</span>ci_lower, group<span class="sc">$</span>ci_upper))</span>
+<span id="cb29-27"><a href="#cb29-27" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb29-28"><a href="#cb29-28" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb29-29"><a href="#cb29-29" aria-hidden="true" tabindex="-1"></a>} <span class="cf">else</span> {</span>
+<span id="cb29-30"><a href="#cb29-30" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">"*Sensitivity analysis will be available after running the full analysis pipeline.*</span><span class="sc">\n\n</span><span class="st">"</span>)</span>
+<span id="cb29-31"><a href="#cb29-31" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">"**Planned analyses:**</span><span class="sc">\n\n</span><span class="st">"</span>)</span>
+<span id="cb29-32"><a href="#cb29-32" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">"1. Leave-one-participant-out analysis</span><span class="sc">\n</span><span class="st">"</span>)</span>
+<span id="cb29-33"><a href="#cb29-33" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">"2. Subgroup comparisons (sex, load percentage)</span><span class="sc">\n</span><span class="st">"</span>)</span>
+<span id="cb29-34"><a href="#cb29-34" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">"3. Coefficient stability assessment</span><span class="sc">\n</span><span class="st">"</span>)</span>
+<span id="cb29-35"><a href="#cb29-35" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <p><strong>Sensitivity Analysis Results:</strong></p>
 </section>
@@ -1590,20 +1985,20 @@ Figure&nbsp;3: Distribution of Minimum Velocity Threshold at failure
 <div class="cell">
 <details class="code-fold">
 <summary>Show code</summary>
-<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>targets <span class="ot">&lt;-</span> <span class="fu">aggregate</span>(mean_velocity <span class="sc">~</span> rir <span class="sc">+</span> load_percentage, <span class="at">data =</span> data, <span class="at">FUN =</span> mean)</span>
-<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>targets <span class="ot">&lt;-</span> <span class="fu">reshape</span>(targets, <span class="at">idvar =</span> <span class="st">"rir"</span>, <span class="at">timevar =</span> <span class="st">"load_percentage"</span>,</span>
-<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>                   <span class="at">direction =</span> <span class="st">"wide"</span>, <span class="at">v.names =</span> <span class="st">"mean_velocity"</span>)</span>
-<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a><span class="fu">names</span>(targets) <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"RIR"</span>, <span class="st">"80% 1RM"</span>, <span class="st">"90% 1RM"</span>)</span>
-<span id="cb20-5"><a href="#cb20-5" aria-hidden="true" tabindex="-1"></a>targets <span class="ot">&lt;-</span> targets[<span class="fu">order</span>(<span class="sc">-</span>targets<span class="sc">$</span>RIR), ]</span>
-<span id="cb20-6"><a href="#cb20-6" aria-hidden="true" tabindex="-1"></a>targets<span class="sc">$</span><span class="st">`</span><span class="at">80% 1RM</span><span class="st">`</span> <span class="ot">&lt;-</span> <span class="fu">round</span>(targets<span class="sc">$</span><span class="st">`</span><span class="at">80% 1RM</span><span class="st">`</span>, <span class="dv">3</span>)</span>
-<span id="cb20-7"><a href="#cb20-7" aria-hidden="true" tabindex="-1"></a>targets<span class="sc">$</span><span class="st">`</span><span class="at">90% 1RM</span><span class="st">`</span> <span class="ot">&lt;-</span> <span class="fu">round</span>(targets<span class="sc">$</span><span class="st">`</span><span class="at">90% 1RM</span><span class="st">`</span>, <span class="dv">3</span>)</span>
-<span id="cb20-8"><a href="#cb20-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb20-9"><a href="#cb20-9" aria-hidden="true" tabindex="-1"></a><span class="fu">format_table</span>(targets)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb30"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a>targets <span class="ot">&lt;-</span> <span class="fu">aggregate</span>(mean_velocity <span class="sc">~</span> rir <span class="sc">+</span> load_percentage, <span class="at">data =</span> data, <span class="at">FUN =</span> mean)</span>
+<span id="cb30-2"><a href="#cb30-2" aria-hidden="true" tabindex="-1"></a>targets <span class="ot">&lt;-</span> <span class="fu">reshape</span>(targets, <span class="at">idvar =</span> <span class="st">"rir"</span>, <span class="at">timevar =</span> <span class="st">"load_percentage"</span>,</span>
+<span id="cb30-3"><a href="#cb30-3" aria-hidden="true" tabindex="-1"></a>                   <span class="at">direction =</span> <span class="st">"wide"</span>, <span class="at">v.names =</span> <span class="st">"mean_velocity"</span>)</span>
+<span id="cb30-4"><a href="#cb30-4" aria-hidden="true" tabindex="-1"></a><span class="fu">names</span>(targets) <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"RIR"</span>, <span class="st">"80% 1RM"</span>, <span class="st">"90% 1RM"</span>)</span>
+<span id="cb30-5"><a href="#cb30-5" aria-hidden="true" tabindex="-1"></a>targets <span class="ot">&lt;-</span> targets[<span class="fu">order</span>(<span class="sc">-</span>targets<span class="sc">$</span>RIR), ]</span>
+<span id="cb30-6"><a href="#cb30-6" aria-hidden="true" tabindex="-1"></a>targets<span class="sc">$</span><span class="st">`</span><span class="at">80% 1RM</span><span class="st">`</span> <span class="ot">&lt;-</span> <span class="fu">round</span>(targets<span class="sc">$</span><span class="st">`</span><span class="at">80% 1RM</span><span class="st">`</span>, <span class="dv">3</span>)</span>
+<span id="cb30-7"><a href="#cb30-7" aria-hidden="true" tabindex="-1"></a>targets<span class="sc">$</span><span class="st">`</span><span class="at">90% 1RM</span><span class="st">`</span> <span class="ot">&lt;-</span> <span class="fu">round</span>(targets<span class="sc">$</span><span class="st">`</span><span class="at">90% 1RM</span><span class="st">`</span>, <span class="dv">3</span>)</span>
+<span id="cb30-8"><a href="#cb30-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb30-9"><a href="#cb30-9" aria-hidden="true" tabindex="-1"></a><span class="fu">format_table</span>(targets)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div id="tbl-reference" class="cell quarto-float anchored">
 <figure class="quarto-float quarto-float-tbl figure">
 <figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-reference-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Table&nbsp;6: Population-Average Velocity Thresholds (Use for Initial Reference Only)
+Table&nbsp;8: Population-Average Velocity Thresholds (Use for Initial Reference Only)
 </figcaption>
 <div aria-describedby="tbl-reference-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <div class="cell-output-display">

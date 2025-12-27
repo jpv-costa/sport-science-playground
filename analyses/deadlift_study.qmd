@@ -255,7 +255,73 @@ The deadlift shows **lower R² values** than the squat, likely due to:
 3. **Absence of stretch-shortening cycle**: Increased rep-to-rep variability
 4. **Technical breakdown**: May affect velocity differently than pure muscular fatigue
 
-### 3.4 Load Effects
+### 3.4 Cross-Day Prediction Accuracy
+
+A critical test of any VBT model is its ability to predict performance on novel occasions. We tested Day 1 models on Day 2 data:
+
+```{r tbl-prediction}
+#| label: tbl-prediction
+#| tbl-cap: "Cross-Day Prediction Accuracy"
+
+if (!is.null(deadlift_results$general_prediction_accuracy)) {
+  accuracy <- deadlift_results$general_prediction_accuracy
+
+  prediction_df <- data.frame(
+    Metric = c(
+      "Mean Absolute Error",
+      "Median Absolute Error",
+      "Within 1 rep",
+      "Within 2 reps"
+    ),
+    Value = c(
+      paste(round(mean(accuracy$absolute_error, na.rm = TRUE), 2), "reps"),
+      paste(round(median(accuracy$absolute_error, na.rm = TRUE), 2), "reps"),
+      paste0(round(mean(accuracy$absolute_error <= 1, na.rm = TRUE) * 100, 1), "%"),
+      paste0(round(mean(accuracy$absolute_error <= 2, na.rm = TRUE) * 100, 1), "%")
+    )
+  )
+
+  format_table(prediction_df, col.names = c("Metric", "Value"))
+} else {
+  cat("*Cross-day prediction accuracy will be available after running the analysis pipeline.*\n")
+}
+```
+
+These prediction errors (~1.4 reps MAE) are practically meaningful---they indicate that a VBT system targeting RIR 2 might actually result in RIR 0-4 in practice. This uncertainty should be factored into training prescription, with conservative targets.
+
+### 3.5 Velocity Distribution by Load
+
+```{r fig-velocity-load}
+#| label: fig-velocity-load
+#| fig-cap: "Velocity distribution by load and RIR"
+
+ggplot(data, aes(x = factor(rir), y = mean_velocity, fill = load_percentage)) +
+  geom_boxplot(alpha = 0.5, outlier.shape = NA, width = 0.7) +
+  geom_point(
+    aes(color = load_percentage),
+    position = position_jitterdodge(jitter.width = 0.15, dodge.width = 0.7),
+    alpha = 0.6, size = 1.5
+  ) +
+  labs(
+    x = "Repetitions in Reserve",
+    y = "Mean Velocity (m/s)",
+    fill = "Load",
+    color = "Load"
+  ) +
+  scale_fill_load() +
+  scale_color_manual(values = c("80%" = "#CC7A00", "90%" = "#007A5E")) +
+  theme(legend.position = "bottom") +
+  guides(fill = guide_legend(override.aes = list(alpha = 0.7)),
+         color = "none")
+```
+
+**Observations:**
+
+- Higher load (90%) = lower velocities overall
+- Clear velocity decrease as RIR approaches 0
+- Wide variability between individuals at the same RIR
+
+### 3.6 Load Effects (LMM Analysis)
 
 #### The Question
 
@@ -531,6 +597,48 @@ if (!is.null(advanced_results)) {
 }
 ```
 
+```{r fig-mvt-individual}
+#| label: fig-mvt-individual
+#| fig-cap: "Individual MVT values showing between-participant variability"
+
+if (!is.null(advanced_results) && !is.null(advanced_results$mvt$individual_stats)) {
+  ind_mvt <- advanced_results$mvt$individual_stats
+  ind_mvt <- ind_mvt[order(ind_mvt$mean_mvt), ]
+  ind_mvt$id <- factor(ind_mvt$id, levels = ind_mvt$id)
+
+  ggplot(ind_mvt, aes(x = id, y = mean_mvt, color = sex)) +
+    geom_point(size = 3) +
+    geom_errorbar(aes(ymin = mean_mvt - sd_mvt, ymax = mean_mvt + sd_mvt),
+                  width = 0.3) +
+    geom_hline(yintercept = advanced_results$mvt$population_stats$mean,
+               linetype = "dashed", color = "gray50") +
+    coord_flip() +
+    labs(x = "Participant", y = "MVT (m/s)",
+         title = "Individual MVT with Standard Deviation",
+         color = "Sex") +
+    scale_color_manual(values = c("female" = COLORS$secondary, "male" = COLORS$primary))
+}
+```
+
+**Load Comparison:**
+
+```{r mvt-load}
+#| results: asis
+
+if (!is.null(advanced_results) && !is.null(advanced_results$mvt$load_comparison)) {
+  lc <- advanced_results$mvt$load_comparison
+  cat("- 80% 1RM MVT:", round(lc$load_80_mean, 3), "±", round(lc$load_80_sd, 3), "m/s\n")
+  cat("- 90% 1RM MVT:", round(lc$load_90_mean, 3), "±", round(lc$load_90_sd, 3), "m/s\n")
+  cat("- Difference:", round(lc$difference, 3), "m/s\n")
+  cat("- p-value:", format(lc$wilcox_p, digits = 4), "\n")
+  if (lc$significant) {
+    cat("- **Significant difference** - MVT varies by load\n")
+  } else {
+    cat("- No significant load effect - MVT appears consistent across loads\n")
+  }
+}
+```
+
 The CV of `r if(!is.null(advanced_results)) round(advanced_results$mvt$population_stats$cv_percent, 1) else "25"`% indicates **high inter-individual variability** (above the 25% threshold).
 
 **Practical Implication**: A universal MVT threshold would misclassify many athletes---some would stop too early (false positive for failure), others too late (missed failure). Individual calibration is not optional for accurate VBT in deadlifts.
@@ -583,6 +691,40 @@ if (!is.null(advanced_results)) {
 }
 ```
 
+```{r fig-reliability-slopes}
+#| label: fig-reliability-slopes
+#| fig-cap: "Day 1 vs Day 2 comparison of individual velocity-RIR slopes"
+
+if (!is.null(advanced_results) && !is.null(advanced_results$reliability$day_parameters)) {
+  day_params <- advanced_results$reliability$day_parameters
+
+  ggplot(day_params, aes(x = slope_day1, y = slope_day2)) +
+    geom_point(size = 3, alpha = 0.7, color = COLORS$primary) +
+    geom_abline(slope = 1, intercept = 0, linetype = "dashed", color = "gray50") +
+    geom_smooth(method = "lm", se = TRUE, color = COLORS$secondary) +
+    labs(x = "Slope Day 1 (m/s per RIR)", y = "Slope Day 2 (m/s per RIR)",
+         title = "Day-to-Day Reliability of Individual Slopes",
+         subtitle = paste("ICC =", round(advanced_results$reliability$slope_icc$icc, 2)))
+}
+```
+
+```{r fig-reliability-mvt}
+#| label: fig-reliability-mvt
+#| fig-cap: "Day 1 vs Day 2 comparison of predicted MVT"
+
+if (!is.null(advanced_results) && !is.null(advanced_results$reliability$day_parameters)) {
+  day_params <- advanced_results$reliability$day_parameters
+
+  ggplot(day_params, aes(x = mvt_day1, y = mvt_day2)) +
+    geom_point(size = 3, alpha = 0.7, color = COLORS$primary) +
+    geom_abline(slope = 1, intercept = 0, linetype = "dashed", color = "gray50") +
+    geom_smooth(method = "lm", se = TRUE, color = COLORS$secondary) +
+    labs(x = "MVT Day 1 (m/s)", y = "MVT Day 2 (m/s)",
+         title = "Day-to-Day Reliability of Predicted MVT",
+         subtitle = paste("ICC =", round(advanced_results$reliability$mvt_icc$icc, 2)))
+}
+```
+
 **Practical Recommendation**: The moderate reliability suggests that velocity profiles are reasonably stable but not perfect. **Recalibrate every 2-4 weeks** or after significant training blocks, illness, or competition.
 
 ### 4.3 Linear vs Polynomial Models
@@ -623,6 +765,26 @@ if (!is.null(advanced_results)) {
               poly$best_model_summary$n_quad_best,
               poly$best_model_summary$pct_quad_best))
   cat(sprintf("| Average R² improvement (quadratic) | %.4f |\n", poly$best_model_summary$avg_r2_improvement))
+}
+```
+
+```{r fig-model-aic}
+#| label: fig-model-aic
+#| fig-cap: "AIC comparison between linear and quadratic models by participant"
+
+if (!is.null(advanced_results) && !is.null(advanced_results$polynomial_comparison$individual_results)) {
+  ind_results <- advanced_results$polynomial_comparison$individual_results
+
+  ggplot(ind_results, aes(x = reorder(id, delta_aic), y = delta_aic, fill = best_model)) +
+    geom_col() +
+    geom_hline(yintercept = -2, linetype = "dashed", color = COLORS$secondary) +
+    geom_hline(yintercept = 2, linetype = "dashed", color = COLORS$secondary) +
+    coord_flip() +
+    labs(x = "Participant", y = "ΔAIC (Quadratic - Linear)",
+         title = "Model Comparison by Participant",
+         subtitle = "Negative values favor quadratic model",
+         fill = "Best Model") +
+    scale_fill_manual(values = c("linear" = COLORS$primary, "quadratic" = COLORS$tertiary))
 }
 ```
 
@@ -681,6 +843,27 @@ if (!is.null(advanced_results) && !is.null(advanced_results$velocity_decay)) {
 }
 ```
 
+```{r fig-velocity-trajectories}
+#| label: fig-velocity-trajectories
+#| fig-cap: "Velocity trajectories for individual sets"
+
+if (!is.null(data) && "set_id" %in% names(data)) {
+  # Calculate rep number within each set based on RIR
+  traj_data <- data
+  traj_data$rep_num <- ave(traj_data$rir, traj_data$set_id, FUN = function(x) max(x) - x + 1)
+
+  ggplot(traj_data, aes(x = rep_num, y = mean_velocity, group = set_id)) +
+    geom_line(alpha = 0.3, color = COLORS$primary) +
+    stat_summary(aes(group = 1), fun = mean, geom = "line",
+                 color = COLORS$secondary, linewidth = 1.5) +
+    stat_summary(aes(group = 1), fun = mean, geom = "point",
+                 color = COLORS$secondary, size = 3) +
+    labs(x = "Rep Number", y = "Mean Velocity (m/s)",
+         title = "Velocity Trajectories Across Sets",
+         subtitle = "Individual sets (blue) with population mean (red)")
+}
+```
+
 **Practical Implication**: Because velocity loss accelerates near failure, athletes should use **conservative stopping thresholds**. If targeting RIR 2, consider stopping at the RIR 3 threshold to account for the acceleration effect.
 
 ### 4.5 First-Rep Failure Prediction
@@ -719,6 +902,47 @@ if (!is.null(advanced_results)) {
   cat(sprintf("| MAE | %.2f reps | Average prediction error |\n", pred$cv_results$mae))
   cat(sprintf("| RMSE | %.2f reps | Error penalizing outliers |\n", pred$cv_results$rmse))
   cat(sprintf("| R² | %.3f | Variance explained |\n", pred$cv_results$r2))
+}
+```
+
+```{r tbl-prediction-lookup}
+#| label: tbl-prediction-lookup
+#| tbl-cap: "Practical Lookup Table: First Rep Velocity → Predicted Reps"
+
+if (!is.null(advanced_results) && !is.null(advanced_results$failure_prediction$lookup_table)) {
+  lookup <- advanced_results$failure_prediction$lookup_table
+  format_table(lookup, digits = 1,
+        col.names = c("First Rep Velocity (m/s)", "Predicted Reps", "Lower 95%", "Upper 95%"))
+}
+```
+
+```{r fig-prediction}
+#| label: fig-prediction
+#| fig-cap: "First rep velocity vs total reps completed"
+
+if (!is.null(data)) {
+  # Prepare set-level data
+  set_data <- do.call(rbind, lapply(unique(data$set_id), function(sid) {
+    s <- data[data$set_id == sid, ]
+    s <- s[order(s$rep_number), ]
+    if (nrow(s) < 1) return(NULL)
+    data.frame(
+      set_id = sid,
+      v1 = s$mean_velocity[1],
+      reps_to_failure = s$reps_to_failure[1],
+      load_percentage = s$load_percentage[1]
+    )
+  }))
+
+  if (!is.null(set_data) && nrow(set_data) > 0) {
+    ggplot(set_data, aes(x = v1, y = reps_to_failure, color = load_percentage)) +
+      geom_point(size = 3, alpha = 0.7) +
+      geom_smooth(method = "lm", se = TRUE, aes(group = 1), color = "black") +
+      labs(x = "First Rep Velocity (m/s)", y = "Total Reps to Failure",
+           title = "Relationship Between First Rep Velocity and Set Capacity",
+           color = "Load") +
+      scale_color_load()
+  }
 }
 ```
 
