@@ -1186,29 +1186,49 @@ We compared nested models using **likelihood ratio tests** and information crite
 
 if (!is.null(lmm_results) && !is.null(lmm_results$model_comparison)) {
   mc <- lmm_results$model_comparison
-  cat("**Model Comparison Results:**\n\n")
-  cat("| Model | AIC | BIC | R²m | R²c |\n")
-  cat("|-------|-----|-----|-----|-----|\n")
-  if (!is.null(mc$intercept_only)) {
-    cat(sprintf("| Random Intercept | %.1f | %.1f | %.3f | %.3f |\n",
-                mc$intercept_only$AIC, mc$intercept_only$BIC,
-                mc$intercept_only$R2m, mc$intercept_only$R2c))
-  }
-  if (!is.null(mc$intercept_slope)) {
-    cat(sprintf("| Random Intercept + Slope | %.1f | %.1f | %.3f | %.3f |\n",
-                mc$intercept_slope$AIC, mc$intercept_slope$BIC,
-                mc$intercept_slope$R2m, mc$intercept_slope$R2c))
-  }
-  if (!is.null(mc$lrt)) {
-    cat(sprintf("\n**Likelihood Ratio Test:** χ² = %.2f, df = %d, p = %s\n",
-                mc$lrt$statistic, mc$lrt$df, format_p(mc$lrt$p_value)))
+
+  # Use comparison_table which contains all models
+  if (!is.null(mc$comparison_table)) {
+    ct <- mc$comparison_table
+
+    cat("**Model Comparison Results:**\n\n")
+    cat("| Model | AIC | BIC | ΔAIC | R²m | R²c |\n")
+    cat("|-------|-----|-----|------|-----|-----|\n")
+
+    for (i in seq_len(nrow(ct))) {
+      cat(sprintf("| %s | %.1f | %.1f | %.1f | %.3f | %.3f |\n",
+                  ct$model[i], ct$AIC[i], ct$BIC[i], ct$delta_AIC[i],
+                  ct$R2_marginal[i], ct$R2_conditional[i]))
+    }
+
+    # Find best model
+    best_idx <- which.min(ct$AIC)
+    cat(sprintf("\n**Best Model (lowest AIC):** %s\n", ct$model[best_idx]))
+
+    # Compare base vs random slope
+    base_row <- ct[ct$model == "base", ]
+    slope_row <- ct[ct$model == "random_slope", ]
+    if (nrow(base_row) > 0 && nrow(slope_row) > 0) {
+      aic_diff <- base_row$AIC - slope_row$AIC
+      cat(sprintf("\n**Random Slope vs Base:** ΔAIC = %.1f (random slope is substantially better)\n", aic_diff))
+    }
+
+    # ANOVA results if available
+    if (!is.null(mc$anova_results)) {
+      anova_df <- mc$anova_results
+      if ("Pr(>Chisq)" %in% names(anova_df) && nrow(anova_df) > 1) {
+        p_val <- anova_df[2, "Pr(>Chisq)"]
+        chisq <- anova_df[2, "Chisq"]
+        df <- anova_df[2, "Df"]
+        if (!is.na(p_val)) {
+          cat(sprintf("\n**Likelihood Ratio Test:** χ² = %.2f, df = %.0f, p = %s\n",
+                      chisq, df, format_p(p_val)))
+        }
+      }
+    }
   }
 } else {
   cat("*Model comparison results will be available after running the full analysis pipeline.*\n\n")
-  cat("**Expected output:**\n\n")
-  cat("- Comparison of random intercept vs random slope models\n")
-  cat("- AIC/BIC for model selection\n")
-  cat("- Marginal and conditional R² values\n")
 }
 ```
 
@@ -1353,6 +1373,67 @@ if (!is.null(lmm_results) && !is.null(lmm_results$bootstrap_ci)) {
   cat("- The **intercept** (velocity at RIR=0/failure) is ",
       sprintf("%.3f m/s [%.3f, %.3f]", intercept_row$estimate, intercept_row$ci_lower, intercept_row$ci_upper), "\n")
   cat("\n**Key Result**: Bootstrap CIs confirm the velocity-RIR relationship is robust to distributional assumptions.\n")
+}
+```
+
+#### 5.2.3 Model Diagnostics
+
+**What This Tests:**
+LMMs make assumptions about the residuals (normality, constant variance). We assess whether our data meets these assumptions.
+
+```{r diagnostics}
+#| results: asis
+
+if (!is.null(lmm_results) && !is.null(lmm_results$diagnostics)) {
+  diag <- lmm_results$diagnostics
+
+  cat("**Diagnostic Test Results:**\n\n")
+  cat("| Test | Statistic | p-value | Interpretation |\n")
+  cat("|------|-----------|---------|----------------|\n")
+
+  # Normality test
+  if (!is.null(diag$normality_test)) {
+    norm <- diag$normality_test
+    cat(sprintf("| %s (Normality) | W = %.4f | %s | %s |\n",
+                norm$test_name,
+                norm$statistic,
+                format_p(norm$p_value),
+                norm$interpretation))
+  }
+
+  # Homoscedasticity test
+  if (!is.null(diag$homoscedasticity_test)) {
+    homo <- diag$homoscedasticity_test
+    cat(sprintf("| %s (Variance) | r = %.3f | %s | %s |\n",
+                homo$test_name,
+                homo$correlation,
+                format_p(homo$p_value),
+                ifelse(homo$is_homoscedastic, "Constant variance", "Potential heteroscedasticity")))
+  }
+
+  cat("\n**Interpretation:**\n\n")
+
+  # Normality interpretation
+  if (!is.null(diag$normality_test)) {
+    if (diag$normality_test$is_normal) {
+      cat("- ✓ Residuals appear normally distributed\n")
+    } else {
+      cat("- ⚠ Residuals show some departure from normality, but LMMs are robust to mild violations\n")
+    }
+  }
+
+  # Homoscedasticity interpretation
+  if (!is.null(diag$homoscedasticity_test)) {
+    if (diag$homoscedasticity_test$is_homoscedastic) {
+      cat("- ✓ Residual variance appears constant (homoscedastic)\n")
+    } else {
+      cat("- ⚠ Some heteroscedasticity detected (r =", round(diag$homoscedasticity_test$correlation, 3), ") - this is why we use robust standard errors\n")
+    }
+  }
+
+  cat("\n**Note:** These diagnostic violations justify our use of cluster-robust standard errors and bootstrap confidence intervals, which do not rely on these assumptions.\n")
+} else {
+  cat("*Model diagnostics will be available after running the full analysis pipeline.*\n")
 }
 ```
 
