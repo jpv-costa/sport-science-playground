@@ -2518,98 +2518,221 @@ Table&nbsp;12: Bootstrap 95% Confidence Intervals
 </section>
 <section id="model-diagnostics" class="level4">
 <h4 class="anchored" data-anchor-id="model-diagnostics">5.2.3 Model Diagnostics</h4>
-<p><strong>What This Tests:</strong> LMMs make assumptions about the residuals (normality, constant variance). We assess whether our data meets these assumptions.</p>
+<p><strong>What This Tests:</strong> LMMs make several assumptions that we assess:</p>
+<ol type="1">
+<li><strong>Residual normality</strong>: Residuals should be approximately normal</li>
+<li><strong>Homoscedasticity</strong>: Residual variance should be constant</li>
+<li><strong>Random effects normality</strong>: Random intercepts and slopes should be normal</li>
+<li><strong>Influential observations</strong>: No single observation should dominate results</li>
+</ol>
 <details class="code-fold">
 <summary>Show code</summary>
 <div class="sourceCode cell-code" id="cb39"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb39-1"><a href="#cb39-1" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (<span class="sc">!</span><span class="fu">is.null</span>(lmm_results) <span class="sc">&amp;&amp;</span> <span class="sc">!</span><span class="fu">is.null</span>(lmm_results<span class="sc">$</span>diagnostics)) {</span>
 <span id="cb39-2"><a href="#cb39-2" aria-hidden="true" tabindex="-1"></a>  diag <span class="ot">&lt;-</span> lmm_results<span class="sc">$</span>diagnostics</span>
 <span id="cb39-3"><a href="#cb39-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb39-4"><a href="#cb39-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">"**Diagnostic Test Results:**</span><span class="sc">\n\n</span><span class="st">"</span>)</span>
-<span id="cb39-5"><a href="#cb39-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">"| Test | Statistic | p-value | Interpretation |</span><span class="sc">\n</span><span class="st">"</span>)</span>
-<span id="cb39-6"><a href="#cb39-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">"|------|-----------|---------|----------------|</span><span class="sc">\n</span><span class="st">"</span>)</span>
+<span id="cb39-4"><a href="#cb39-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">"**Residual Diagnostics:**</span><span class="sc">\n\n</span><span class="st">"</span>)</span>
+<span id="cb39-5"><a href="#cb39-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">"| Test | Statistic | p-value | Result |</span><span class="sc">\n</span><span class="st">"</span>)</span>
+<span id="cb39-6"><a href="#cb39-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">"|------|-----------|---------|--------|</span><span class="sc">\n</span><span class="st">"</span>)</span>
 <span id="cb39-7"><a href="#cb39-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb39-8"><a href="#cb39-8" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Normality test</span></span>
+<span id="cb39-8"><a href="#cb39-8" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Residual normality test</span></span>
 <span id="cb39-9"><a href="#cb39-9" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (<span class="sc">!</span><span class="fu">is.null</span>(diag<span class="sc">$</span>normality_test)) {</span>
 <span id="cb39-10"><a href="#cb39-10" aria-hidden="true" tabindex="-1"></a>    norm <span class="ot">&lt;-</span> diag<span class="sc">$</span>normality_test</span>
-<span id="cb39-11"><a href="#cb39-11" aria-hidden="true" tabindex="-1"></a>    <span class="fu">cat</span>(<span class="fu">sprintf</span>(<span class="st">"| %s (Normality) | W = %.4f | %s | %s |</span><span class="sc">\n</span><span class="st">"</span>,</span>
-<span id="cb39-12"><a href="#cb39-12" aria-hidden="true" tabindex="-1"></a>                norm<span class="sc">$</span>test_name,</span>
-<span id="cb39-13"><a href="#cb39-13" aria-hidden="true" tabindex="-1"></a>                norm<span class="sc">$</span>statistic,</span>
-<span id="cb39-14"><a href="#cb39-14" aria-hidden="true" tabindex="-1"></a>                <span class="fu">format_p</span>(norm<span class="sc">$</span>p_value),</span>
-<span id="cb39-15"><a href="#cb39-15" aria-hidden="true" tabindex="-1"></a>                norm<span class="sc">$</span>interpretation))</span>
-<span id="cb39-16"><a href="#cb39-16" aria-hidden="true" tabindex="-1"></a>  }</span>
-<span id="cb39-17"><a href="#cb39-17" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb39-18"><a href="#cb39-18" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Homoscedasticity test</span></span>
-<span id="cb39-19"><a href="#cb39-19" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (<span class="sc">!</span><span class="fu">is.null</span>(diag<span class="sc">$</span>homoscedasticity_test)) {</span>
-<span id="cb39-20"><a href="#cb39-20" aria-hidden="true" tabindex="-1"></a>    homo <span class="ot">&lt;-</span> diag<span class="sc">$</span>homoscedasticity_test</span>
-<span id="cb39-21"><a href="#cb39-21" aria-hidden="true" tabindex="-1"></a>    <span class="fu">cat</span>(<span class="fu">sprintf</span>(<span class="st">"| %s (Variance) | r = %.3f | %s | %s |</span><span class="sc">\n</span><span class="st">"</span>,</span>
-<span id="cb39-22"><a href="#cb39-22" aria-hidden="true" tabindex="-1"></a>                homo<span class="sc">$</span>test_name,</span>
-<span id="cb39-23"><a href="#cb39-23" aria-hidden="true" tabindex="-1"></a>                homo<span class="sc">$</span>correlation,</span>
-<span id="cb39-24"><a href="#cb39-24" aria-hidden="true" tabindex="-1"></a>                <span class="fu">format_p</span>(homo<span class="sc">$</span>p_value),</span>
-<span id="cb39-25"><a href="#cb39-25" aria-hidden="true" tabindex="-1"></a>                <span class="fu">ifelse</span>(homo<span class="sc">$</span>is_homoscedastic, <span class="st">"Constant variance"</span>, <span class="st">"Potential heteroscedasticity"</span>)))</span>
-<span id="cb39-26"><a href="#cb39-26" aria-hidden="true" tabindex="-1"></a>  }</span>
-<span id="cb39-27"><a href="#cb39-27" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb39-28"><a href="#cb39-28" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">"</span><span class="sc">\n</span><span class="st">**Interpretation:**</span><span class="sc">\n\n</span><span class="st">"</span>)</span>
-<span id="cb39-29"><a href="#cb39-29" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb39-30"><a href="#cb39-30" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Normality interpretation</span></span>
-<span id="cb39-31"><a href="#cb39-31" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (<span class="sc">!</span><span class="fu">is.null</span>(diag<span class="sc">$</span>normality_test)) {</span>
-<span id="cb39-32"><a href="#cb39-32" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> (diag<span class="sc">$</span>normality_test<span class="sc">$</span>is_normal) {</span>
-<span id="cb39-33"><a href="#cb39-33" aria-hidden="true" tabindex="-1"></a>      <span class="fu">cat</span>(<span class="st">"- ✓ Residuals appear normally distributed</span><span class="sc">\n</span><span class="st">"</span>)</span>
-<span id="cb39-34"><a href="#cb39-34" aria-hidden="true" tabindex="-1"></a>    } <span class="cf">else</span> {</span>
-<span id="cb39-35"><a href="#cb39-35" aria-hidden="true" tabindex="-1"></a>      <span class="fu">cat</span>(<span class="st">"- ⚠ Residuals show some departure from normality, but LMMs are robust to mild violations</span><span class="sc">\n</span><span class="st">"</span>)</span>
-<span id="cb39-36"><a href="#cb39-36" aria-hidden="true" tabindex="-1"></a>    }</span>
-<span id="cb39-37"><a href="#cb39-37" aria-hidden="true" tabindex="-1"></a>  }</span>
-<span id="cb39-38"><a href="#cb39-38" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb39-39"><a href="#cb39-39" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Homoscedasticity interpretation</span></span>
-<span id="cb39-40"><a href="#cb39-40" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (<span class="sc">!</span><span class="fu">is.null</span>(diag<span class="sc">$</span>homoscedasticity_test)) {</span>
-<span id="cb39-41"><a href="#cb39-41" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> (diag<span class="sc">$</span>homoscedasticity_test<span class="sc">$</span>is_homoscedastic) {</span>
-<span id="cb39-42"><a href="#cb39-42" aria-hidden="true" tabindex="-1"></a>      <span class="fu">cat</span>(<span class="st">"- ✓ Residual variance appears constant (homoscedastic)</span><span class="sc">\n</span><span class="st">"</span>)</span>
-<span id="cb39-43"><a href="#cb39-43" aria-hidden="true" tabindex="-1"></a>    } <span class="cf">else</span> {</span>
-<span id="cb39-44"><a href="#cb39-44" aria-hidden="true" tabindex="-1"></a>      <span class="fu">cat</span>(<span class="st">"- ⚠ Some heteroscedasticity detected (r ="</span>, <span class="fu">round</span>(diag<span class="sc">$</span>homoscedasticity_test<span class="sc">$</span>correlation, <span class="dv">3</span>), <span class="st">") - this is why we use robust standard errors</span><span class="sc">\n</span><span class="st">"</span>)</span>
-<span id="cb39-45"><a href="#cb39-45" aria-hidden="true" tabindex="-1"></a>    }</span>
-<span id="cb39-46"><a href="#cb39-46" aria-hidden="true" tabindex="-1"></a>  }</span>
-<span id="cb39-47"><a href="#cb39-47" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb39-48"><a href="#cb39-48" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">"</span><span class="sc">\n</span><span class="st">**Note:** These diagnostic violations justify our use of cluster-robust standard errors and bootstrap confidence intervals, which do not rely on these assumptions.</span><span class="sc">\n</span><span class="st">"</span>)</span>
-<span id="cb39-49"><a href="#cb39-49" aria-hidden="true" tabindex="-1"></a>} <span class="cf">else</span> {</span>
-<span id="cb39-50"><a href="#cb39-50" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">"*Model diagnostics will be available after running the full analysis pipeline.*</span><span class="sc">\n</span><span class="st">"</span>)</span>
-<span id="cb39-51"><a href="#cb39-51" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb39-11"><a href="#cb39-11" aria-hidden="true" tabindex="-1"></a>    result <span class="ot">&lt;-</span> <span class="fu">ifelse</span>(norm<span class="sc">$</span>is_normal, <span class="st">"Normal"</span>, <span class="st">"Non-normal"</span>)</span>
+<span id="cb39-12"><a href="#cb39-12" aria-hidden="true" tabindex="-1"></a>    <span class="fu">cat</span>(<span class="fu">sprintf</span>(<span class="st">"| Shapiro-Wilk (Residuals) | W = %.4f | %s | %s |</span><span class="sc">\n</span><span class="st">"</span>,</span>
+<span id="cb39-13"><a href="#cb39-13" aria-hidden="true" tabindex="-1"></a>                norm<span class="sc">$</span>statistic, <span class="fu">format_p</span>(norm<span class="sc">$</span>p_value), result))</span>
+<span id="cb39-14"><a href="#cb39-14" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb39-15"><a href="#cb39-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb39-16"><a href="#cb39-16" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Homoscedasticity test</span></span>
+<span id="cb39-17"><a href="#cb39-17" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (<span class="sc">!</span><span class="fu">is.null</span>(diag<span class="sc">$</span>homoscedasticity_test)) {</span>
+<span id="cb39-18"><a href="#cb39-18" aria-hidden="true" tabindex="-1"></a>    homo <span class="ot">&lt;-</span> diag<span class="sc">$</span>homoscedasticity_test</span>
+<span id="cb39-19"><a href="#cb39-19" aria-hidden="true" tabindex="-1"></a>    result <span class="ot">&lt;-</span> <span class="fu">ifelse</span>(homo<span class="sc">$</span>is_homoscedastic, <span class="st">"Homoscedastic"</span>, <span class="st">"Heteroscedastic"</span>)</span>
+<span id="cb39-20"><a href="#cb39-20" aria-hidden="true" tabindex="-1"></a>    <span class="fu">cat</span>(<span class="fu">sprintf</span>(<span class="st">"| Residual-Fitted Correlation | r = %.3f | %s | %s |</span><span class="sc">\n</span><span class="st">"</span>,</span>
+<span id="cb39-21"><a href="#cb39-21" aria-hidden="true" tabindex="-1"></a>                homo<span class="sc">$</span>correlation, <span class="fu">format_p</span>(homo<span class="sc">$</span>p_value), result))</span>
+<span id="cb39-22"><a href="#cb39-22" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb39-23"><a href="#cb39-23" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
-<p><strong>Diagnostic Test Results:</strong></p>
+<p><strong>Residual Diagnostics:</strong></p>
 <table class="table">
-<colgroup>
-<col style="width: 14%">
-<col style="width: 26%">
-<col style="width: 21%">
-<col style="width: 38%">
-</colgroup>
 <thead>
 <tr class="header">
 <th>Test</th>
 <th>Statistic</th>
 <th>p-value</th>
-<th>Interpretation</th>
+<th>Result</th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
-<td>Shapiro-Wilk (Normality)</td>
+<td>Shapiro-Wilk (Residuals)</td>
 <td>W = 0.9777</td>
 <td>&lt;0.001</td>
-<td>Residuals may deviate from normality (p &lt; 0.05)</td>
+<td>Non-normal</td>
 </tr>
 <tr class="even">
-<td>Residual-Fitted Correlation (Variance)</td>
+<td>Residual-Fitted Correlation</td>
 <td>r = 0.266</td>
 <td>&lt;0.001</td>
-<td>Potential heteroscedasticity</td>
+<td>Heteroscedastic</td>
 </tr>
 </tbody>
 </table>
-<p><strong>Interpretation:</strong></p>
+<details class="code-fold">
+<summary>Show code</summary>
+<div class="sourceCode cell-code" id="cb40"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Test random effects normality</span></span>
+<span id="cb40-2"><a href="#cb40-2" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (<span class="sc">!</span><span class="fu">is.null</span>(lmm_results) <span class="sc">&amp;&amp;</span> <span class="sc">!</span><span class="fu">is.null</span>(lmm_results<span class="sc">$</span>diagnostics_full)) {</span>
+<span id="cb40-3"><a href="#cb40-3" aria-hidden="true" tabindex="-1"></a>  re <span class="ot">&lt;-</span> lmm_results<span class="sc">$</span>diagnostics_full<span class="sc">$</span>random_effects</span>
+<span id="cb40-4"><a href="#cb40-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb40-5"><a href="#cb40-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">"</span><span class="sc">\n</span><span class="st">**Random Effects Normality:**</span><span class="sc">\n\n</span><span class="st">"</span>)</span>
+<span id="cb40-6"><a href="#cb40-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">"| Random Effect | Shapiro-Wilk W | p-value | Result |</span><span class="sc">\n</span><span class="st">"</span>)</span>
+<span id="cb40-7"><a href="#cb40-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">"|---------------|----------------|---------|--------|</span><span class="sc">\n</span><span class="st">"</span>)</span>
+<span id="cb40-8"><a href="#cb40-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb40-9"><a href="#cb40-9" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Test intercepts</span></span>
+<span id="cb40-10"><a href="#cb40-10" aria-hidden="true" tabindex="-1"></a>  int_test <span class="ot">&lt;-</span> <span class="fu">shapiro.test</span>(re[, <span class="dv">1</span>])</span>
+<span id="cb40-11"><a href="#cb40-11" aria-hidden="true" tabindex="-1"></a>  int_result <span class="ot">&lt;-</span> <span class="fu">ifelse</span>(int_test<span class="sc">$</span>p.value <span class="sc">&gt;</span> <span class="fl">0.05</span>, <span class="st">"Normal"</span>, <span class="st">"Non-normal"</span>)</span>
+<span id="cb40-12"><a href="#cb40-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="fu">sprintf</span>(<span class="st">"| Intercepts (n=%d) | %.4f | %s | %s |</span><span class="sc">\n</span><span class="st">"</span>,</span>
+<span id="cb40-13"><a href="#cb40-13" aria-hidden="true" tabindex="-1"></a>              <span class="fu">nrow</span>(re), int_test<span class="sc">$</span>statistic, <span class="fu">format_p</span>(int_test<span class="sc">$</span>p.value), int_result))</span>
+<span id="cb40-14"><a href="#cb40-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb40-15"><a href="#cb40-15" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Test slopes</span></span>
+<span id="cb40-16"><a href="#cb40-16" aria-hidden="true" tabindex="-1"></a>  slope_test <span class="ot">&lt;-</span> <span class="fu">shapiro.test</span>(re[, <span class="dv">2</span>])</span>
+<span id="cb40-17"><a href="#cb40-17" aria-hidden="true" tabindex="-1"></a>  slope_result <span class="ot">&lt;-</span> <span class="fu">ifelse</span>(slope_test<span class="sc">$</span>p.value <span class="sc">&gt;</span> <span class="fl">0.05</span>, <span class="st">"Normal"</span>, <span class="st">"Non-normal"</span>)</span>
+<span id="cb40-18"><a href="#cb40-18" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="fu">sprintf</span>(<span class="st">"| Slopes (n=%d) | %.4f | %s | %s |</span><span class="sc">\n</span><span class="st">"</span>,</span>
+<span id="cb40-19"><a href="#cb40-19" aria-hidden="true" tabindex="-1"></a>              <span class="fu">nrow</span>(re), slope_test<span class="sc">$</span>statistic, <span class="fu">format_p</span>(slope_test<span class="sc">$</span>p.value), slope_result))</span>
+<span id="cb40-20"><a href="#cb40-20" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<p><strong>Random Effects Normality:</strong></p>
+<table class="table">
+<thead>
+<tr class="header">
+<th>Random Effect</th>
+<th>Shapiro-Wilk W</th>
+<th>p-value</th>
+<th>Result</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Intercepts (n=19)</td>
+<td>0.9621</td>
+<td>0.614</td>
+<td>Normal</td>
+</tr>
+<tr class="even">
+<td>Slopes (n=19)</td>
+<td>0.9089</td>
+<td>0.071</td>
+<td>Normal</td>
+</tr>
+</tbody>
+</table>
+<details class="code-fold">
+<summary>Show code</summary>
+<div class="sourceCode cell-code" id="cb41"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb41-1"><a href="#cb41-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Influence diagnostics from underlying lmer model</span></span>
+<span id="cb41-2"><a href="#cb41-2" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (<span class="sc">!</span><span class="fu">is.null</span>(lmm_results) <span class="sc">&amp;&amp;</span> <span class="sc">!</span><span class="fu">is.null</span>(lmm_results<span class="sc">$</span>best_model) <span class="sc">&amp;&amp;</span></span>
+<span id="cb41-3"><a href="#cb41-3" aria-hidden="true" tabindex="-1"></a>    <span class="sc">!</span><span class="fu">is.null</span>(lmm_results<span class="sc">$</span>best_model<span class="sc">$</span>model)) {</span>
+<span id="cb41-4"><a href="#cb41-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-5"><a href="#cb41-5" aria-hidden="true" tabindex="-1"></a>  mod <span class="ot">&lt;-</span> lmm_results<span class="sc">$</span>best_model<span class="sc">$</span>model</span>
+<span id="cb41-6"><a href="#cb41-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-7"><a href="#cb41-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">"</span><span class="sc">\n</span><span class="st">**Influential Observations:**</span><span class="sc">\n\n</span><span class="st">"</span>)</span>
+<span id="cb41-8"><a href="#cb41-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-9"><a href="#cb41-9" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Cook's distance</span></span>
+<span id="cb41-10"><a href="#cb41-10" aria-hidden="true" tabindex="-1"></a>  cooks_d <span class="ot">&lt;-</span> <span class="fu">cooks.distance</span>(mod)</span>
+<span id="cb41-11"><a href="#cb41-11" aria-hidden="true" tabindex="-1"></a>  n <span class="ot">&lt;-</span> <span class="fu">length</span>(cooks_d)</span>
+<span id="cb41-12"><a href="#cb41-12" aria-hidden="true" tabindex="-1"></a>  cooks_threshold <span class="ot">&lt;-</span> <span class="dv">4</span><span class="sc">/</span>n</span>
+<span id="cb41-13"><a href="#cb41-13" aria-hidden="true" tabindex="-1"></a>  n_high_cooks <span class="ot">&lt;-</span> <span class="fu">sum</span>(cooks_d <span class="sc">&gt;</span> cooks_threshold, <span class="at">na.rm =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb41-14"><a href="#cb41-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-15"><a href="#cb41-15" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Leverage</span></span>
+<span id="cb41-16"><a href="#cb41-16" aria-hidden="true" tabindex="-1"></a>  hat_vals <span class="ot">&lt;-</span> <span class="fu">hatvalues</span>(mod)</span>
+<span id="cb41-17"><a href="#cb41-17" aria-hidden="true" tabindex="-1"></a>  p <span class="ot">&lt;-</span> <span class="dv">2</span>  <span class="co"># number of fixed effects</span></span>
+<span id="cb41-18"><a href="#cb41-18" aria-hidden="true" tabindex="-1"></a>  lev_threshold <span class="ot">&lt;-</span> <span class="dv">2</span><span class="sc">*</span>p<span class="sc">/</span>n</span>
+<span id="cb41-19"><a href="#cb41-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-20"><a href="#cb41-20" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">"| Metric | Threshold | Max Value | N Exceeding |</span><span class="sc">\n</span><span class="st">"</span>)</span>
+<span id="cb41-21"><a href="#cb41-21" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">"|--------|-----------|-----------|-------------|</span><span class="sc">\n</span><span class="st">"</span>)</span>
+<span id="cb41-22"><a href="#cb41-22" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="fu">sprintf</span>(<span class="st">"| Cook's Distance | %.4f (4/n) | %.4f | %d of %d |</span><span class="sc">\n</span><span class="st">"</span>,</span>
+<span id="cb41-23"><a href="#cb41-23" aria-hidden="true" tabindex="-1"></a>              cooks_threshold, <span class="fu">max</span>(cooks_d, <span class="at">na.rm=</span><span class="cn">TRUE</span>), n_high_cooks, n))</span>
+<span id="cb41-24"><a href="#cb41-24" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="fu">sprintf</span>(<span class="st">"| Leverage | %.4f (2p/n) | %.4f | %d of %d |</span><span class="sc">\n</span><span class="st">"</span>,</span>
+<span id="cb41-25"><a href="#cb41-25" aria-hidden="true" tabindex="-1"></a>              lev_threshold, <span class="fu">max</span>(hat_vals, <span class="at">na.rm=</span><span class="cn">TRUE</span>), <span class="fu">sum</span>(hat_vals <span class="sc">&gt;</span> lev_threshold, <span class="at">na.rm=</span><span class="cn">TRUE</span>), n))</span>
+<span id="cb41-26"><a href="#cb41-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-27"><a href="#cb41-27" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Interpretation</span></span>
+<span id="cb41-28"><a href="#cb41-28" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">"</span><span class="sc">\n</span><span class="st">**Note on Influence Metrics:**</span><span class="sc">\n\n</span><span class="st">"</span>)</span>
+<span id="cb41-29"><a href="#cb41-29" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (<span class="fu">max</span>(cooks_d, <span class="at">na.rm=</span><span class="cn">TRUE</span>) <span class="sc">&gt;</span> <span class="dv">1</span>) {</span>
+<span id="cb41-30"><a href="#cb41-30" aria-hidden="true" tabindex="-1"></a>    <span class="fu">cat</span>(<span class="st">"- Some observations have high Cook's D (&gt;1), but this is common in longitudinal data with repeated measures</span><span class="sc">\n</span><span class="st">"</span>)</span>
+<span id="cb41-31"><a href="#cb41-31" aria-hidden="true" tabindex="-1"></a>  } <span class="cf">else</span> {</span>
+<span id="cb41-32"><a href="#cb41-32" aria-hidden="true" tabindex="-1"></a>    <span class="fu">cat</span>(<span class="st">"- No observations have extreme influence (Cook's D &lt; 1)</span><span class="sc">\n</span><span class="st">"</span>)</span>
+<span id="cb41-33"><a href="#cb41-33" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb41-34"><a href="#cb41-34" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">"- High leverage values reflect the within-participant correlation structure of the data</span><span class="sc">\n</span><span class="st">"</span>)</span>
+<span id="cb41-35"><a href="#cb41-35" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">"- These patterns are expected and do not invalidate the analysis</span><span class="sc">\n</span><span class="st">"</span>)</span>
+<span id="cb41-36"><a href="#cb41-36" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<p><strong>Influential Observations:</strong></p>
+<table class="table">
+<thead>
+<tr class="header">
+<th>Metric</th>
+<th>Threshold</th>
+<th>Max Value</th>
+<th>N Exceeding</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Cook’s Distance</td>
+<td>0.0099 (4/n)</td>
+<td>1.2830</td>
+<td>228 of 406</td>
+</tr>
+<tr class="even">
+<td>Leverage</td>
+<td>0.0099 (2p/n)</td>
+<td>0.3103</td>
+<td>406 of 406</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Note on Influence Metrics:</strong></p>
 <ul>
-<li>⚠ Residuals show some departure from normality, but LMMs are robust to mild violations</li>
-<li>⚠ Some heteroscedasticity detected (r = 0.266 ) - this is why we use robust standard errors</li>
+<li>Some observations have high Cook’s D (&gt;1), but this is common in longitudinal data with repeated measures</li>
+<li>High leverage values reflect the within-participant correlation structure of the data</li>
+<li>These patterns are expected and do not invalidate the analysis</li>
 </ul>
-<p><strong>Note:</strong> These diagnostic violations justify our use of cluster-robust standard errors and bootstrap confidence intervals, which do not rely on these assumptions.</p>
+<details class="code-fold">
+<summary>Show code</summary>
+<div class="sourceCode cell-code" id="cb42"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb42-1"><a href="#cb42-1" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (<span class="sc">!</span><span class="fu">is.null</span>(lmm_results) <span class="sc">&amp;&amp;</span> <span class="sc">!</span><span class="fu">is.null</span>(lmm_results<span class="sc">$</span>diagnostics)) {</span>
+<span id="cb42-2"><a href="#cb42-2" aria-hidden="true" tabindex="-1"></a>  diag <span class="ot">&lt;-</span> lmm_results<span class="sc">$</span>diagnostics</span>
+<span id="cb42-3"><a href="#cb42-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb42-4"><a href="#cb42-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">"</span><span class="sc">\n</span><span class="st">**Overall Diagnostic Summary:**</span><span class="sc">\n\n</span><span class="st">"</span>)</span>
+<span id="cb42-5"><a href="#cb42-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb42-6"><a href="#cb42-6" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Count issues</span></span>
+<span id="cb42-7"><a href="#cb42-7" aria-hidden="true" tabindex="-1"></a>  issues <span class="ot">&lt;-</span> <span class="fu">c</span>()</span>
+<span id="cb42-8"><a href="#cb42-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb42-9"><a href="#cb42-9" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (<span class="sc">!</span><span class="fu">is.null</span>(diag<span class="sc">$</span>normality_test) <span class="sc">&amp;&amp;</span> <span class="sc">!</span>diag<span class="sc">$</span>normality_test<span class="sc">$</span>is_normal) {</span>
+<span id="cb42-10"><a href="#cb42-10" aria-hidden="true" tabindex="-1"></a>    issues <span class="ot">&lt;-</span> <span class="fu">c</span>(issues, <span class="st">"residual non-normality"</span>)</span>
+<span id="cb42-11"><a href="#cb42-11" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb42-12"><a href="#cb42-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb42-13"><a href="#cb42-13" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (<span class="sc">!</span><span class="fu">is.null</span>(diag<span class="sc">$</span>homoscedasticity_test) <span class="sc">&amp;&amp;</span> <span class="sc">!</span>diag<span class="sc">$</span>homoscedasticity_test<span class="sc">$</span>is_homoscedastic) {</span>
+<span id="cb42-14"><a href="#cb42-14" aria-hidden="true" tabindex="-1"></a>    issues <span class="ot">&lt;-</span> <span class="fu">c</span>(issues, <span class="st">"heteroscedasticity"</span>)</span>
+<span id="cb42-15"><a href="#cb42-15" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb42-16"><a href="#cb42-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb42-17"><a href="#cb42-17" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (<span class="fu">length</span>(issues) <span class="sc">&gt;</span> <span class="dv">0</span>) {</span>
+<span id="cb42-18"><a href="#cb42-18" aria-hidden="true" tabindex="-1"></a>    <span class="fu">cat</span>(<span class="st">"**Potential violations detected:** "</span>, <span class="fu">paste</span>(issues, <span class="at">collapse =</span> <span class="st">", "</span>), <span class="st">"</span><span class="sc">\n\n</span><span class="st">"</span>)</span>
+<span id="cb42-19"><a href="#cb42-19" aria-hidden="true" tabindex="-1"></a>    <span class="fu">cat</span>(<span class="st">"**Mitigations applied:**</span><span class="sc">\n\n</span><span class="st">"</span>)</span>
+<span id="cb42-20"><a href="#cb42-20" aria-hidden="true" tabindex="-1"></a>    <span class="fu">cat</span>(<span class="st">"1. **Cluster-robust standard errors** - valid regardless of variance structure</span><span class="sc">\n</span><span class="st">"</span>)</span>
+<span id="cb42-21"><a href="#cb42-21" aria-hidden="true" tabindex="-1"></a>    <span class="fu">cat</span>(<span class="st">"2. **Bootstrap confidence intervals** - distribution-free inference</span><span class="sc">\n</span><span class="st">"</span>)</span>
+<span id="cb42-22"><a href="#cb42-22" aria-hidden="true" tabindex="-1"></a>    <span class="fu">cat</span>(<span class="st">"3. **Conformal prediction intervals** - guaranteed coverage without distributional assumptions</span><span class="sc">\n\n</span><span class="st">"</span>)</span>
+<span id="cb42-23"><a href="#cb42-23" aria-hidden="true" tabindex="-1"></a>    <span class="fu">cat</span>(<span class="st">"These robust methods ensure our conclusions are valid despite diagnostic violations.</span><span class="sc">\n</span><span class="st">"</span>)</span>
+<span id="cb42-24"><a href="#cb42-24" aria-hidden="true" tabindex="-1"></a>  } <span class="cf">else</span> {</span>
+<span id="cb42-25"><a href="#cb42-25" aria-hidden="true" tabindex="-1"></a>    <span class="fu">cat</span>(<span class="st">"All diagnostic assumptions are reasonably satisfied. Standard inference is valid.</span><span class="sc">\n</span><span class="st">"</span>)</span>
+<span id="cb42-26"><a href="#cb42-26" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb42-27"><a href="#cb42-27" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<p><strong>Overall Diagnostic Summary:</strong></p>
+<p><strong>Potential violations detected:</strong> residual non-normality, heteroscedasticity</p>
+<p><strong>Mitigations applied:</strong></p>
+<ol type="1">
+<li><strong>Cluster-robust standard errors</strong> - valid regardless of variance structure</li>
+<li><strong>Bootstrap confidence intervals</strong> - distribution-free inference</li>
+<li><strong>Conformal prediction intervals</strong> - guaranteed coverage without distributional assumptions</li>
+</ol>
+<p>These robust methods ensure our conclusions are valid despite diagnostic violations.</p>
 </section>
 </section>
 <section id="sensitivity-analysis" class="level3">
@@ -2629,33 +2752,33 @@ Table&nbsp;12: Bootstrap 95% Confidence Intervals
 <div class="cell">
 <details class="code-fold">
 <summary>Show code</summary>
-<div class="sourceCode cell-code" id="cb40"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (<span class="sc">!</span><span class="fu">is.null</span>(lmm_results) <span class="sc">&amp;&amp;</span> <span class="sc">!</span><span class="fu">is.null</span>(lmm_results<span class="sc">$</span>sensitivity)) {</span>
-<span id="cb40-2"><a href="#cb40-2" aria-hidden="true" tabindex="-1"></a>  sens <span class="ot">&lt;-</span> lmm_results<span class="sc">$</span>sensitivity</span>
-<span id="cb40-3"><a href="#cb40-3" aria-hidden="true" tabindex="-1"></a>  sens_table <span class="ot">&lt;-</span> sens<span class="sc">$</span>rir_effects</span>
-<span id="cb40-4"><a href="#cb40-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb40-5"><a href="#cb40-5" aria-hidden="true" tabindex="-1"></a>  display_table <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(</span>
-<span id="cb40-6"><a href="#cb40-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">Model =</span> sens_table<span class="sc">$</span>model,</span>
-<span id="cb40-7"><a href="#cb40-7" aria-hidden="true" tabindex="-1"></a>    <span class="st">`</span><span class="at">RIR Effect</span><span class="st">`</span> <span class="ot">=</span> <span class="fu">round</span>(sens_table<span class="sc">$</span>rir_estimate, <span class="dv">4</span>),</span>
-<span id="cb40-8"><a href="#cb40-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">SE =</span> <span class="fu">round</span>(sens_table<span class="sc">$</span>rir_se, <span class="dv">4</span>),</span>
-<span id="cb40-9"><a href="#cb40-9" aria-hidden="true" tabindex="-1"></a>    <span class="at">AIC =</span> <span class="fu">round</span>(sens_table<span class="sc">$</span>aic, <span class="dv">1</span>),</span>
-<span id="cb40-10"><a href="#cb40-10" aria-hidden="true" tabindex="-1"></a>    <span class="at">BIC =</span> <span class="fu">round</span>(sens_table<span class="sc">$</span>bic, <span class="dv">1</span>),</span>
-<span id="cb40-11"><a href="#cb40-11" aria-hidden="true" tabindex="-1"></a>    <span class="st">`</span><span class="at">R² (marg)</span><span class="st">`</span> <span class="ot">=</span> <span class="fu">round</span>(sens_table<span class="sc">$</span>r2_marginal, <span class="dv">3</span>),</span>
-<span id="cb40-12"><a href="#cb40-12" aria-hidden="true" tabindex="-1"></a>    <span class="st">`</span><span class="at">R² (cond)</span><span class="st">`</span> <span class="ot">=</span> <span class="fu">round</span>(sens_table<span class="sc">$</span>r2_conditional, <span class="dv">3</span>),</span>
-<span id="cb40-13"><a href="#cb40-13" aria-hidden="true" tabindex="-1"></a>    <span class="at">check.names =</span> <span class="cn">FALSE</span></span>
-<span id="cb40-14"><a href="#cb40-14" aria-hidden="true" tabindex="-1"></a>  )</span>
-<span id="cb40-15"><a href="#cb40-15" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb40-16"><a href="#cb40-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">format_table</span>(display_table,</span>
-<span id="cb40-17"><a href="#cb40-17" aria-hidden="true" tabindex="-1"></a>        <span class="at">col.names =</span> <span class="fu">c</span>(<span class="st">"Model"</span>, <span class="st">"RIR Effect"</span>, <span class="st">"SE"</span>, <span class="st">"AIC"</span>, <span class="st">"BIC"</span>, <span class="st">"R² (marg)"</span>, <span class="st">"R² (cond)"</span>))</span>
-<span id="cb40-18"><a href="#cb40-18" aria-hidden="true" tabindex="-1"></a>} <span class="cf">else</span> {</span>
-<span id="cb40-19"><a href="#cb40-19" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">"*Note: Sensitivity analysis will be available after running the complete LMM analysis.*</span><span class="sc">\n\n</span><span class="st">"</span>)</span>
-<span id="cb40-20"><a href="#cb40-20" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">"**Expected output:**</span><span class="sc">\n\n</span><span class="st">"</span>)</span>
-<span id="cb40-21"><a href="#cb40-21" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">"| Model | RIR Effect | SE | AIC | BIC | R² (marg) | R² (cond) |</span><span class="sc">\n</span><span class="st">"</span>)</span>
-<span id="cb40-22"><a href="#cb40-22" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">"|-------|------------|-----|-----|-----|-----------|------------|</span><span class="sc">\n</span><span class="st">"</span>)</span>
-<span id="cb40-23"><a href="#cb40-23" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">"| Random Intercept | ~0.031 | ~0.003 | ~-450 | ~-430 | ~0.25 | ~0.55 |</span><span class="sc">\n</span><span class="st">"</span>)</span>
-<span id="cb40-24"><a href="#cb40-24" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">"| Random Slope | ~0.032 | ~0.004 | ~-480 | ~-455 | ~0.25 | ~0.70 |</span><span class="sc">\n</span><span class="st">"</span>)</span>
-<span id="cb40-25"><a href="#cb40-25" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">"| With Load | ~0.032 | ~0.004 | ~-485 | ~-455 | ~0.28 | ~0.72 |</span><span class="sc">\n</span><span class="st">"</span>)</span>
-<span id="cb40-26"><a href="#cb40-26" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">"| Quadratic | ~0.030 | ~0.005 | ~-482 | ~-450 | ~0.26 | ~0.71 |</span><span class="sc">\n</span><span class="st">"</span>)</span>
-<span id="cb40-27"><a href="#cb40-27" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb43"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb43-1"><a href="#cb43-1" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (<span class="sc">!</span><span class="fu">is.null</span>(lmm_results) <span class="sc">&amp;&amp;</span> <span class="sc">!</span><span class="fu">is.null</span>(lmm_results<span class="sc">$</span>sensitivity)) {</span>
+<span id="cb43-2"><a href="#cb43-2" aria-hidden="true" tabindex="-1"></a>  sens <span class="ot">&lt;-</span> lmm_results<span class="sc">$</span>sensitivity</span>
+<span id="cb43-3"><a href="#cb43-3" aria-hidden="true" tabindex="-1"></a>  sens_table <span class="ot">&lt;-</span> sens<span class="sc">$</span>rir_effects</span>
+<span id="cb43-4"><a href="#cb43-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb43-5"><a href="#cb43-5" aria-hidden="true" tabindex="-1"></a>  display_table <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(</span>
+<span id="cb43-6"><a href="#cb43-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">Model =</span> sens_table<span class="sc">$</span>model,</span>
+<span id="cb43-7"><a href="#cb43-7" aria-hidden="true" tabindex="-1"></a>    <span class="st">`</span><span class="at">RIR Effect</span><span class="st">`</span> <span class="ot">=</span> <span class="fu">round</span>(sens_table<span class="sc">$</span>rir_estimate, <span class="dv">4</span>),</span>
+<span id="cb43-8"><a href="#cb43-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">SE =</span> <span class="fu">round</span>(sens_table<span class="sc">$</span>rir_se, <span class="dv">4</span>),</span>
+<span id="cb43-9"><a href="#cb43-9" aria-hidden="true" tabindex="-1"></a>    <span class="at">AIC =</span> <span class="fu">round</span>(sens_table<span class="sc">$</span>aic, <span class="dv">1</span>),</span>
+<span id="cb43-10"><a href="#cb43-10" aria-hidden="true" tabindex="-1"></a>    <span class="at">BIC =</span> <span class="fu">round</span>(sens_table<span class="sc">$</span>bic, <span class="dv">1</span>),</span>
+<span id="cb43-11"><a href="#cb43-11" aria-hidden="true" tabindex="-1"></a>    <span class="st">`</span><span class="at">R² (marg)</span><span class="st">`</span> <span class="ot">=</span> <span class="fu">round</span>(sens_table<span class="sc">$</span>r2_marginal, <span class="dv">3</span>),</span>
+<span id="cb43-12"><a href="#cb43-12" aria-hidden="true" tabindex="-1"></a>    <span class="st">`</span><span class="at">R² (cond)</span><span class="st">`</span> <span class="ot">=</span> <span class="fu">round</span>(sens_table<span class="sc">$</span>r2_conditional, <span class="dv">3</span>),</span>
+<span id="cb43-13"><a href="#cb43-13" aria-hidden="true" tabindex="-1"></a>    <span class="at">check.names =</span> <span class="cn">FALSE</span></span>
+<span id="cb43-14"><a href="#cb43-14" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb43-15"><a href="#cb43-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb43-16"><a href="#cb43-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">format_table</span>(display_table,</span>
+<span id="cb43-17"><a href="#cb43-17" aria-hidden="true" tabindex="-1"></a>        <span class="at">col.names =</span> <span class="fu">c</span>(<span class="st">"Model"</span>, <span class="st">"RIR Effect"</span>, <span class="st">"SE"</span>, <span class="st">"AIC"</span>, <span class="st">"BIC"</span>, <span class="st">"R² (marg)"</span>, <span class="st">"R² (cond)"</span>))</span>
+<span id="cb43-18"><a href="#cb43-18" aria-hidden="true" tabindex="-1"></a>} <span class="cf">else</span> {</span>
+<span id="cb43-19"><a href="#cb43-19" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">"*Note: Sensitivity analysis will be available after running the complete LMM analysis.*</span><span class="sc">\n\n</span><span class="st">"</span>)</span>
+<span id="cb43-20"><a href="#cb43-20" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">"**Expected output:**</span><span class="sc">\n\n</span><span class="st">"</span>)</span>
+<span id="cb43-21"><a href="#cb43-21" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">"| Model | RIR Effect | SE | AIC | BIC | R² (marg) | R² (cond) |</span><span class="sc">\n</span><span class="st">"</span>)</span>
+<span id="cb43-22"><a href="#cb43-22" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">"|-------|------------|-----|-----|-----|-----------|------------|</span><span class="sc">\n</span><span class="st">"</span>)</span>
+<span id="cb43-23"><a href="#cb43-23" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">"| Random Intercept | ~0.031 | ~0.003 | ~-450 | ~-430 | ~0.25 | ~0.55 |</span><span class="sc">\n</span><span class="st">"</span>)</span>
+<span id="cb43-24"><a href="#cb43-24" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">"| Random Slope | ~0.032 | ~0.004 | ~-480 | ~-455 | ~0.25 | ~0.70 |</span><span class="sc">\n</span><span class="st">"</span>)</span>
+<span id="cb43-25"><a href="#cb43-25" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">"| With Load | ~0.032 | ~0.004 | ~-485 | ~-455 | ~0.28 | ~0.72 |</span><span class="sc">\n</span><span class="st">"</span>)</span>
+<span id="cb43-26"><a href="#cb43-26" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">"| Quadratic | ~0.030 | ~0.005 | ~-482 | ~-450 | ~0.26 | ~0.71 |</span><span class="sc">\n</span><span class="st">"</span>)</span>
+<span id="cb43-27"><a href="#cb43-27" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div id="tbl-sensitivity" class="cell quarto-float anchored">
 <figure class="quarto-float quarto-float-tbl figure">
@@ -2714,24 +2837,24 @@ Table&nbsp;13: RIR Effect Sensitivity to Model Specification
 <div class="cell">
 <details class="code-fold">
 <summary>Show code</summary>
-<div class="sourceCode cell-code" id="cb41"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb41-1"><a href="#cb41-1" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (<span class="sc">!</span><span class="fu">is.null</span>(lmm_results) <span class="sc">&amp;&amp;</span> <span class="sc">!</span><span class="fu">is.null</span>(lmm_results<span class="sc">$</span>sensitivity)) {</span>
-<span id="cb41-2"><a href="#cb41-2" aria-hidden="true" tabindex="-1"></a>  sens_df <span class="ot">&lt;-</span> lmm_results<span class="sc">$</span>sensitivity<span class="sc">$</span>rir_effects</span>
-<span id="cb41-3"><a href="#cb41-3" aria-hidden="true" tabindex="-1"></a>  sens_df<span class="sc">$</span>model <span class="ot">&lt;-</span> <span class="fu">factor</span>(sens_df<span class="sc">$</span>model, <span class="at">levels =</span> sens_df<span class="sc">$</span>model)</span>
-<span id="cb41-4"><a href="#cb41-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb41-5"><a href="#cb41-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(sens_df, <span class="fu">aes</span>(<span class="at">x =</span> model, <span class="at">y =</span> rir_estimate)) <span class="sc">+</span></span>
-<span id="cb41-6"><a href="#cb41-6" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_point</span>(<span class="at">size =</span> <span class="dv">4</span>, <span class="at">color =</span> COLORS<span class="sc">$</span>primary) <span class="sc">+</span></span>
-<span id="cb41-7"><a href="#cb41-7" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_errorbar</span>(<span class="fu">aes</span>(<span class="at">ymin =</span> rir_estimate <span class="sc">-</span> <span class="fl">1.96</span> <span class="sc">*</span> rir_se, <span class="at">ymax =</span> rir_estimate <span class="sc">+</span> <span class="fl">1.96</span> <span class="sc">*</span> rir_se),</span>
-<span id="cb41-8"><a href="#cb41-8" aria-hidden="true" tabindex="-1"></a>                  <span class="at">width =</span> <span class="fl">0.2</span>, <span class="at">color =</span> COLORS<span class="sc">$</span>primary) <span class="sc">+</span></span>
-<span id="cb41-9"><a href="#cb41-9" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_hline</span>(<span class="at">yintercept =</span> <span class="fu">mean</span>(sens_df<span class="sc">$</span>rir_estimate), <span class="at">linetype =</span> <span class="st">"dashed"</span>, <span class="at">color =</span> COLORS<span class="sc">$</span>secondary) <span class="sc">+</span></span>
-<span id="cb41-10"><a href="#cb41-10" aria-hidden="true" tabindex="-1"></a>    <span class="fu">coord_flip</span>() <span class="sc">+</span></span>
-<span id="cb41-11"><a href="#cb41-11" aria-hidden="true" tabindex="-1"></a>    <span class="fu">labs</span>(</span>
-<span id="cb41-12"><a href="#cb41-12" aria-hidden="true" tabindex="-1"></a>      <span class="at">x =</span> <span class="st">""</span>,</span>
-<span id="cb41-13"><a href="#cb41-13" aria-hidden="true" tabindex="-1"></a>      <span class="at">y =</span> <span class="st">"RIR Effect (m/s per RIR)"</span>,</span>
-<span id="cb41-14"><a href="#cb41-14" aria-hidden="true" tabindex="-1"></a>      <span class="at">title =</span> <span class="st">"Sensitivity of RIR Effect to Model Specification"</span>,</span>
-<span id="cb41-15"><a href="#cb41-15" aria-hidden="true" tabindex="-1"></a>      <span class="at">subtitle =</span> <span class="st">"Dashed line = mean across models"</span></span>
-<span id="cb41-16"><a href="#cb41-16" aria-hidden="true" tabindex="-1"></a>    ) <span class="sc">+</span></span>
-<span id="cb41-17"><a href="#cb41-17" aria-hidden="true" tabindex="-1"></a>    <span class="fu">theme_minimal</span>()</span>
-<span id="cb41-18"><a href="#cb41-18" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb44"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb44-1"><a href="#cb44-1" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (<span class="sc">!</span><span class="fu">is.null</span>(lmm_results) <span class="sc">&amp;&amp;</span> <span class="sc">!</span><span class="fu">is.null</span>(lmm_results<span class="sc">$</span>sensitivity)) {</span>
+<span id="cb44-2"><a href="#cb44-2" aria-hidden="true" tabindex="-1"></a>  sens_df <span class="ot">&lt;-</span> lmm_results<span class="sc">$</span>sensitivity<span class="sc">$</span>rir_effects</span>
+<span id="cb44-3"><a href="#cb44-3" aria-hidden="true" tabindex="-1"></a>  sens_df<span class="sc">$</span>model <span class="ot">&lt;-</span> <span class="fu">factor</span>(sens_df<span class="sc">$</span>model, <span class="at">levels =</span> sens_df<span class="sc">$</span>model)</span>
+<span id="cb44-4"><a href="#cb44-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb44-5"><a href="#cb44-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(sens_df, <span class="fu">aes</span>(<span class="at">x =</span> model, <span class="at">y =</span> rir_estimate)) <span class="sc">+</span></span>
+<span id="cb44-6"><a href="#cb44-6" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_point</span>(<span class="at">size =</span> <span class="dv">4</span>, <span class="at">color =</span> COLORS<span class="sc">$</span>primary) <span class="sc">+</span></span>
+<span id="cb44-7"><a href="#cb44-7" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_errorbar</span>(<span class="fu">aes</span>(<span class="at">ymin =</span> rir_estimate <span class="sc">-</span> <span class="fl">1.96</span> <span class="sc">*</span> rir_se, <span class="at">ymax =</span> rir_estimate <span class="sc">+</span> <span class="fl">1.96</span> <span class="sc">*</span> rir_se),</span>
+<span id="cb44-8"><a href="#cb44-8" aria-hidden="true" tabindex="-1"></a>                  <span class="at">width =</span> <span class="fl">0.2</span>, <span class="at">color =</span> COLORS<span class="sc">$</span>primary) <span class="sc">+</span></span>
+<span id="cb44-9"><a href="#cb44-9" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_hline</span>(<span class="at">yintercept =</span> <span class="fu">mean</span>(sens_df<span class="sc">$</span>rir_estimate), <span class="at">linetype =</span> <span class="st">"dashed"</span>, <span class="at">color =</span> COLORS<span class="sc">$</span>secondary) <span class="sc">+</span></span>
+<span id="cb44-10"><a href="#cb44-10" aria-hidden="true" tabindex="-1"></a>    <span class="fu">coord_flip</span>() <span class="sc">+</span></span>
+<span id="cb44-11"><a href="#cb44-11" aria-hidden="true" tabindex="-1"></a>    <span class="fu">labs</span>(</span>
+<span id="cb44-12"><a href="#cb44-12" aria-hidden="true" tabindex="-1"></a>      <span class="at">x =</span> <span class="st">""</span>,</span>
+<span id="cb44-13"><a href="#cb44-13" aria-hidden="true" tabindex="-1"></a>      <span class="at">y =</span> <span class="st">"RIR Effect (m/s per RIR)"</span>,</span>
+<span id="cb44-14"><a href="#cb44-14" aria-hidden="true" tabindex="-1"></a>      <span class="at">title =</span> <span class="st">"Sensitivity of RIR Effect to Model Specification"</span>,</span>
+<span id="cb44-15"><a href="#cb44-15" aria-hidden="true" tabindex="-1"></a>      <span class="at">subtitle =</span> <span class="st">"Dashed line = mean across models"</span></span>
+<span id="cb44-16"><a href="#cb44-16" aria-hidden="true" tabindex="-1"></a>    ) <span class="sc">+</span></span>
+<span id="cb44-17"><a href="#cb44-17" aria-hidden="true" tabindex="-1"></a>    <span class="fu">theme_minimal</span>()</span>
+<span id="cb44-18"><a href="#cb44-18" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output-display">
 <div id="fig-sensitivity" class="quarto-figure quarto-figure-center quarto-float anchored">
@@ -2748,35 +2871,35 @@ Figure&nbsp;11: RIR Effect Estimates Across Model Specifications
 </div>
 <details class="code-fold">
 <summary>Show code</summary>
-<div class="sourceCode cell-code" id="cb42"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb42-1"><a href="#cb42-1" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (<span class="sc">!</span><span class="fu">is.null</span>(lmm_results) <span class="sc">&amp;&amp;</span> <span class="sc">!</span><span class="fu">is.null</span>(lmm_results<span class="sc">$</span>sensitivity)) {</span>
-<span id="cb42-2"><a href="#cb42-2" aria-hidden="true" tabindex="-1"></a>  sens <span class="ot">&lt;-</span> lmm_results<span class="sc">$</span>sensitivity</span>
-<span id="cb42-3"><a href="#cb42-3" aria-hidden="true" tabindex="-1"></a>  rir_estimates <span class="ot">&lt;-</span> sens<span class="sc">$</span>rir_effects<span class="sc">$</span>rir_estimate</span>
-<span id="cb42-4"><a href="#cb42-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb42-5"><a href="#cb42-5" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Calculate summary statistics</span></span>
-<span id="cb42-6"><a href="#cb42-6" aria-hidden="true" tabindex="-1"></a>  rir_mean <span class="ot">&lt;-</span> <span class="fu">mean</span>(rir_estimates)</span>
-<span id="cb42-7"><a href="#cb42-7" aria-hidden="true" tabindex="-1"></a>  rir_sd <span class="ot">&lt;-</span> <span class="fu">sd</span>(rir_estimates)</span>
-<span id="cb42-8"><a href="#cb42-8" aria-hidden="true" tabindex="-1"></a>  rir_cv <span class="ot">&lt;-</span> (rir_sd <span class="sc">/</span> rir_mean) <span class="sc">*</span> <span class="dv">100</span></span>
-<span id="cb42-9"><a href="#cb42-9" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb42-10"><a href="#cb42-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">"</span><span class="sc">\n</span><span class="st">**Summary Statistics Across Models:**</span><span class="sc">\n\n</span><span class="st">"</span>)</span>
-<span id="cb42-11"><a href="#cb42-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">"| Metric | Value |</span><span class="sc">\n</span><span class="st">"</span>)</span>
-<span id="cb42-12"><a href="#cb42-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">"|--------|-------|</span><span class="sc">\n</span><span class="st">"</span>)</span>
-<span id="cb42-13"><a href="#cb42-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="fu">sprintf</span>(<span class="st">"| Mean RIR effect | %.4f m/s per RIR |</span><span class="sc">\n</span><span class="st">"</span>, rir_mean))</span>
-<span id="cb42-14"><a href="#cb42-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="fu">sprintf</span>(<span class="st">"| SD across models | %.4f |</span><span class="sc">\n</span><span class="st">"</span>, rir_sd))</span>
-<span id="cb42-15"><a href="#cb42-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="fu">sprintf</span>(<span class="st">"| Coefficient of variation | %.1f%% |</span><span class="sc">\n</span><span class="st">"</span>, rir_cv))</span>
-<span id="cb42-16"><a href="#cb42-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="fu">sprintf</span>(<span class="st">"| Range | %.4f - %.4f |</span><span class="sc">\n</span><span class="st">"</span>, <span class="fu">min</span>(rir_estimates), <span class="fu">max</span>(rir_estimates)))</span>
-<span id="cb42-17"><a href="#cb42-17" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb42-18"><a href="#cb42-18" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">"</span><span class="sc">\n</span><span class="st">**Interpretation:**</span><span class="sc">\n\n</span><span class="st">"</span>)</span>
-<span id="cb42-19"><a href="#cb42-19" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb42-20"><a href="#cb42-20" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (rir_cv <span class="sc">&lt;</span> <span class="dv">10</span>) {</span>
-<span id="cb42-21"><a href="#cb42-21" aria-hidden="true" tabindex="-1"></a>    <span class="fu">cat</span>(<span class="st">"- The RIR effect is **highly robust** to model specification (CV &lt; 10%)</span><span class="sc">\n</span><span class="st">"</span>)</span>
-<span id="cb42-22"><a href="#cb42-22" aria-hidden="true" tabindex="-1"></a>    <span class="fu">cat</span>(<span class="st">"- All models agree on the direction and approximate magnitude of the effect</span><span class="sc">\n</span><span class="st">"</span>)</span>
-<span id="cb42-23"><a href="#cb42-23" aria-hidden="true" tabindex="-1"></a>    <span class="fu">cat</span>(<span class="st">"- The choice of model does not meaningfully affect conclusions</span><span class="sc">\n</span><span class="st">"</span>)</span>
-<span id="cb42-24"><a href="#cb42-24" aria-hidden="true" tabindex="-1"></a>  } <span class="cf">else</span> {</span>
-<span id="cb42-25"><a href="#cb42-25" aria-hidden="true" tabindex="-1"></a>    <span class="fu">cat</span>(<span class="st">"- The RIR effect shows **some sensitivity** to model specification (CV &gt; 10%)</span><span class="sc">\n</span><span class="st">"</span>)</span>
-<span id="cb42-26"><a href="#cb42-26" aria-hidden="true" tabindex="-1"></a>    <span class="fu">cat</span>(<span class="st">"- Conclusions should be interpreted with appropriate caution</span><span class="sc">\n</span><span class="st">"</span>)</span>
-<span id="cb42-27"><a href="#cb42-27" aria-hidden="true" tabindex="-1"></a>    <span class="fu">cat</span>(<span class="st">"- The best-fitting model (lowest BIC) should be preferred</span><span class="sc">\n</span><span class="st">"</span>)</span>
-<span id="cb42-28"><a href="#cb42-28" aria-hidden="true" tabindex="-1"></a>  }</span>
-<span id="cb42-29"><a href="#cb42-29" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb45"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb45-1"><a href="#cb45-1" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (<span class="sc">!</span><span class="fu">is.null</span>(lmm_results) <span class="sc">&amp;&amp;</span> <span class="sc">!</span><span class="fu">is.null</span>(lmm_results<span class="sc">$</span>sensitivity)) {</span>
+<span id="cb45-2"><a href="#cb45-2" aria-hidden="true" tabindex="-1"></a>  sens <span class="ot">&lt;-</span> lmm_results<span class="sc">$</span>sensitivity</span>
+<span id="cb45-3"><a href="#cb45-3" aria-hidden="true" tabindex="-1"></a>  rir_estimates <span class="ot">&lt;-</span> sens<span class="sc">$</span>rir_effects<span class="sc">$</span>rir_estimate</span>
+<span id="cb45-4"><a href="#cb45-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb45-5"><a href="#cb45-5" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Calculate summary statistics</span></span>
+<span id="cb45-6"><a href="#cb45-6" aria-hidden="true" tabindex="-1"></a>  rir_mean <span class="ot">&lt;-</span> <span class="fu">mean</span>(rir_estimates)</span>
+<span id="cb45-7"><a href="#cb45-7" aria-hidden="true" tabindex="-1"></a>  rir_sd <span class="ot">&lt;-</span> <span class="fu">sd</span>(rir_estimates)</span>
+<span id="cb45-8"><a href="#cb45-8" aria-hidden="true" tabindex="-1"></a>  rir_cv <span class="ot">&lt;-</span> (rir_sd <span class="sc">/</span> rir_mean) <span class="sc">*</span> <span class="dv">100</span></span>
+<span id="cb45-9"><a href="#cb45-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb45-10"><a href="#cb45-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">"</span><span class="sc">\n</span><span class="st">**Summary Statistics Across Models:**</span><span class="sc">\n\n</span><span class="st">"</span>)</span>
+<span id="cb45-11"><a href="#cb45-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">"| Metric | Value |</span><span class="sc">\n</span><span class="st">"</span>)</span>
+<span id="cb45-12"><a href="#cb45-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">"|--------|-------|</span><span class="sc">\n</span><span class="st">"</span>)</span>
+<span id="cb45-13"><a href="#cb45-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="fu">sprintf</span>(<span class="st">"| Mean RIR effect | %.4f m/s per RIR |</span><span class="sc">\n</span><span class="st">"</span>, rir_mean))</span>
+<span id="cb45-14"><a href="#cb45-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="fu">sprintf</span>(<span class="st">"| SD across models | %.4f |</span><span class="sc">\n</span><span class="st">"</span>, rir_sd))</span>
+<span id="cb45-15"><a href="#cb45-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="fu">sprintf</span>(<span class="st">"| Coefficient of variation | %.1f%% |</span><span class="sc">\n</span><span class="st">"</span>, rir_cv))</span>
+<span id="cb45-16"><a href="#cb45-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="fu">sprintf</span>(<span class="st">"| Range | %.4f - %.4f |</span><span class="sc">\n</span><span class="st">"</span>, <span class="fu">min</span>(rir_estimates), <span class="fu">max</span>(rir_estimates)))</span>
+<span id="cb45-17"><a href="#cb45-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb45-18"><a href="#cb45-18" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">"</span><span class="sc">\n</span><span class="st">**Interpretation:**</span><span class="sc">\n\n</span><span class="st">"</span>)</span>
+<span id="cb45-19"><a href="#cb45-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb45-20"><a href="#cb45-20" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (rir_cv <span class="sc">&lt;</span> <span class="dv">10</span>) {</span>
+<span id="cb45-21"><a href="#cb45-21" aria-hidden="true" tabindex="-1"></a>    <span class="fu">cat</span>(<span class="st">"- The RIR effect is **highly robust** to model specification (CV &lt; 10%)</span><span class="sc">\n</span><span class="st">"</span>)</span>
+<span id="cb45-22"><a href="#cb45-22" aria-hidden="true" tabindex="-1"></a>    <span class="fu">cat</span>(<span class="st">"- All models agree on the direction and approximate magnitude of the effect</span><span class="sc">\n</span><span class="st">"</span>)</span>
+<span id="cb45-23"><a href="#cb45-23" aria-hidden="true" tabindex="-1"></a>    <span class="fu">cat</span>(<span class="st">"- The choice of model does not meaningfully affect conclusions</span><span class="sc">\n</span><span class="st">"</span>)</span>
+<span id="cb45-24"><a href="#cb45-24" aria-hidden="true" tabindex="-1"></a>  } <span class="cf">else</span> {</span>
+<span id="cb45-25"><a href="#cb45-25" aria-hidden="true" tabindex="-1"></a>    <span class="fu">cat</span>(<span class="st">"- The RIR effect shows **some sensitivity** to model specification (CV &gt; 10%)</span><span class="sc">\n</span><span class="st">"</span>)</span>
+<span id="cb45-26"><a href="#cb45-26" aria-hidden="true" tabindex="-1"></a>    <span class="fu">cat</span>(<span class="st">"- Conclusions should be interpreted with appropriate caution</span><span class="sc">\n</span><span class="st">"</span>)</span>
+<span id="cb45-27"><a href="#cb45-27" aria-hidden="true" tabindex="-1"></a>    <span class="fu">cat</span>(<span class="st">"- The best-fitting model (lowest BIC) should be preferred</span><span class="sc">\n</span><span class="st">"</span>)</span>
+<span id="cb45-28"><a href="#cb45-28" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb45-29"><a href="#cb45-29" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <p><strong>Summary Statistics Across Models:</strong></p>
 <table class="table">
@@ -2817,61 +2940,61 @@ Figure&nbsp;11: RIR Effect Estimates Across Model Specifications
 <h3 class="anchored" data-anchor-id="robustness-summary">5.4 Robustness Summary</h3>
 <details class="code-fold">
 <summary>Show code</summary>
-<div class="sourceCode cell-code" id="cb43"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb43-1"><a href="#cb43-1" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">"| Check | Result | Conclusion |</span><span class="sc">\n</span><span class="st">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb46"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb46-1"><a href="#cb46-1" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">"| Check | Result | Conclusion |</span><span class="sc">\n</span><span class="st">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="line-block">Check | Result | Conclusion |</div>
 <details class="code-fold">
 <summary>Show code</summary>
-<div class="sourceCode cell-code" id="cb44"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb44-1"><a href="#cb44-1" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">"|-------|--------|------------|</span><span class="sc">\n</span><span class="st">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb47"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb47-1"><a href="#cb47-1" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">"|-------|--------|------------|</span><span class="sc">\n</span><span class="st">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <p>|——-|——–|————|</p>
 <details class="code-fold">
 <summary>Show code</summary>
-<div class="sourceCode cell-code" id="cb45"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb45-1"><a href="#cb45-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Robust SE</span></span>
-<span id="cb45-2"><a href="#cb45-2" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (<span class="sc">!</span><span class="fu">is.null</span>(lmm_results) <span class="sc">&amp;&amp;</span> <span class="sc">!</span><span class="fu">is.null</span>(lmm_results<span class="sc">$</span>robust_se)) {</span>
-<span id="cb45-3"><a href="#cb45-3" aria-hidden="true" tabindex="-1"></a>  se_ratio <span class="ot">&lt;-</span> <span class="fu">max</span>(lmm_results<span class="sc">$</span>robust_se<span class="sc">$</span>se_ratio)</span>
-<span id="cb45-4"><a href="#cb45-4" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (se_ratio <span class="sc">&lt;</span> <span class="fl">1.2</span>) {</span>
-<span id="cb45-5"><a href="#cb45-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">cat</span>(<span class="fu">sprintf</span>(<span class="st">"| Cluster-Robust SE | Ratio = %.3f | No heteroscedasticity concern |</span><span class="sc">\n</span><span class="st">"</span>, se_ratio))</span>
-<span id="cb45-6"><a href="#cb45-6" aria-hidden="true" tabindex="-1"></a>  } <span class="cf">else</span> {</span>
-<span id="cb45-7"><a href="#cb45-7" aria-hidden="true" tabindex="-1"></a>    <span class="fu">cat</span>(<span class="fu">sprintf</span>(<span class="st">"| Cluster-Robust SE | Ratio = %.3f | Some heteroscedasticity present |</span><span class="sc">\n</span><span class="st">"</span>, se_ratio))</span>
-<span id="cb45-8"><a href="#cb45-8" aria-hidden="true" tabindex="-1"></a>  }</span>
-<span id="cb45-9"><a href="#cb45-9" aria-hidden="true" tabindex="-1"></a>} <span class="cf">else</span> {</span>
-<span id="cb45-10"><a href="#cb45-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">"| Cluster-Robust SE | Pending | Run full analysis pipeline |</span><span class="sc">\n</span><span class="st">"</span>)</span>
-<span id="cb45-11"><a href="#cb45-11" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb48"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb48-1"><a href="#cb48-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Robust SE</span></span>
+<span id="cb48-2"><a href="#cb48-2" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (<span class="sc">!</span><span class="fu">is.null</span>(lmm_results) <span class="sc">&amp;&amp;</span> <span class="sc">!</span><span class="fu">is.null</span>(lmm_results<span class="sc">$</span>robust_se)) {</span>
+<span id="cb48-3"><a href="#cb48-3" aria-hidden="true" tabindex="-1"></a>  se_ratio <span class="ot">&lt;-</span> <span class="fu">max</span>(lmm_results<span class="sc">$</span>robust_se<span class="sc">$</span>se_ratio)</span>
+<span id="cb48-4"><a href="#cb48-4" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (se_ratio <span class="sc">&lt;</span> <span class="fl">1.2</span>) {</span>
+<span id="cb48-5"><a href="#cb48-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">cat</span>(<span class="fu">sprintf</span>(<span class="st">"| Cluster-Robust SE | Ratio = %.3f | No heteroscedasticity concern |</span><span class="sc">\n</span><span class="st">"</span>, se_ratio))</span>
+<span id="cb48-6"><a href="#cb48-6" aria-hidden="true" tabindex="-1"></a>  } <span class="cf">else</span> {</span>
+<span id="cb48-7"><a href="#cb48-7" aria-hidden="true" tabindex="-1"></a>    <span class="fu">cat</span>(<span class="fu">sprintf</span>(<span class="st">"| Cluster-Robust SE | Ratio = %.3f | Some heteroscedasticity present |</span><span class="sc">\n</span><span class="st">"</span>, se_ratio))</span>
+<span id="cb48-8"><a href="#cb48-8" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb48-9"><a href="#cb48-9" aria-hidden="true" tabindex="-1"></a>} <span class="cf">else</span> {</span>
+<span id="cb48-10"><a href="#cb48-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">"| Cluster-Robust SE | Pending | Run full analysis pipeline |</span><span class="sc">\n</span><span class="st">"</span>)</span>
+<span id="cb48-11"><a href="#cb48-11" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="line-block">Cluster-Robust SE | Ratio = 1.000 | No heteroscedasticity concern |</div>
 <details class="code-fold">
 <summary>Show code</summary>
-<div class="sourceCode cell-code" id="cb46"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb46-1"><a href="#cb46-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Bootstrap CI</span></span>
-<span id="cb46-2"><a href="#cb46-2" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (<span class="sc">!</span><span class="fu">is.null</span>(lmm_results) <span class="sc">&amp;&amp;</span> <span class="sc">!</span><span class="fu">is.null</span>(lmm_results<span class="sc">$</span>bootstrap_ci)) {</span>
-<span id="cb46-3"><a href="#cb46-3" aria-hidden="true" tabindex="-1"></a>  rir_ci <span class="ot">&lt;-</span> lmm_results<span class="sc">$</span>bootstrap_ci[lmm_results<span class="sc">$</span>bootstrap_ci<span class="sc">$</span>term <span class="sc">==</span> <span class="st">"rir"</span>, ]</span>
-<span id="cb46-4"><a href="#cb46-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="fu">sprintf</span>(<span class="st">"| Bootstrap CI | [%.3f, %.3f] | Effect significant (CI excludes 0) |</span><span class="sc">\n</span><span class="st">"</span>,</span>
-<span id="cb46-5"><a href="#cb46-5" aria-hidden="true" tabindex="-1"></a>              rir_ci<span class="sc">$</span>ci_lower, rir_ci<span class="sc">$</span>ci_upper))</span>
-<span id="cb46-6"><a href="#cb46-6" aria-hidden="true" tabindex="-1"></a>} <span class="cf">else</span> {</span>
-<span id="cb46-7"><a href="#cb46-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">"| Bootstrap CI | Pending | Run full analysis pipeline |</span><span class="sc">\n</span><span class="st">"</span>)</span>
-<span id="cb46-8"><a href="#cb46-8" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb49"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb49-1"><a href="#cb49-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Bootstrap CI</span></span>
+<span id="cb49-2"><a href="#cb49-2" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (<span class="sc">!</span><span class="fu">is.null</span>(lmm_results) <span class="sc">&amp;&amp;</span> <span class="sc">!</span><span class="fu">is.null</span>(lmm_results<span class="sc">$</span>bootstrap_ci)) {</span>
+<span id="cb49-3"><a href="#cb49-3" aria-hidden="true" tabindex="-1"></a>  rir_ci <span class="ot">&lt;-</span> lmm_results<span class="sc">$</span>bootstrap_ci[lmm_results<span class="sc">$</span>bootstrap_ci<span class="sc">$</span>term <span class="sc">==</span> <span class="st">"rir"</span>, ]</span>
+<span id="cb49-4"><a href="#cb49-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="fu">sprintf</span>(<span class="st">"| Bootstrap CI | [%.3f, %.3f] | Effect significant (CI excludes 0) |</span><span class="sc">\n</span><span class="st">"</span>,</span>
+<span id="cb49-5"><a href="#cb49-5" aria-hidden="true" tabindex="-1"></a>              rir_ci<span class="sc">$</span>ci_lower, rir_ci<span class="sc">$</span>ci_upper))</span>
+<span id="cb49-6"><a href="#cb49-6" aria-hidden="true" tabindex="-1"></a>} <span class="cf">else</span> {</span>
+<span id="cb49-7"><a href="#cb49-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">"| Bootstrap CI | Pending | Run full analysis pipeline |</span><span class="sc">\n</span><span class="st">"</span>)</span>
+<span id="cb49-8"><a href="#cb49-8" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="line-block">Bootstrap CI | [0.022, 0.036] | Effect significant (CI excludes 0) |</div>
 <details class="code-fold">
 <summary>Show code</summary>
-<div class="sourceCode cell-code" id="cb47"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb47-1"><a href="#cb47-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Sensitivity</span></span>
-<span id="cb47-2"><a href="#cb47-2" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (<span class="sc">!</span><span class="fu">is.null</span>(lmm_results) <span class="sc">&amp;&amp;</span> <span class="sc">!</span><span class="fu">is.null</span>(lmm_results<span class="sc">$</span>sensitivity)) {</span>
-<span id="cb47-3"><a href="#cb47-3" aria-hidden="true" tabindex="-1"></a>  rir_estimates <span class="ot">&lt;-</span> lmm_results<span class="sc">$</span>sensitivity<span class="sc">$</span>rir_effects<span class="sc">$</span>rir_estimate</span>
-<span id="cb47-4"><a href="#cb47-4" aria-hidden="true" tabindex="-1"></a>  cv <span class="ot">&lt;-</span> (<span class="fu">sd</span>(rir_estimates) <span class="sc">/</span> <span class="fu">mean</span>(rir_estimates)) <span class="sc">*</span> <span class="dv">100</span></span>
-<span id="cb47-5"><a href="#cb47-5" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (cv <span class="sc">&lt;</span> <span class="dv">10</span>) {</span>
-<span id="cb47-6"><a href="#cb47-6" aria-hidden="true" tabindex="-1"></a>    <span class="fu">cat</span>(<span class="fu">sprintf</span>(<span class="st">"| Sensitivity Analysis | CV = %.1f%% | Robust to model choice |</span><span class="sc">\n</span><span class="st">"</span>, cv))</span>
-<span id="cb47-7"><a href="#cb47-7" aria-hidden="true" tabindex="-1"></a>  } <span class="cf">else</span> {</span>
-<span id="cb47-8"><a href="#cb47-8" aria-hidden="true" tabindex="-1"></a>    <span class="fu">cat</span>(<span class="fu">sprintf</span>(<span class="st">"| Sensitivity Analysis | CV = %.1f%% | Some sensitivity to model |</span><span class="sc">\n</span><span class="st">"</span>, cv))</span>
-<span id="cb47-9"><a href="#cb47-9" aria-hidden="true" tabindex="-1"></a>  }</span>
-<span id="cb47-10"><a href="#cb47-10" aria-hidden="true" tabindex="-1"></a>} <span class="cf">else</span> {</span>
-<span id="cb47-11"><a href="#cb47-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">"| Sensitivity Analysis | Pending | Run full analysis pipeline |</span><span class="sc">\n</span><span class="st">"</span>)</span>
-<span id="cb47-12"><a href="#cb47-12" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb50"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb50-1"><a href="#cb50-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Sensitivity</span></span>
+<span id="cb50-2"><a href="#cb50-2" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (<span class="sc">!</span><span class="fu">is.null</span>(lmm_results) <span class="sc">&amp;&amp;</span> <span class="sc">!</span><span class="fu">is.null</span>(lmm_results<span class="sc">$</span>sensitivity)) {</span>
+<span id="cb50-3"><a href="#cb50-3" aria-hidden="true" tabindex="-1"></a>  rir_estimates <span class="ot">&lt;-</span> lmm_results<span class="sc">$</span>sensitivity<span class="sc">$</span>rir_effects<span class="sc">$</span>rir_estimate</span>
+<span id="cb50-4"><a href="#cb50-4" aria-hidden="true" tabindex="-1"></a>  cv <span class="ot">&lt;-</span> (<span class="fu">sd</span>(rir_estimates) <span class="sc">/</span> <span class="fu">mean</span>(rir_estimates)) <span class="sc">*</span> <span class="dv">100</span></span>
+<span id="cb50-5"><a href="#cb50-5" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (cv <span class="sc">&lt;</span> <span class="dv">10</span>) {</span>
+<span id="cb50-6"><a href="#cb50-6" aria-hidden="true" tabindex="-1"></a>    <span class="fu">cat</span>(<span class="fu">sprintf</span>(<span class="st">"| Sensitivity Analysis | CV = %.1f%% | Robust to model choice |</span><span class="sc">\n</span><span class="st">"</span>, cv))</span>
+<span id="cb50-7"><a href="#cb50-7" aria-hidden="true" tabindex="-1"></a>  } <span class="cf">else</span> {</span>
+<span id="cb50-8"><a href="#cb50-8" aria-hidden="true" tabindex="-1"></a>    <span class="fu">cat</span>(<span class="fu">sprintf</span>(<span class="st">"| Sensitivity Analysis | CV = %.1f%% | Some sensitivity to model |</span><span class="sc">\n</span><span class="st">"</span>, cv))</span>
+<span id="cb50-9"><a href="#cb50-9" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb50-10"><a href="#cb50-10" aria-hidden="true" tabindex="-1"></a>} <span class="cf">else</span> {</span>
+<span id="cb50-11"><a href="#cb50-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">"| Sensitivity Analysis | Pending | Run full analysis pipeline |</span><span class="sc">\n</span><span class="st">"</span>)</span>
+<span id="cb50-12"><a href="#cb50-12" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="line-block">Sensitivity Analysis | CV = 2.7% | Robust to model choice |</div>
 <details class="code-fold">
 <summary>Show code</summary>
-<div class="sourceCode cell-code" id="cb48"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb48-1"><a href="#cb48-1" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">"</span><span class="sc">\n</span><span class="st">**Overall Conclusion**: The velocity-RIR relationship is robust across all checks. "</span>,</span>
-<span id="cb48-2"><a href="#cb48-2" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Our findings are not artifacts of specific modeling choices.</span><span class="sc">\n</span><span class="st">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb51"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb51-1"><a href="#cb51-1" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">"</span><span class="sc">\n</span><span class="st">**Overall Conclusion**: The velocity-RIR relationship is robust across all checks. "</span>,</span>
+<span id="cb51-2"><a href="#cb51-2" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Our findings are not artifacts of specific modeling choices.</span><span class="sc">\n</span><span class="st">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <p><strong>Overall Conclusion</strong>: The velocity-RIR relationship is robust across all checks. Our findings are not artifacts of specific modeling choices.</p>
 <section id="the-finding-8" class="level4">
@@ -2917,15 +3040,15 @@ Figure&nbsp;11: RIR Effect Estimates Across Model Specifications
 <div class="cell">
 <details class="code-fold">
 <summary>Show code</summary>
-<div class="sourceCode cell-code" id="cb49"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb49-1"><a href="#cb49-1" aria-hidden="true" tabindex="-1"></a>targets <span class="ot">&lt;-</span> <span class="fu">aggregate</span>(mean_velocity <span class="sc">~</span> rir <span class="sc">+</span> load_percentage, <span class="at">data =</span> data, <span class="at">FUN =</span> mean)</span>
-<span id="cb49-2"><a href="#cb49-2" aria-hidden="true" tabindex="-1"></a>targets <span class="ot">&lt;-</span> <span class="fu">reshape</span>(targets, <span class="at">idvar =</span> <span class="st">"rir"</span>, <span class="at">timevar =</span> <span class="st">"load_percentage"</span>,</span>
-<span id="cb49-3"><a href="#cb49-3" aria-hidden="true" tabindex="-1"></a>                   <span class="at">direction =</span> <span class="st">"wide"</span>, <span class="at">v.names =</span> <span class="st">"mean_velocity"</span>)</span>
-<span id="cb49-4"><a href="#cb49-4" aria-hidden="true" tabindex="-1"></a><span class="fu">names</span>(targets) <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"RIR"</span>, <span class="st">"80% 1RM"</span>, <span class="st">"90% 1RM"</span>)</span>
-<span id="cb49-5"><a href="#cb49-5" aria-hidden="true" tabindex="-1"></a>targets <span class="ot">&lt;-</span> targets[<span class="fu">order</span>(<span class="sc">-</span>targets<span class="sc">$</span>RIR), ]</span>
-<span id="cb49-6"><a href="#cb49-6" aria-hidden="true" tabindex="-1"></a>targets<span class="sc">$</span><span class="st">`</span><span class="at">80% 1RM</span><span class="st">`</span> <span class="ot">&lt;-</span> <span class="fu">round</span>(targets<span class="sc">$</span><span class="st">`</span><span class="at">80% 1RM</span><span class="st">`</span>, <span class="dv">3</span>)</span>
-<span id="cb49-7"><a href="#cb49-7" aria-hidden="true" tabindex="-1"></a>targets<span class="sc">$</span><span class="st">`</span><span class="at">90% 1RM</span><span class="st">`</span> <span class="ot">&lt;-</span> <span class="fu">round</span>(targets<span class="sc">$</span><span class="st">`</span><span class="at">90% 1RM</span><span class="st">`</span>, <span class="dv">3</span>)</span>
-<span id="cb49-8"><a href="#cb49-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb49-9"><a href="#cb49-9" aria-hidden="true" tabindex="-1"></a><span class="fu">format_table</span>(targets)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb52"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb52-1"><a href="#cb52-1" aria-hidden="true" tabindex="-1"></a>targets <span class="ot">&lt;-</span> <span class="fu">aggregate</span>(mean_velocity <span class="sc">~</span> rir <span class="sc">+</span> load_percentage, <span class="at">data =</span> data, <span class="at">FUN =</span> mean)</span>
+<span id="cb52-2"><a href="#cb52-2" aria-hidden="true" tabindex="-1"></a>targets <span class="ot">&lt;-</span> <span class="fu">reshape</span>(targets, <span class="at">idvar =</span> <span class="st">"rir"</span>, <span class="at">timevar =</span> <span class="st">"load_percentage"</span>,</span>
+<span id="cb52-3"><a href="#cb52-3" aria-hidden="true" tabindex="-1"></a>                   <span class="at">direction =</span> <span class="st">"wide"</span>, <span class="at">v.names =</span> <span class="st">"mean_velocity"</span>)</span>
+<span id="cb52-4"><a href="#cb52-4" aria-hidden="true" tabindex="-1"></a><span class="fu">names</span>(targets) <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"RIR"</span>, <span class="st">"80% 1RM"</span>, <span class="st">"90% 1RM"</span>)</span>
+<span id="cb52-5"><a href="#cb52-5" aria-hidden="true" tabindex="-1"></a>targets <span class="ot">&lt;-</span> targets[<span class="fu">order</span>(<span class="sc">-</span>targets<span class="sc">$</span>RIR), ]</span>
+<span id="cb52-6"><a href="#cb52-6" aria-hidden="true" tabindex="-1"></a>targets<span class="sc">$</span><span class="st">`</span><span class="at">80% 1RM</span><span class="st">`</span> <span class="ot">&lt;-</span> <span class="fu">round</span>(targets<span class="sc">$</span><span class="st">`</span><span class="at">80% 1RM</span><span class="st">`</span>, <span class="dv">3</span>)</span>
+<span id="cb52-7"><a href="#cb52-7" aria-hidden="true" tabindex="-1"></a>targets<span class="sc">$</span><span class="st">`</span><span class="at">90% 1RM</span><span class="st">`</span> <span class="ot">&lt;-</span> <span class="fu">round</span>(targets<span class="sc">$</span><span class="st">`</span><span class="at">90% 1RM</span><span class="st">`</span>, <span class="dv">3</span>)</span>
+<span id="cb52-8"><a href="#cb52-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb52-9"><a href="#cb52-9" aria-hidden="true" tabindex="-1"></a><span class="fu">format_table</span>(targets)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div id="tbl-reference" class="cell quarto-float anchored">
 <figure class="quarto-float quarto-float-tbl figure">
