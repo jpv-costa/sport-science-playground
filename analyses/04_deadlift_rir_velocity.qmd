@@ -300,6 +300,21 @@ knitr::kable(targets, row.names = FALSE)
 3. **Prediction accuracy is acceptable** for practical use (~1.4 rep error)
 4. **Deadlift-specific factors** (grip, binary failure) may reduce predictability
 
+## Further Analyses
+
+This foundational study is extended with more advanced analyses:
+
+| Analysis | Study | Key Findings |
+|----------|-------|--------------|
+| Linear Mixed Effects Models | [Study 5](05_deadlift_lmm_analysis.qmd) | Global vs individual velocity tables, load effect testing |
+| MVT Variability | [Study 6](06_advanced_velocity_analyses.qmd) | Minimum velocity threshold variation across individuals |
+| Day-to-Day Reliability | [Study 6](06_advanced_velocity_analyses.qmd) | ICC analysis of velocity profile stability |
+| Polynomial vs Linear | [Study 6](06_advanced_velocity_analyses.qmd) | Model comparison with AIC/BIC |
+| Velocity Decay Patterns | [Study 6](06_advanced_velocity_analyses.qmd) | Within-set fatigue dynamics |
+| Failure Prediction | [Study 6](06_advanced_velocity_analyses.qmd) | LOOCV prediction from early rep velocities |
+
+These extensions provide practical velocity tables, reliability metrics, and predictive models for real-world training applications.
+
 ## Technical Notes
 
 This analysis used:

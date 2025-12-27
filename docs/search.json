@@ -1,269 +1,234 @@
 [
   {
-    "objectID": "01_pelland_meta_regression.html",
-    "href": "01_pelland_meta_regression.html",
-    "title": "Does Training to Failure Matter?",
+    "objectID": "06_advanced_velocity_analyses.html",
+    "href": "06_advanced_velocity_analyses.html",
+    "title": "Study 6: Advanced Velocity-RIR Analyses",
     "section": "",
-    "text": "Should I push every set to complete failure, or stop a few reps short?\nThis question has practical implications:\n\nTraining to failure is harder and requires more recovery\nIf stopping short gives the same results, you could train more frequently\nBut if failure is necessary for gains, stopping short wastes your time\n\nPelland and colleagues tackled this question by analyzing all available research on the topic."
+    "text": "This study presents five novel analyses (H2-H6) that extend our understanding of the deadlift velocity-RIR relationship, addressing key gaps in the velocity-based training literature.\n\n\n\n\n\n\n\n\n\n\nAnalysis\nResult\nPractical Implication\n\n\n\n\nH2: MVT Variability\nCV = 30.8%\nIndividual calibration essential\n\n\nH3: Day Reliability\nSlope ICC = 0.72\nPeriodic recalibration needed\n\n\nH4: Model Comparison\n26.3% prefer quadratic\nLinear model adequate\n\n\nH5: Velocity Decay\nAccelerates (p = 0.035)\nNon-linear considerations\n\n\nH6: Failure Prediction\nMAE = 1.29 reps\nFirst rep velocity useful"
   },
   {
-    "objectID": "01_pelland_meta_regression.html#the-question-every-lifter-asks",
-    "href": "01_pelland_meta_regression.html#the-question-every-lifter-asks",
-    "title": "Does Training to Failure Matter?",
+    "objectID": "06_advanced_velocity_analyses.html#executive-summary",
+    "href": "06_advanced_velocity_analyses.html#executive-summary",
+    "title": "Study 6: Advanced Velocity-RIR Analyses",
     "section": "",
-    "text": "Should I push every set to complete failure, or stop a few reps short?\nThis question has practical implications:\n\nTraining to failure is harder and requires more recovery\nIf stopping short gives the same results, you could train more frequently\nBut if failure is necessary for gains, stopping short wastes your time\n\nPelland and colleagues tackled this question by analyzing all available research on the topic."
+    "text": "This study presents five novel analyses (H2-H6) that extend our understanding of the deadlift velocity-RIR relationship, addressing key gaps in the velocity-based training literature.\n\n\n\n\n\n\n\n\n\n\nAnalysis\nResult\nPractical Implication\n\n\n\n\nH2: MVT Variability\nCV = 30.8%\nIndividual calibration essential\n\n\nH3: Day Reliability\nSlope ICC = 0.72\nPeriodic recalibration needed\n\n\nH4: Model Comparison\n26.3% prefer quadratic\nLinear model adequate\n\n\nH5: Velocity Decay\nAccelerates (p = 0.035)\nNon-linear considerations\n\n\nH6: Failure Prediction\nMAE = 1.29 reps\nFirst rep velocity useful"
   },
   {
-    "objectID": "01_pelland_meta_regression.html#what-is-proximity-to-failure",
-    "href": "01_pelland_meta_regression.html#what-is-proximity-to-failure",
-    "title": "Does Training to Failure Matter?",
-    "section": "What is “Proximity to Failure”?",
-    "text": "What is “Proximity to Failure”?\nResearchers use Repetitions in Reserve (RIR) to measure how close you are to failure:\n\n\n\nRIR\nMeaning\n\n\n\n\n0\nComplete failure - couldn’t do another rep\n\n\n1\nStopped with 1 rep “left in the tank”\n\n\n2\nStopped with 2 reps remaining\n\n\n3+\nStopped well short of failure\n\n\n\nThe key question: Does RIR predict training outcomes?"
+    "objectID": "06_advanced_velocity_analyses.html#experimental-setup",
+    "href": "06_advanced_velocity_analyses.html#experimental-setup",
+    "title": "Study 6: Advanced Velocity-RIR Analyses",
+    "section": "Experimental Setup",
+    "text": "Experimental Setup\n\nStudy Design\n\n\nParticipants: 19 \n\n\nTotal observations: 406 \n\n\nTotal sets: 74 \n\n\nReps per set: 1 - 8 (mean: 5.5 )\n\n\nProtocol:\n\nParticipants: 19 resistance-trained individuals (15 male, 4 female)\nExercise: Conventional deadlift\nLoads: 80% and 90% of 1RM\nTesting days: 2 separate days\nProtocol: Each participant performed sets to muscular failure at both loads on both days\nMeasurement: Mean concentric velocity (MCV) for each repetition using linear position transducer\n\nData Structure:\nEach observation represents a single repetition within a set to failure:\n\n\n\nSample data structure (first 10 rows)\n\n\n\n\n\n\n\n\n\n\n\n\nid\nday\nload_percentage\nset_id\nrep_number\nrir\nmean_velocity\nreps_to_failure\n\n\n\n\nSebastião\nDay 1\n90%\nSebastião_Day1_90pct_S1\n1\n3\n0.333\n4\n\n\nSebastião\nDay 1\n90%\nSebastião_Day1_90pct_S1\n2\n2\n0.293\n4\n\n\nSebastião\nDay 1\n90%\nSebastião_Day1_90pct_S1\n3\n1\n0.235\n4\n\n\nSebastião\nDay 1\n90%\nSebastião_Day1_90pct_S1\n4\n0\n0.246\n4\n\n\nSebastião\nDay 1\n80%\nSebastião_Day1_80pct_S2\n1\n5\n0.398\n6\n\n\nSebastião\nDay 1\n80%\nSebastião_Day1_80pct_S2\n2\n4\n0.363\n6\n\n\nSebastião\nDay 1\n80%\nSebastião_Day1_80pct_S2\n3\n3\n0.386\n6\n\n\nSebastião\nDay 1\n80%\nSebastião_Day1_80pct_S2\n4\n2\n0.387\n6\n\n\nSebastião\nDay 1\n80%\nSebastião_Day1_80pct_S2\n5\n1\n0.325\n6\n\n\nSebastião\nDay 1\n80%\nSebastião_Day1_80pct_S2\n6\n0\n0.206\n6"
   },
   {
-    "objectID": "01_pelland_meta_regression.html#the-study-design",
-    "href": "01_pelland_meta_regression.html#the-study-design",
-    "title": "Does Training to Failure Matter?",
-    "section": "The Study Design",
-    "text": "The Study Design\n\nMeta-Regression: Analyzing All the Evidence\nRather than running a single study, the authors performed a meta-regression - a statistical technique that:\n\nGathers effect sizes from many individual studies\nWeights each study by its precision (larger studies count more)\nModels how a predictor (RIR) relates to outcomes across all studies\nAccounts for non-independence (multiple effects from the same study)\n\n\n\nThe Data\n\n\nShow code\ndata.frame(\n  Outcome = c(\"Strength\", \"Hypertrophy\"),\n  `Effect Sizes` = c(nrow(results$data_strength), nrow(results$data_hypertrophy)),\n  `Imputed Correlation` = c(\n    round(results$correlation_strength, 3),\n    round(results$correlation_hypertrophy, 3)\n  ),\n  check.names = FALSE\n) |&gt; knitr::kable()\n\n\n\n\nTable 1: Summary of included effect sizes\n\n\n\n\n\n\nOutcome\nEffect Sizes\nImputed Correlation\n\n\n\n\nStrength\n243\n0.866\n\n\nHypertrophy\n140\n0.875\n\n\n\n\n\n\n\n\nThe analysis included 243 strength effect sizes and 140 hypertrophy effect sizes."
+    "objectID": "06_advanced_velocity_analyses.html#h2-minimum-velocity-threshold-mvt-variability",
+    "href": "06_advanced_velocity_analyses.html#h2-minimum-velocity-threshold-mvt-variability",
+    "title": "Study 6: Advanced Velocity-RIR Analyses",
+    "section": "H2: Minimum Velocity Threshold (MVT) Variability",
+    "text": "H2: Minimum Velocity Threshold (MVT) Variability\n\nResearch Question\nHow variable is the velocity at muscular failure (RIR=0) across individuals?\n\n\nWhy This Matters\nThe Minimum Velocity Threshold (MVT) is the velocity at which an athlete reaches muscular failure. Understanding MVT variability has critical implications:\n\nIf MVT is consistent across individuals (~0.15-0.20 m/s for all), it could serve as a universal failure indicator\nIf MVT varies widely, individual calibration is essential before using velocity-based prescriptions\nPractical question: Can coaches use a single “stop velocity” for all athletes?\n\n\n\nMethods\n\nExtracted all observations at RIR = 0 (failure reps)\nCalculated population-level MVT statistics (mean, SD, CV, IQR)\nCalculated individual MVT for each participant\nTested for sex differences using Mann-Whitney U test\nTested for load differences (80% vs 90%) using paired comparison\n\n\n\nResults\n\n\nPopulation MVT Statistics:\n\n\n  Mean: 0.206 m/s\n\n\n  SD: 0.063 m/s\n\n\n  CV: 30.8 %\n\n\n  IQR: 0.082 m/s\n\n\n  Range: 0.119 - 0.402 m/s\n\n\n\n\nShow code\n# Extract failure data\nfailure_data &lt;- data[data$rir == 0, ]\n\n# Density plot\nggplot(failure_data, aes(x = mean_velocity)) +\n  geom_histogram(aes(y = after_stat(density)), bins = 20, fill = \"steelblue\", alpha = 0.7) +\n  geom_density(color = \"darkred\", linewidth = 1) +\n  geom_vline(xintercept = mvt_result$population_stats$mean,\n             linetype = \"dashed\", color = \"black\", linewidth = 1) +\n  annotate(\"text\", x = mvt_result$population_stats$mean + 0.02, y = 5,\n           label = paste(\"Mean =\", round(mvt_result$population_stats$mean, 3), \"m/s\"),\n           hjust = 0) +\n  labs(x = \"Velocity at Failure (m/s)\", y = \"Density\",\n       title = \"MVT Distribution Across All Failure Observations\") +\n  theme_minimal()\n\n\n\n\n\nDistribution of Minimum Velocity Threshold (MVT) at failure\n\n\n\n\n\n\nShow code\n# Individual MVT plot\nind_mvt &lt;- mvt_result$individual_stats\nind_mvt &lt;- ind_mvt[order(ind_mvt$mean_mvt), ]\nind_mvt$id &lt;- factor(ind_mvt$id, levels = ind_mvt$id)\n\nggplot(ind_mvt, aes(x = id, y = mean_mvt, color = sex)) +\n  geom_point(size = 3) +\n  geom_errorbar(aes(ymin = mean_mvt - sd_mvt, ymax = mean_mvt + sd_mvt),\n                width = 0.3) +\n  geom_hline(yintercept = mvt_result$population_stats$mean,\n             linetype = \"dashed\", color = \"gray50\") +\n  coord_flip() +\n  labs(x = \"Participant\", y = \"MVT (m/s)\",\n       title = \"Individual MVT with Standard Deviation\",\n       color = \"Sex\") +\n  scale_color_manual(values = c(\"female\" = \"#E41A1C\", \"male\" = \"#377EB8\")) +\n  theme_minimal()\n\n\n\n\n\nIndividual MVT values showing between-participant variability\n\n\n\n\nLoad Comparison:\n\n\n80% 1RM MVT: 0.217 ± 0.066 m/s\n\n\n90% 1RM MVT: 0.196 ± 0.061 m/s\n\n\nDifference: 0.021 m/s\n\n\np-value: 0.148 \n\n\nSignificant: FALSE \n\n\n\n\nInterpretation\nThe coefficient of variation (CV = 30.8%) indicates high inter-individual variability in MVT. This finding has important practical implications:\n\nA single MVT value cannot be applied to all athletes - using a population mean (0.21 m/s) would underestimate capacity for some and overshoot for others\nIndividual calibration is essential - each athlete needs their own MVT determined through testing to failure\nNo significant load effect - MVT appears similar at 80% and 90% 1RM, suggesting MVT is an individual characteristic independent of load"
   },
   {
-    "objectID": "01_pelland_meta_regression.html#the-key-finding-strength-vs-hypertrophy-differ",
-    "href": "01_pelland_meta_regression.html#the-key-finding-strength-vs-hypertrophy-differ",
-    "title": "Does Training to Failure Matter?",
-    "section": "The Key Finding: Strength vs Hypertrophy Differ",
-    "text": "The Key Finding: Strength vs Hypertrophy Differ\n\nStrength Gains\n\n\nShow code\nstr_mod &lt;- results$strength_model\nstr_rir_b &lt;- str_mod$b[\"avg.rir\", 1]\nstr_rir_p &lt;- str_mod$pval[rownames(str_mod$b) == \"avg.rir\"]\n\n\nFor strength gains, RIR showed:\n\nCoefficient: 0.0018 (effect per 1 RIR increase)\nP-value: 0.784\nInterpretation: Not statistically significant\n\n\n\n\n\n\n\nWhat This Means for Strength Training\n\n\n\nTraining closer to failure does not produce significantly greater strength gains. You can stop 2-3 reps short and still get similar strength improvements.\n\n\n\n\nMuscle Hypertrophy\n\n\nShow code\nhyp_mod &lt;- results$hypertrophy_model\nhyp_rir_b &lt;- hyp_mod$b[\"avg.rir\", 1]\nhyp_rir_p &lt;- hyp_mod$pval[rownames(hyp_mod$b) == \"avg.rir\"]\n\n\nFor muscle growth, RIR showed:\n\nCoefficient: -0.0193 (effect per 1 RIR increase)\nP-value: 0.0042\nInterpretation: Statistically significant and negative\n\n\n\n\n\n\n\nWhat This Means for Muscle Building\n\n\n\nTraining closer to failure does produce greater muscle hypertrophy. Each RIR reduction (getting closer to failure) is associated with slightly more muscle growth."
+    "objectID": "06_advanced_velocity_analyses.html#h3-day-to-day-reliability",
+    "href": "06_advanced_velocity_analyses.html#h3-day-to-day-reliability",
+    "title": "Study 6: Advanced Velocity-RIR Analyses",
+    "section": "H3: Day-to-Day Reliability",
+    "text": "H3: Day-to-Day Reliability\n\nResearch Question\nAre individual velocity-RIR relationships stable across testing days?\n\n\nWhy This Matters\nIf velocity profiles are reliable day-to-day: - A single calibration session is sufficient to establish individual velocity zones - Athletes don’t need frequent retesting\nIf velocity profiles are unreliable: - Athletes need frequent recalibration (perhaps weekly or monthly) - Session-to-session factors (fatigue, recovery, motivation) may affect velocity targets\n\n\nMethods\n\nFit individual linear models (velocity ~ RIR) for Day 1 and Day 2 separately\nExtract slopes (velocity loss per RIR) and intercepts (baseline velocity)\nCalculate MVT predictions for each day (predicted velocity at RIR = 0)\nCompute ICC(2,1) - two-way random effects model\nCalculate SEM (Standard Error of Measurement) and MDC95 (Minimal Detectable Change)\n\nICC Interpretation (Koo & Li, 2016):\n\n\n\nICC\nInterpretation\n\n\n\n\n&lt; 0.50\nPoor\n\n\n0.50-0.75\nModerate\n\n\n0.75-0.90\nGood\n\n\n&gt; 0.90\nExcellent\n\n\n\n\n\nResults\n\n\nSlope ICC (velocity loss per RIR):\n\n\n  ICC: 0.72 \n\n\n  95% CI: 0.644 - 0.796 \n\n\n  Interpretation: Moderate \n\n\nMVT ICC (predicted failure velocity):\n\n\n  ICC: 0.498 \n\n\n  95% CI: 0.379 - 0.617 \n\n\n  Interpretation: Poor \n\n\n  SEM: 0.024 m/s\n\n\n  MDC95: 0.0666 m/s\n\n\n\n\nShow code\nday_params &lt;- reliability$day_parameters\n\n# Slopes comparison\nggplot(day_params, aes(x = slope_day1, y = slope_day2)) +\n  geom_point(size = 3, alpha = 0.7) +\n  geom_abline(slope = 1, intercept = 0, linetype = \"dashed\", color = \"gray50\") +\n  geom_smooth(method = \"lm\", se = TRUE, color = \"steelblue\") +\n  labs(x = \"Slope Day 1 (m/s per RIR)\", y = \"Slope Day 2 (m/s per RIR)\",\n       title = \"Day-to-Day Reliability of Individual Slopes\",\n       subtitle = paste(\"ICC =\", round(reliability$slope_icc$icc, 2))) +\n  theme_minimal()\n\n\n\n\n\nDay 1 vs Day 2 comparison of individual slopes\n\n\n\n\n\n\nShow code\nggplot(day_params, aes(x = mvt_day1, y = mvt_day2)) +\n  geom_point(size = 3, alpha = 0.7) +\n  geom_abline(slope = 1, intercept = 0, linetype = \"dashed\", color = \"gray50\") +\n  geom_smooth(method = \"lm\", se = TRUE, color = \"steelblue\") +\n  labs(x = \"MVT Day 1 (m/s)\", y = \"MVT Day 2 (m/s)\",\n       title = \"Day-to-Day Reliability of Predicted MVT\",\n       subtitle = paste(\"ICC =\", round(reliability$mvt_icc$icc, 2))) +\n  theme_minimal()\n\n\n\n\n\nDay 1 vs Day 2 comparison of predicted MVT\n\n\n\n\n\n\nInterpretation\n\nSlope reliability is moderate (ICC = 0.72), suggesting the rate of velocity decline per RIR is reasonably consistent\nMVT reliability is poor (ICC = 0.5), indicating that predicted failure velocity varies substantially between days\nMDC95 = 0.067 m/s - changes in MVT smaller than this may represent measurement error rather than true change\n\nPractical recommendation: Consider periodic recalibration (every 2-4 weeks) rather than relying on a single test session."
   },
   {
-    "objectID": "01_pelland_meta_regression.html#visualizing-the-difference",
-    "href": "01_pelland_meta_regression.html#visualizing-the-difference",
-    "title": "Does Training to Failure Matter?",
-    "section": "Visualizing the Difference",
-    "text": "Visualizing the Difference\n\n\nShow code\n# Create comparison data\ncomparison_df &lt;- data.frame(\n  Outcome = c(\"Strength\", \"Hypertrophy\"),\n  Estimate = c(str_rir_b, hyp_rir_b),\n  SE = c(str_mod$se[rownames(str_mod$b) == \"avg.rir\"],\n         hyp_mod$se[rownames(hyp_mod$b) == \"avg.rir\"]),\n  Significant = c(\"No\", \"Yes\")\n)\n\ncomparison_df$Lower &lt;- comparison_df$Estimate - 1.96 * comparison_df$SE\ncomparison_df$Upper &lt;- comparison_df$Estimate + 1.96 * comparison_df$SE\n\nggplot(comparison_df, aes(x = Outcome, y = Estimate, color = Significant)) +\n  geom_point(size = 4) +\n  geom_errorbar(aes(ymin = Lower, ymax = Upper), width = 0.2, linewidth = 1) +\n  geom_hline(yintercept = 0, linetype = \"dashed\", color = \"gray50\") +\n  scale_color_manual(values = c(\"No\" = \"gray50\", \"Yes\" = \"#E41A1C\")) +\n  labs(\n    x = NULL,\n    y = \"RIR Coefficient (Hedge's g per RIR)\",\n    title = \"Effect of RIR on Training Outcomes\",\n    subtitle = \"Negative values = closer to failure is better\"\n  ) +\n  theme_minimal(base_size = 14) +\n  theme(legend.position = \"bottom\")\n\n\n\n\n\n\n\n\nFigure 1: RIR Effect on Strength vs Hypertrophy Outcomes\n\n\n\n\n\nThe figure shows:\n\nStrength (gray): Confidence interval includes zero - no significant effect\nHypertrophy (red): Entirely below zero - significant negative effect"
+    "objectID": "06_advanced_velocity_analyses.html#h4-polynomial-vs-linear-model-comparison",
+    "href": "06_advanced_velocity_analyses.html#h4-polynomial-vs-linear-model-comparison",
+    "title": "Study 6: Advanced Velocity-RIR Analyses",
+    "section": "H4: Polynomial vs Linear Model Comparison",
+    "text": "H4: Polynomial vs Linear Model Comparison\n\nResearch Question\nDoes a quadratic model fit the velocity-RIR relationship better than linear?\n\n\nWhy This Matters\n\nLinear assumption: Velocity decreases at a constant rate with each rep (each rep costs the same velocity)\nQuadratic model: Velocity loss accelerates near failure (fatigue compounds)\n\nIf quadratic is substantially better, this suggests: - The velocity-RIR relationship is non-linear - Simple linear velocity zones may underestimate proximity to failure in the final reps - Coaches should use curvilinear charts or adjust expectations near failure\n\n\nMethods\n\nFor each participant, fit:\n\nLinear: velocity ~ RIR\nQuadratic: velocity ~ RIR + RIR²\n\nCompare using adjusted R², AIC, and BIC\nFit population-level LMM versions and conduct likelihood ratio test\nCount how many participants show significantly better fit with quadratic\n\n\n\nResults\n\n\nIndividual Model Comparison:\n\n\n  Participants analyzed: 19 \n\n\n  Linear preferred: 14 \n\n\n  Quadratic preferred: 5 ( 26.3 %)\n\n\n  Avg R² improvement (quad - linear): 0.0164 \n\n\n\n\nShow code\nind_results &lt;- poly_result$individual_results\n\nggplot(ind_results, aes(x = reorder(id, delta_aic), y = delta_aic, fill = best_model)) +\n  geom_col() +\n  geom_hline(yintercept = -2, linetype = \"dashed\", color = \"red\") +\n  geom_hline(yintercept = 2, linetype = \"dashed\", color = \"red\") +\n  annotate(\"text\", x = 1, y = -3, label = \"Quadratic better\", hjust = 0, color = \"gray40\") +\n  annotate(\"text\", x = 1, y = 3, label = \"Linear better\", hjust = 0, color = \"gray40\") +\n  coord_flip() +\n  labs(x = \"Participant\", y = \"ΔAIC (Quadratic - Linear)\",\n       title = \"Model Comparison by Participant\",\n       subtitle = \"Negative values favor quadratic model\",\n       fill = \"Best Model\") +\n  scale_fill_manual(values = c(\"linear\" = \"steelblue\", \"quadratic\" = \"coral\")) +\n  theme_minimal()\n\n\n\n\n\nAIC comparison between linear and quadratic models by participant\n\n\n\n\n\n\nShow code\nggplot(ind_results, aes(x = r2_adj_linear, y = r2_adj_quad)) +\n  geom_point(aes(color = best_model), size = 3) +\n  geom_abline(slope = 1, intercept = 0, linetype = \"dashed\") +\n  labs(x = \"Adjusted R² (Linear)\", y = \"Adjusted R² (Quadratic)\",\n       title = \"Model Fit Comparison\",\n       color = \"Best Model\") +\n  scale_color_manual(values = c(\"linear\" = \"steelblue\", \"quadratic\" = \"coral\")) +\n  theme_minimal()\n\n\n\n\n\nR² comparison between linear and quadratic models\n\n\n\n\n\n\nInterpretation\nOnly 26.3% of participants show a meaningfully better fit with the quadratic model. This suggests:\n\nLinear model is generally adequate for describing the velocity-RIR relationship\nThe additional complexity of a quadratic term is not justified for most individuals\nPractitioners can confidently use linear velocity zones for training prescription\n\nNote: While a minority of individuals may benefit from quadratic modeling, the linear approximation provides sufficient accuracy for practical applications."
   },
   {
-    "objectID": "01_pelland_meta_regression.html#replication-validation",
-    "href": "01_pelland_meta_regression.html#replication-validation",
-    "title": "Does Training to Failure Matter?",
-    "section": "Replication Validation",
-    "text": "Replication Validation\nOur replication matches the published findings:\n\n\nShow code\ndata.frame(\n  Outcome = c(\"Strength\", \"Hypertrophy\"),\n  `Paper Claim` = c(\n    \"CI contains null (not significant)\",\n    \"Negative slope, CI excludes null\"\n  ),\n  `Our Result` = c(\n    paste0(\"p = \", round(str_rir_p, 3), \" (not significant)\"),\n    paste0(\"b = \", round(hyp_rir_b, 3), \", p = \", round(hyp_rir_p, 3))\n  ),\n  Match = c(\"Yes\", \"Yes\"),\n  check.names = FALSE\n) |&gt; knitr::kable()\n\n\n\n\nTable 2: Replication vs Published Results\n\n\n\n\n\n\n\n\n\n\n\n\nOutcome\nPaper Claim\nOur Result\nMatch\n\n\n\n\nStrength\nCI contains null (not significant)\np = 0.784 (not significant)\nYes\n\n\nHypertrophy\nNegative slope, CI excludes null\nb = -0.019, p = 0.004\nYes"
+    "objectID": "06_advanced_velocity_analyses.html#h5-velocity-decay-rate-within-sets",
+    "href": "06_advanced_velocity_analyses.html#h5-velocity-decay-rate-within-sets",
+    "title": "Study 6: Advanced Velocity-RIR Analyses",
+    "section": "H5: Velocity Decay Rate Within Sets",
+    "text": "H5: Velocity Decay Rate Within Sets\n\nResearch Question\nHow does velocity loss per rep change as a set progresses?\n\n\nWhy This Matters\nUnderstanding velocity decay patterns informs: - When to stop a set - if decay accelerates, stopping earlier preserves movement quality - Model selection - constant decay supports linear models; accelerating decay suggests non-linear approaches - Fatigue thresholds - identifying the rep where decay sharply increases\n\n\nMethods\n\nCalculate rep-to-rep velocity change (Δv = v_n - v_{n-1})\nModel decay rate vs rep number: Δv ~ rep_number\nTest if decay accelerates (negative slope = accelerating fatigue)\nDetect breakpoint where decay notably increases\n\n\n\nResults\n\n\nVelocity Decay Summary:\n\n\n  Average decay per rep: -0.0283 m/s\n\n\n  Early reps (1-3): -0.0206 m/s\n\n\n  Late reps (4+): -0.0338 m/s\n\n\n  Acceleration: -0.0132 m/s\n\n\nAcceleration Test:\n\n\n  Slope: -0.00318 \n\n\n  p-value: 0.03495 \n\n\n  Interpretation: Decay accelerates toward failure \n\n\n\n\nShow code\n# Create spaghetti plot of velocity trajectories\nggplot(data, aes(x = rep_number, y = mean_velocity, group = set_id)) +\n  geom_line(alpha = 0.3, color = \"steelblue\") +\n  stat_summary(aes(group = 1), fun = mean, geom = \"line\",\n               color = \"darkred\", linewidth = 1.5) +\n  stat_summary(aes(group = 1), fun = mean, geom = \"point\",\n               color = \"darkred\", size = 3) +\n  labs(x = \"Rep Number\", y = \"Mean Velocity (m/s)\",\n       title = \"Velocity Trajectories Across Sets\",\n       subtitle = \"Individual sets (blue) with population mean (red)\") +\n  theme_minimal()\n\n\n\n\n\nVelocity trajectories for individual sets\n\n\n\n\n\n\nShow code\n# Decay by rep number\ndecay_data &lt;- decay$set_trajectories\n\nggplot(decay_data, aes(x = factor(rep_number), y = delta_v)) +\n  geom_boxplot(fill = \"steelblue\", alpha = 0.7) +\n  geom_hline(yintercept = 0, linetype = \"dashed\", color = \"gray50\") +\n  labs(x = \"Rep Number\", y = \"Velocity Change from Previous Rep (m/s)\",\n       title = \"Rep-to-Rep Velocity Change\",\n       subtitle = \"Negative values indicate velocity loss\") +\n  theme_minimal()\n\n\n\n\n\nRep-to-rep velocity change by rep number\n\n\n\n\n\n\nInterpretation\nVelocity decay accelerates as the set progresses (p = 0.035):\n\nEarly reps (1-3): Average decay = 20.6 mm/s per rep\nLate reps (4+): Average decay = 33.8 mm/s per rep\n\nThis 13.2 mm/s acceleration in decay rate suggests:\n\nFatigue compounds near failure - the last few reps cost more velocity than earlier reps\nVelocity thresholds are conservative early - athletes have more “buffer” in early reps\nQuality deteriorates rapidly near failure - this supports stopping 1-2 reps before failure for technique preservation"
   },
   {
-    "objectID": "01_pelland_meta_regression.html#practical-implications",
-    "href": "01_pelland_meta_regression.html#practical-implications",
-    "title": "Does Training to Failure Matter?",
+    "objectID": "06_advanced_velocity_analyses.html#h6-early-rep-velocity-for-failure-prediction",
+    "href": "06_advanced_velocity_analyses.html#h6-early-rep-velocity-for-failure-prediction",
+    "title": "Study 6: Advanced Velocity-RIR Analyses",
+    "section": "H6: Early Rep Velocity for Failure Prediction",
+    "text": "H6: Early Rep Velocity for Failure Prediction\n\nResearch Question\nCan the first 1-3 rep velocities predict when failure will occur?\n\n\nWhy This Matters\nThis is perhaps the most practically valuable analysis: - Real-time autoregulation: Predict total reps from the first rep velocity - No rep counting needed: Know when to stop based on velocity alone - Pre-set planning: Estimate how many reps are possible before starting\n\n\nMethods\n\nFor each set, extract: v1 (first rep velocity), v2, v3, and total reps\nBuild prediction models:\n\nModel 1: reps ~ v1\nModel 2: reps ~ v1 + v2\nModel 3: reps ~ v1 + v2 + v3\nModel 4: reps ~ v1 + load\n\nEvaluate with leave-one-set-out cross-validation\nCreate practical lookup table\n\n\n\nResults\n\n\nLeave-One-Set-Out Cross-Validation:\n\n\n  Sets analyzed: 66 \n\n\n  MAE: 1.29 reps\n\n\n  RMSE: 1.53 reps\n\n\n  R²: 0.065 \n\n\n  Within ±1 rep: 42.4 %\n\n\n  Within ±2 reps: 75.8 %\n\n\n\n\n\nPractical Lookup Table: First Rep Velocity → Predicted Reps\n\n\nFirst Rep Velocity (m/s)\nPredicted Reps\nLower 95%\nUpper 95%\n\n\n\n\n0.1\n4.9\n1.8\n8.0\n\n\n0.2\n5.2\n2.1\n8.3\n\n\n0.2\n5.4\n2.4\n8.5\n\n\n0.3\n5.7\n2.6\n8.7\n\n\n0.3\n6.0\n2.9\n9.0\n\n\n0.4\n6.2\n3.2\n9.3\n\n\n0.5\n6.5\n3.4\n9.6\n\n\n0.5\n6.8\n3.7\n9.9\n\n\n0.6\n7.0\n3.9\n10.2\n\n\n\n\n\n\n\nShow code\n# Prepare set-level data\nset_data &lt;- do.call(rbind, lapply(unique(data$set_id), function(sid) {\n  s &lt;- data[data$set_id == sid, ]\n  s &lt;- s[order(s$rep_number), ]\n  if (nrow(s) &lt; 1) return(NULL)\n  data.frame(\n    set_id = sid,\n    v1 = s$mean_velocity[1],\n    reps_to_failure = s$reps_to_failure[1],\n    load_percentage = s$load_percentage[1]\n  )\n}))\n\nggplot(set_data, aes(x = v1, y = reps_to_failure, color = load_percentage)) +\n  geom_point(size = 3, alpha = 0.7) +\n  geom_smooth(method = \"lm\", se = TRUE, aes(group = 1), color = \"black\") +\n  labs(x = \"First Rep Velocity (m/s)\", y = \"Total Reps to Failure\",\n       title = \"Relationship Between First Rep Velocity and Set Capacity\",\n       color = \"Load\") +\n  scale_color_manual(values = c(\"80%\" = \"#E41A1C\", \"90%\" = \"#377EB8\")) +\n  theme_minimal()\n\n\n\n\n\nFirst rep velocity vs total reps completed\n\n\n\n\n\n\nInterpretation\nThe first rep velocity provides a reasonable prediction of set capacity:\n\nMAE = 1.29 reps means predictions are typically within ~1 rep of actual\n75.8% accuracy within ±2 reps is sufficient for practical autoregulation\nEach +0.1 m/s in first rep velocity → ~0.5 additional reps expected\n\nPractical Application: Use the lookup table to estimate available reps from your first rep velocity. For example: - First rep at 0.30 m/s → Expect ~6 reps (95% PI: 3-9) - First rep at 0.45 m/s → Expect ~7 reps (95% PI: 3-10)"
+  },
+  {
+    "objectID": "06_advanced_velocity_analyses.html#practical-implications",
+    "href": "06_advanced_velocity_analyses.html#practical-implications",
+    "title": "Study 6: Advanced Velocity-RIR Analyses",
     "section": "Practical Implications",
-    "text": "Practical Implications\n\nFor Strength Training\n\nStop 2-3 reps short of failure on most sets\nReserve failure training for testing or peaking phases\nThis allows higher frequency and volume\n\n\n\nFor Muscle Building\n\nTrain closer to failure for optimal hypertrophy\n0-2 RIR appears beneficial\nBalance this against recovery demands\n\n\n\nThe Trade-Off\n\n\nShow code\n# Conceptual illustration\nrir_seq &lt;- 0:5\nconcept_df &lt;- data.frame(\n  RIR = rep(rir_seq, 2),\n  Outcome = rep(c(\"Strength Gain\", \"Muscle Growth\"), each = length(rir_seq)),\n  Benefit = c(\n    rep(1, length(rir_seq)),  # Strength: flat line (no effect)\n    1 - 0.15 * rir_seq        # Hypertrophy: decreasing line\n  )\n)\n\nggplot(concept_df, aes(x = RIR, y = Benefit, color = Outcome)) +\n  geom_line(linewidth = 1.5) +\n  geom_point(size = 3) +\n  scale_x_reverse() +\n  scale_color_manual(values = c(\"Strength Gain\" = \"#377EB8\", \"Muscle Growth\" = \"#E41A1C\")) +\n  labs(\n    x = \"Repetitions in Reserve (RIR)\",\n    y = \"Relative Benefit\",\n    title = \"Conceptual Model: RIR Effects by Outcome\",\n    subtitle = \"Lower RIR = closer to failure\"\n  ) +\n  theme_minimal(base_size = 14) +\n  theme(legend.position = \"bottom\")\n\n\n\n\n\n\n\n\nFigure 2: The Strength-Hypertrophy Trade-off with RIR"
+    "text": "Practical Implications\n\nSummary of Recommendations\n\n\n\n\n\n\n\nFinding\nPractical Recommendation\n\n\n\n\nHigh MVT variability (CV = 31%)\nCalibrate MVT individually for each athlete\n\n\nModerate slope reliability (ICC = 0.72)\nRecalibrate velocity zones every 2-4 weeks\n\n\nLinear model adequate\nUse simple linear velocity zones\n\n\nDecay accelerates near failure\nStop 1-2 reps from failure for quality\n\n\nFirst rep predicts set capacity\nUse first rep velocity for autoregulation\n\n\n\n\n\nImplementation Steps\n\nInitial Calibration: Test each athlete to failure at submaximal loads (75-85% 1RM) to establish individual MVT\nSet Up Zones: Create linear velocity zones from MVT to maximum velocity\nMonitor First Rep: Use first rep velocity to estimate available reps\nStop Before Failure: Given acceleration of velocity loss, target stopping 1-2 reps before predicted failure\nRecalibrate Periodically: Update velocity zones every 2-4 weeks or after significant training blocks"
   },
   {
-    "objectID": "01_pelland_meta_regression.html#methods-summary",
-    "href": "01_pelland_meta_regression.html#methods-summary",
-    "title": "Does Training to Failure Matter?",
-    "section": "Methods Summary",
-    "text": "Methods Summary\n\nStatistical Model\nWe used a multi-level meta-regression with:\n\nFixed effects: RIR, load, volume equating, duration, training status\nRandom effects: Nested structure (~1|study/group/obs)\nEffect sizes: Hedge’s g (bias-corrected standardized mean change)\nEstimation: REML with t-distribution tests\n\n\n\nPre-Post Correlation Imputation\nMissing pre-post correlations were imputed via meta-analysis:\n\nStrength: r = 0.866\nHypertrophy: r = 0.875"
-  },
-  {
-    "objectID": "01_pelland_meta_regression.html#references",
-    "href": "01_pelland_meta_regression.html#references",
-    "title": "Does Training to Failure Matter?",
-    "section": "References",
-    "text": "References"
-  },
-  {
-    "objectID": "01_pelland_meta_regression.html#source",
-    "href": "01_pelland_meta_regression.html#source",
-    "title": "Does Training to Failure Matter?",
-    "section": "Source",
-    "text": "Source\n\nOriginal paper: Pelland et al. (2024) Sports Medicine\nData and code: OSF Repository"
-  },
-  {
-    "objectID": "02_velocity_rir_relationship.html",
-    "href": "02_velocity_rir_relationship.html",
-    "title": "Can Bar Speed Tell You How Hard a Set Was?",
-    "section": "",
-    "text": "Imagine if your barbell could tell you exactly how hard a set was - not based on your feelings, but on objective physics.\nVelocity-Based Training (VBT) makes this promise:\n\nMeasure bar speed during each rep\nSlower speeds = more fatigue\nUse this to autoregulate training intensity\n\nBut there’s a catch: Does bar velocity actually reflect how hard you’re working?"
-  },
-  {
-    "objectID": "02_velocity_rir_relationship.html#the-promise-of-velocity-based-training",
-    "href": "02_velocity_rir_relationship.html#the-promise-of-velocity-based-training",
-    "title": "Can Bar Speed Tell You How Hard a Set Was?",
-    "section": "",
-    "text": "Imagine if your barbell could tell you exactly how hard a set was - not based on your feelings, but on objective physics.\nVelocity-Based Training (VBT) makes this promise:\n\nMeasure bar speed during each rep\nSlower speeds = more fatigue\nUse this to autoregulate training intensity\n\nBut there’s a catch: Does bar velocity actually reflect how hard you’re working?"
-  },
-  {
-    "objectID": "02_velocity_rir_relationship.html#the-core-question",
-    "href": "02_velocity_rir_relationship.html#the-core-question",
-    "title": "Can Bar Speed Tell You How Hard a Set Was?",
-    "section": "The Core Question",
-    "text": "The Core Question\nResearchers wanted to know if bar velocity correlates with perceived Repetitions in Reserve (pRIR) - how many reps people think they have left.\nIf velocity and perceived effort align, VBT could replace subjective fatigue monitoring."
-  },
-  {
-    "objectID": "02_velocity_rir_relationship.html#the-study-design",
-    "href": "02_velocity_rir_relationship.html#the-study-design",
-    "title": "Can Bar Speed Tell You How Hard a Set Was?",
-    "section": "The Study Design",
-    "text": "The Study Design\n\nParticipants\n\n\nShow code\nn_participants &lt;- length(unique(df$id))\nn_obs &lt;- nrow(df)\n\n\n\n19 trained individuals\n2,972 total observations\nBoth squat and bench press tested\n\n\n\nWhat They Measured\nEach set, researchers recorded:\n\nMean velocity - How fast the bar moved (m/s)\nPerceived RIR - How many reps the lifter thought they had left\nVelocity loss - How much slower the last rep was vs the first"
-  },
-  {
-    "objectID": "02_velocity_rir_relationship.html#the-key-finding-velocity-predicts-rir-mostly",
-    "href": "02_velocity_rir_relationship.html#the-key-finding-velocity-predicts-rir-mostly",
-    "title": "Can Bar Speed Tell You How Hard a Set Was?",
-    "section": "The Key Finding: Velocity Predicts RIR (Mostly)",
-    "text": "The Key Finding: Velocity Predicts RIR (Mostly)\n\n\nShow code\noverall_r &lt;- cor(df$mean_velocity_, df$perceived_reps_in_reserve_, use = \"complete.obs\")\n\n\nOverall correlation: r = 0.45\nThis means:\n\nFaster bar speed → Higher perceived RIR (more reps left)\nThe relationship is moderate - not perfect\n\n\n\nShow code\nggplot(df, aes(x = mean_velocity_, y = perceived_reps_in_reserve_, color = exercise)) +\n  geom_point(alpha = 0.2, size = 1) +\n  geom_smooth(method = \"lm\", se = TRUE) +\n  scale_color_manual(values = c(\"Bench press\" = \"#E41A1C\", \"Squat\" = \"#377EB8\")) +\n  labs(\n    x = \"Mean Velocity (m/s)\",\n    y = \"Perceived Repetitions in Reserve\",\n    title = \"Bar Speed vs Perceived Effort\",\n    subtitle = \"Higher velocity generally means more reps left\",\n    color = \"Exercise\"\n  ) +\n  theme_minimal(base_size = 14) +\n  theme(legend.position = \"bottom\")\n\n\n\n\n\n\n\n\nFigure 1: Velocity vs Perceived RIR: Each Point is One Set"
-  },
-  {
-    "objectID": "02_velocity_rir_relationship.html#individual-variation-not-everyone-is-the-same",
-    "href": "02_velocity_rir_relationship.html#individual-variation-not-everyone-is-the-same",
-    "title": "Can Bar Speed Tell You How Hard a Set Was?",
-    "section": "Individual Variation: Not Everyone is the Same",
-    "text": "Individual Variation: Not Everyone is the Same\n\n\nShow code\n# Calculate per-participant correlations\nparticipant_cors &lt;- aggregate(\n  cbind(mean_velocity_, perceived_reps_in_reserve_) ~ id,\n  data = df,\n  FUN = function(x) x\n)\n\ncors_by_id &lt;- sapply(unique(df$id), function(pid) {\n  sub_df &lt;- df[df$id == pid, ]\n  cor(sub_df$mean_velocity_, sub_df$perceived_reps_in_reserve_, use = \"complete.obs\")\n})\n\nmean_r &lt;- mean(cors_by_id, na.rm = TRUE)\nsd_r &lt;- sd(cors_by_id, na.rm = TRUE)\nmin_r &lt;- min(cors_by_id, na.rm = TRUE)\nmax_r &lt;- max(cors_by_id, na.rm = TRUE)\n\n\nHere’s where it gets interesting. The average correlation was r = 0.5 ± 0.21, but:\n\nStrongest: r = 0.79 (velocity explains 62% of RIR variation)\nWeakest: r = 0.09 (velocity explains only 1% of RIR variation)\n\n\n\nShow code\ncors_df &lt;- data.frame(\n  participant = factor(seq_along(cors_by_id)),\n  r = cors_by_id\n)\ncors_df &lt;- cors_df[order(cors_df$r), ]\ncors_df$rank &lt;- seq_len(nrow(cors_df))\n\nggplot(cors_df, aes(x = rank, y = r)) +\n  geom_bar(stat = \"identity\", fill = ifelse(cors_df$r &gt; 0.5, \"#377EB8\", \"#999999\")) +\n  geom_hline(yintercept = mean_r, linetype = \"dashed\", color = \"red\", linewidth = 1) +\n  annotate(\"text\", x = 5, y = mean_r + 0.05, label = paste0(\"Mean r = \", round(mean_r, 2)),\n           color = \"red\", hjust = 0) +\n  labs(\n    x = \"Participant (ranked by correlation)\",\n    y = \"Velocity-RIR Correlation (r)\",\n    title = \"Some People's Velocity Tracks Their Effort Better\",\n    subtitle = \"Blue bars = strong correlation (r &gt; 0.5)\"\n  ) +\n  theme_minimal(base_size = 14)\n\n\n\n\n\n\n\n\nFigure 2: Individual Variation in Velocity-RIR Correlation\n\n\n\n\n\n\n\n\n\n\n\nThe Calibration Problem\n\n\n\nFor some individuals, bar velocity is a poor indicator of fatigue. Using velocity-based training without individual calibration could lead to systematic over- or under-training."
-  },
-  {
-    "objectID": "02_velocity_rir_relationship.html#exercise-differences-bench-vs-squat",
-    "href": "02_velocity_rir_relationship.html#exercise-differences-bench-vs-squat",
-    "title": "Can Bar Speed Tell You How Hard a Set Was?",
-    "section": "Exercise Differences: Bench vs Squat",
-    "text": "Exercise Differences: Bench vs Squat\n\n\nShow code\nbench_df &lt;- df[df$exercise == \"Bench press\", ]\nsquat_df &lt;- df[df$exercise == \"Squat\", ]\n\nbench_r &lt;- cor(bench_df$mean_velocity_, bench_df$perceived_reps_in_reserve_, use = \"complete.obs\")\nsquat_r &lt;- cor(squat_df$mean_velocity_, squat_df$perceived_reps_in_reserve_, use = \"complete.obs\")\n\nbench_mean_vel &lt;- mean(bench_df$mean_velocity_, na.rm = TRUE)\nsquat_mean_vel &lt;- mean(squat_df$mean_velocity_, na.rm = TRUE)\n\n\n\n\nShow code\nexercise_summary &lt;- data.frame(\n  Exercise = c(\"Bench Press\", \"Squat\"),\n  Correlation = c(bench_r, squat_r),\n  Mean_Velocity = c(bench_mean_vel, squat_mean_vel),\n  N = c(nrow(bench_df), nrow(squat_df))\n)\n\nggplot(exercise_summary, aes(x = Exercise, y = Correlation, fill = Exercise)) +\n  geom_bar(stat = \"identity\", width = 0.6) +\n  geom_text(aes(label = paste0(\"r = \", round(Correlation, 2))),\n            vjust = -0.5, size = 5) +\n  scale_fill_manual(values = c(\"Bench Press\" = \"#E41A1C\", \"Squat\" = \"#377EB8\")) +\n  ylim(0, 0.7) +\n  labs(\n    x = NULL,\n    y = \"Correlation with Perceived RIR\",\n    title = \"Both Exercises Show Moderate Velocity-RIR Correlation\"\n  ) +\n  theme_minimal(base_size = 14) +\n  theme(legend.position = \"none\")\n\n\n\n\n\n\n\n\nFigure 3: Velocity-RIR Relationship by Exercise\n\n\n\n\n\n\nWhy the Difference?\nThe exercises have different minimum velocities at 1RM:\n\n\n\nExercise\nTypical 1RM Velocity\nMean Velocity in Study\n\n\n\n\nBench Press\n~0.10-0.17 m/s\n0.26 m/s\n\n\nSquat\n~0.20-0.35 m/s\n0.43 m/s\n\n\n\nAt the same velocity (say, 0.3 m/s):\n\nA squat at 0.3 m/s might be near failure\nA bench press at 0.3 m/s has more reps in reserve"
-  },
-  {
-    "objectID": "02_velocity_rir_relationship.html#summary-statistics",
-    "href": "02_velocity_rir_relationship.html#summary-statistics",
-    "title": "Can Bar Speed Tell You How Hard a Set Was?",
-    "section": "Summary Statistics",
-    "text": "Summary Statistics\n\n\nShow code\nsummary_df &lt;- data.frame(\n  Metric = c(\n    \"Total observations\",\n    \"Participants\",\n    \"Overall correlation\",\n    \"Per-participant mean r\",\n    \"Per-participant SD r\",\n    \"Bench press correlation\",\n    \"Squat correlation\"\n  ),\n  Value = c(\n    format(n_obs, big.mark = \",\"),\n    n_participants,\n    round(overall_r, 3),\n    round(mean_r, 3),\n    round(sd_r, 3),\n    round(bench_r, 3),\n    round(squat_r, 3)\n  )\n)\n\nknitr::kable(summary_df)\n\n\n\n\nTable 1: Summary of Velocity-RIR Analysis\n\n\n\n\n\n\nMetric\nValue\n\n\n\n\nTotal observations\n2,972\n\n\nParticipants\n19\n\n\nOverall correlation\n0.448\n\n\nPer-participant mean r\n0.5\n\n\nPer-participant SD r\n0.211\n\n\nBench press correlation\n0.586\n\n\nSquat correlation\n0.527"
-  },
-  {
-    "objectID": "02_velocity_rir_relationship.html#replication-validation",
-    "href": "02_velocity_rir_relationship.html#replication-validation",
-    "title": "Can Bar Speed Tell You How Hard a Set Was?",
-    "section": "Replication Validation",
-    "text": "Replication Validation\nOur results match the published paper:\n\n\n\nFinding\nPaper\nOur Replication\n\n\n\n\nPer-participant r\n0.6 ± 0.2\n0.5 ± 0.21\n\n\nSquat r range\n0.3 - 0.9\n0.09 - 0.79\n\n\nExercise difference\nYes\nYes"
-  },
-  {
-    "objectID": "02_velocity_rir_relationship.html#practical-implications",
-    "href": "02_velocity_rir_relationship.html#practical-implications",
-    "title": "Can Bar Speed Tell You How Hard a Set Was?",
-    "section": "Practical Implications",
-    "text": "Practical Implications\n\nFor Velocity-Based Training\n\nIndividual calibration is essential - Group-level velocity targets may not work for everyone\nExercise-specific thresholds - Don’t use the same velocity targets for bench and squat\nComplement, don’t replace - Use velocity alongside RPE, not instead of it\n\n\n\nFor Research\n\nAccount for individual differences - Random effects models are necessary\nConsider exercise type - Biomechanics matter for velocity interpretation\nVelocity loss may be more reliable - Some research suggests velocity loss (% decline within a set) is more consistent than absolute velocity"
-  },
-  {
-    "objectID": "02_velocity_rir_relationship.html#the-bottom-line",
-    "href": "02_velocity_rir_relationship.html#the-bottom-line",
-    "title": "Can Bar Speed Tell You How Hard a Set Was?",
-    "section": "The Bottom Line",
-    "text": "The Bottom Line\n\n\n\n\n\n\nKey Takeaway\n\n\n\nBar velocity moderately predicts perceived effort, but the relationship varies substantially between individuals. Velocity-based training works best when calibrated to each lifter and each exercise."
-  },
-  {
-    "objectID": "02_velocity_rir_relationship.html#methods-summary",
-    "href": "02_velocity_rir_relationship.html#methods-summary",
-    "title": "Can Bar Speed Tell You How Hard a Set Was?",
-    "section": "Methods Summary",
-    "text": "Methods Summary\n\nData Collection\n\nTrained participants performed squat and bench press\nMean velocity measured with validated device\nPerceived RIR recorded after each set\n\n\n\nStatistical Analysis\n\nPearson correlations (overall and per-participant)\nLinear mixed models accounting for repeated measures\nExercise-specific subgroup analysis"
-  },
-  {
-    "objectID": "02_velocity_rir_relationship.html#source",
-    "href": "02_velocity_rir_relationship.html#source",
-    "title": "Can Bar Speed Tell You How Hard a Set Was?",
-    "section": "Source",
-    "text": "Source\n\nOriginal paper: Paulsen et al. (2025) PeerJ\nSupplementary data available from the article"
-  },
-  {
-    "objectID": "04_deadlift_rir_velocity.html",
-    "href": "04_deadlift_rir_velocity.html",
-    "title": "Does the RIR-Velocity Relationship Hold for Deadlifts?",
-    "section": "",
-    "text": "The squat study (Study 3) showed that bar velocity can predict Repetitions in Reserve (RIR) with high accuracy—especially when using individual calibration. But does this relationship hold for the deadlift?\nThe deadlift presents unique challenges:\n\nNo eccentric phase at the start (bar starts from the floor)\nGrip fatigue can limit performance independently of target muscles\nMore binary failure pattern (you can lift it or you can’t)\n\nThis study examines whether velocity-based training principles apply to the conventional deadlift."
-  },
-  {
-    "objectID": "04_deadlift_rir_velocity.html#the-question",
-    "href": "04_deadlift_rir_velocity.html#the-question",
-    "title": "Does the RIR-Velocity Relationship Hold for Deadlifts?",
-    "section": "",
-    "text": "The squat study (Study 3) showed that bar velocity can predict Repetitions in Reserve (RIR) with high accuracy—especially when using individual calibration. But does this relationship hold for the deadlift?\nThe deadlift presents unique challenges:\n\nNo eccentric phase at the start (bar starts from the floor)\nGrip fatigue can limit performance independently of target muscles\nMore binary failure pattern (you can lift it or you can’t)\n\nThis study examines whether velocity-based training principles apply to the conventional deadlift."
-  },
-  {
-    "objectID": "04_deadlift_rir_velocity.html#methods",
-    "href": "04_deadlift_rir_velocity.html#methods",
-    "title": "Does the RIR-Velocity Relationship Hold for Deadlifts?",
-    "section": "Methods",
-    "text": "Methods\n\nParticipants\n\n\nShow code\nsummary_df &lt;- data.frame(\n  Metric = c(\"Total Participants\", \"Male\", \"Female\",\n             \"Observations\", \"Velocity Range (m/s)\",\n             \"RIR Range\", \"Weight Range (kg)\"),\n  Value = c(\n    results$summary$n_participants,\n    round(results$summary$n_male),\n    round(results$summary$n_female),\n    results$summary$n_observations,\n    paste(round(results$summary$velocity_range, 3), collapse = \" - \"),\n    paste(results$summary$rir_range, collapse = \" - \"),\n    paste(results$summary$weight_range, collapse = \" - \")\n  )\n)\n\nknitr::kable(summary_df, col.names = c(\"\", \"\"))\n\n\n\n\nTable 1: Participant Characteristics\n\n\n\n\n\n\nTotal Participants\n19\n\n\nMale\n15\n\n\nFemale\n4\n\n\nObservations\n406\n\n\nVelocity Range (m/s)\n0.119 - 0.675\n\n\nRIR Range\n0 - 7\n\n\nWeight Range (kg)\n85 - 210\n\n\n\n\n\n\n\n\n\n\nProtocol\n\nExercise: Conventional deadlift\nLoads: 80% and 90% of 1RM\nTesting Days: 2 (for cross-validation)\nData Collection: Velocity (m/s) and RIR for each repetition"
-  },
-  {
-    "objectID": "04_deadlift_rir_velocity.html#the-velocity-rir-relationship",
-    "href": "04_deadlift_rir_velocity.html#the-velocity-rir-relationship",
-    "title": "Does the RIR-Velocity Relationship Hold for Deadlifts?",
-    "section": "The Velocity-RIR Relationship",
-    "text": "The Velocity-RIR Relationship\nAs lifters approach failure, their bar speed decreases. Here’s what this looks like for the deadlift:\n\n\nShow code\nggplot(data, aes(x = mean_velocity, y = rir, color = load_percentage)) +\n  geom_point(alpha = 0.4, size = 2) +\n  geom_smooth(method = \"lm\", formula = y ~ poly(x, 2), se = FALSE, linewidth = 1.2) +\n  facet_wrap(~load_percentage, labeller = labeller(load_percentage = c(\n    `80%` = \"80% 1RM\",\n    `90%` = \"90% 1RM\"\n  ))) +\n  labs(\n    x = \"Mean Velocity (m/s)\",\n    y = \"Repetitions in Reserve\",\n    color = \"Load\"\n  ) +\n  theme_minimal() +\n  theme(\n    legend.position = \"none\",\n    strip.text = element_text(face = \"bold\", size = 12)\n  ) +\n  scale_color_manual(values = c(\"#E69F00\", \"#009E73\"))\n\n\n\n\n\n\n\n\nFigure 1: Velocity-RIR relationship for conventional deadlift\n\n\n\n\n\nObservation: The relationship is visible but with more scatter than typically seen in squat data, especially at 80% 1RM."
-  },
-  {
-    "objectID": "04_deadlift_rir_velocity.html#general-vs-individual-models",
-    "href": "04_deadlift_rir_velocity.html#general-vs-individual-models",
-    "title": "Does the RIR-Velocity Relationship Hold for Deadlifts?",
-    "section": "General vs Individual Models",
-    "text": "General vs Individual Models\n\n\nShow code\ncomparison_df &lt;- data.frame(\n  `Model Type` = c(\"General (Polynomial)\", \"Individual (Polynomial)\"),\n  `R²` = c(\n    round(results$comparison$general_r2, 3),\n    round(results$comparison$individual_r2, 3)\n  ),\n  `Interpretation` = c(\n    paste0(\"Explains ~\", round(results$comparison$general_r2 * 100), \"% of variance\"),\n    paste0(\"Explains ~\", round(results$comparison$individual_r2 * 100), \"% of variance\")\n  )\n)\n\nknitr::kable(comparison_df, col.names = c(\"Model Type\", \"Median R²\", \"Interpretation\"))\n\n\n\n\nTable 2: Model Fit Comparison\n\n\n\n\n\n\nModel Type\nMedian R²\nInterpretation\n\n\n\n\nGeneral (Polynomial)\n0.362\nExplains ~36% of variance\n\n\nIndividual (Polynomial)\n0.707\nExplains ~71% of variance\n\n\n\n\n\n\n\n\nKey Finding: Individual models explain 2x more variance than general models, consistent with the squat findings."
-  },
-  {
-    "objectID": "04_deadlift_rir_velocity.html#how-does-deadlift-compare-to-squat",
-    "href": "04_deadlift_rir_velocity.html#how-does-deadlift-compare-to-squat",
-    "title": "Does the RIR-Velocity Relationship Hold for Deadlifts?",
-    "section": "How Does Deadlift Compare to Squat?",
-    "text": "How Does Deadlift Compare to Squat?\n\n\nShow code\nexercise_comparison &lt;- data.frame(\n  Metric = c(\n    \"Participants\",\n    \"Load Types\",\n    \"General R² (polynomial)\",\n    \"Individual R² (median)\",\n    \"Improvement Factor\"\n  ),\n  Squat = c(\n    \"46\",\n    \"70%, 80%, 90%\",\n    round(squat_results$comparison$general_r2, 2),\n    round(squat_results$comparison$individual_r2, 2),\n    paste0(round(squat_results$comparison$improvement_factor, 2), \"x\")\n  ),\n  Deadlift = c(\n    as.character(results$summary$n_participants),\n    \"80%, 90%\",\n    round(results$comparison$general_r2, 2),\n    round(results$comparison$individual_r2, 2),\n    paste0(round(results$comparison$improvement_factor, 2), \"x\")\n  )\n)\n\nknitr::kable(exercise_comparison, col.names = c(\"Metric\", \"Squat (Jukic)\", \"Deadlift (Thesis)\"))\n\n\n\n\nTable 3: Deadlift vs Squat RIR-Velocity Relationship\n\n\n\n\n\n\nMetric\nSquat (Jukic)\nDeadlift (Thesis)\n\n\n\n\nParticipants\n46\n19\n\n\nLoad Types\n70%, 80%, 90%\n80%, 90%\n\n\nGeneral R² (polynomial)\n0.5\n0.36\n\n\nIndividual R² (median)\n0.88\n0.71\n\n\nImprovement Factor\n1.78x\n1.95x\n\n\n\n\n\n\n\n\n\nWhy is Deadlift R² Lower?\nThe deadlift shows lower R² values than the squat. Possible explanations:\n\nBinary failure pattern: Deadlifts tend to fail suddenly rather than gradually grinding to a halt\nGrip fatigue: Can limit performance independently of target muscle fatigue\nNo stretch-shortening cycle: Less consistent velocity feedback\nTechnical breakdown: Form changes (back rounding) may affect velocity differently\nSample size: Smaller participant pool (19 vs 46)"
-  },
-  {
-    "objectID": "04_deadlift_rir_velocity.html#prediction-accuracy",
-    "href": "04_deadlift_rir_velocity.html#prediction-accuracy",
-    "title": "Does the RIR-Velocity Relationship Hold for Deadlifts?",
-    "section": "Prediction Accuracy",
-    "text": "Prediction Accuracy\nHow well does a Day 1 model predict Day 2 performance?\n\n\nShow code\naccuracy &lt;- results$general_prediction_accuracy\n\nprediction_df &lt;- data.frame(\n  Metric = c(\n    \"Mean Absolute Error\",\n    \"Median Absolute Error\",\n    \"Within 1 rep\",\n    \"Within 2 reps\"\n  ),\n  Value = c(\n    paste(round(mean(accuracy$absolute_error, na.rm = TRUE), 2), \"reps\"),\n    paste(round(median(accuracy$absolute_error, na.rm = TRUE), 2), \"reps\"),\n    paste0(round(mean(accuracy$absolute_error &lt;= 1, na.rm = TRUE) * 100, 1), \"%\"),\n    paste0(round(mean(accuracy$absolute_error &lt;= 2, na.rm = TRUE) * 100, 1), \"%\")\n  )\n)\n\nknitr::kable(prediction_df, col.names = c(\"Metric\", \"Value\"))\n\n\n\n\nTable 4: Cross-Day Prediction Accuracy\n\n\n\n\n\n\nMetric\nValue\n\n\n\n\nMean Absolute Error\n1.39 reps\n\n\nMedian Absolute Error\n1.15 reps\n\n\nWithin 1 rep\n46.8%\n\n\nWithin 2 reps\n72.2%"
-  },
-  {
-    "objectID": "04_deadlift_rir_velocity.html#velocity-characteristics-by-load",
-    "href": "04_deadlift_rir_velocity.html#velocity-characteristics-by-load",
-    "title": "Does the RIR-Velocity Relationship Hold for Deadlifts?",
-    "section": "Velocity Characteristics by Load",
-    "text": "Velocity Characteristics by Load\n\n\nShow code\nggplot(data, aes(x = factor(rir), y = mean_velocity, fill = load_percentage)) +\n  geom_boxplot(alpha = 0.5, outlier.shape = NA, width = 0.7) +\n  geom_point(\n    aes(color = load_percentage),\n    position = position_jitterdodge(jitter.width = 0.15, dodge.width = 0.7),\n    alpha = 0.6, size = 1.5\n  ) +\n  labs(\n    x = \"Repetitions in Reserve\",\n    y = \"Mean Velocity (m/s)\",\n    fill = \"Load\",\n    color = \"Load\"\n  ) +\n  theme_minimal() +\n  scale_fill_manual(values = c(\"#E69F00\", \"#009E73\")) +\n  scale_color_manual(values = c(\"#CC7A00\", \"#007A5E\")) +\n  theme(legend.position = \"bottom\") +\n  guides(fill = guide_legend(override.aes = list(alpha = 0.7)),\n         color = \"none\")\n\n\n\n\n\n\n\n\nFigure 2: Velocity distribution by load and RIR with individual observations\n\n\n\n\n\nObservation: - Higher load (90%) = lower velocities overall - Clear velocity decrease as RIR approaches 0 - Wide variability between individuals at the same RIR"
-  },
-  {
-    "objectID": "04_deadlift_rir_velocity.html#model-details-by-load",
-    "href": "04_deadlift_rir_velocity.html#model-details-by-load",
-    "title": "Does the RIR-Velocity Relationship Hold for Deadlifts?",
-    "section": "Model Details by Load",
-    "text": "Model Details by Load\n\n\nShow code\nload_df &lt;- data.frame(\n  Load = names(results$general_results),\n  `Linear R²` = sapply(results$general_results, function(x) round(x$linear$r_squared, 3)),\n  `Polynomial R²` = sapply(results$general_results, function(x) round(x$polynomial$r_squared, 3)),\n  `RSE (reps)` = sapply(results$general_results, function(x) round(x$polynomial$rse, 2)),\n  N = sapply(results$general_results, function(x) x$polynomial$n)\n)\nrownames(load_df) &lt;- NULL\n\nknitr::kable(load_df, col.names = c(\"Load\", \"Linear R²\", \"Polynomial R²\", \"RSE (reps)\", \"N\"))\n\n\n\n\nTable 5: Model Performance by Load\n\n\n\n\n\n\nLoad\nLinear R²\nPolynomial R²\nRSE (reps)\nN\n\n\n\n\n90%\n0.398\n0.443\n1.2\n150\n\n\n80%\n0.251\n0.281\n1.8\n256\n\n\n\n\n\n\n\n\nPattern: 90% 1RM shows better model fit than 80% 1RM, likely because: - Fewer total reps (less fatigue accumulation variability) - More consistent near-failure performance"
-  },
-  {
-    "objectID": "04_deadlift_rir_velocity.html#practical-implications",
-    "href": "04_deadlift_rir_velocity.html#practical-implications",
-    "title": "Does the RIR-Velocity Relationship Hold for Deadlifts?",
-    "section": "Practical Implications",
-    "text": "Practical Implications\n\nFor Deadlift Training\n\nIndividual calibration is essential: General equations lose significant precision\nAccept more prediction error: ~1.4 rep error vs ~1 rep for squat\nLoad-specific thresholds: Different velocity targets for 80% vs 90%\n\n\n\nVelocity Targets (Based on This Data)\n\n\nShow code\n# Calculate mean velocity at each RIR level by load\ntargets &lt;- aggregate(mean_velocity ~ rir + load_percentage, data = data, FUN = mean)\ntargets &lt;- reshape(targets, idvar = \"rir\", timevar = \"load_percentage\",\n                   direction = \"wide\", v.names = \"mean_velocity\")\nnames(targets) &lt;- c(\"RIR\", \"80% 1RM\", \"90% 1RM\")\ntargets &lt;- targets[order(-targets$RIR), ]\n\n# Round and display\ntargets$`80% 1RM` &lt;- round(targets$`80% 1RM`, 3)\ntargets$`90% 1RM` &lt;- round(targets$`90% 1RM`, 3)\n\nknitr::kable(targets, row.names = FALSE)\n\n\n\n\nTable 6: Suggested Velocity Thresholds for RIR Estimation\n\n\n\n\n\n\nRIR\n80% 1RM\n90% 1RM\n\n\n\n\n7\n0.376\n0.283\n\n\n6\n0.372\n0.380\n\n\n5\n0.340\n0.408\n\n\n4\n0.334\n0.339\n\n\n3\n0.325\n0.303\n\n\n2\n0.288\n0.268\n\n\n1\n0.258\n0.229\n\n\n0\n0.217\n0.196\n\n\n\n\n\n\n\n\nCaveat: These are population averages. Individual calibration will improve accuracy."
-  },
-  {
-    "objectID": "04_deadlift_rir_velocity.html#limitations",
-    "href": "04_deadlift_rir_velocity.html#limitations",
-    "title": "Does the RIR-Velocity Relationship Hold for Deadlifts?",
+    "objectID": "06_advanced_velocity_analyses.html#limitations",
+    "href": "06_advanced_velocity_analyses.html#limitations",
+    "title": "Study 6: Advanced Velocity-RIR Analyses",
     "section": "Limitations",
-    "text": "Limitations\n\nSample size: 19 participants vs 46 in the squat study\nLoad range: Only 80% and 90% tested (no 70%)\nPopulation: Portuguese lifters—may not generalize globally\nEquipment: Specific velocity measurement device used"
+    "text": "Limitations\n\nSample size: 19 participants limits generalizability\nExercise specificity: Results apply to deadlift; other exercises may differ\nLoad range: Only 80% and 90% 1RM tested; lighter loads may show different patterns\nTraining status: Participants were resistance-trained; novices may differ\nDay-to-day factors: Only 2 testing days; longer-term reliability unknown"
   },
   {
-    "objectID": "04_deadlift_rir_velocity.html#conclusions",
-    "href": "04_deadlift_rir_velocity.html#conclusions",
-    "title": "Does the RIR-Velocity Relationship Hold for Deadlifts?",
-    "section": "Conclusions",
-    "text": "Conclusions\n\nThe RIR-velocity relationship exists for deadlifts, but with more variability than squats\nIndividual models still outperform general models (~2x improvement)\nPrediction accuracy is acceptable for practical use (~1.4 rep error)\nDeadlift-specific factors (grip, binary failure) may reduce predictability"
-  },
-  {
-    "objectID": "04_deadlift_rir_velocity.html#technical-notes",
-    "href": "04_deadlift_rir_velocity.html#technical-notes",
-    "title": "Does the RIR-Velocity Relationship Hold for Deadlifts?",
-    "section": "Technical Notes",
-    "text": "Technical Notes\nThis analysis used: - R6 classes following SOLID principles - Reused RirVelocityModeler from Study 3 (exercise-agnostic) - Custom DeadliftRirDataLoader for thesis data format - Cross-validation using Day 1 → Day 2 prediction"
-  },
-  {
-    "objectID": "04_deadlift_rir_velocity.html#references",
-    "href": "04_deadlift_rir_velocity.html#references",
-    "title": "Does the RIR-Velocity Relationship Hold for Deadlifts?",
+    "objectID": "06_advanced_velocity_analyses.html#references",
+    "href": "06_advanced_velocity_analyses.html#references",
+    "title": "Study 6: Advanced Velocity-RIR Analyses",
     "section": "References",
-    "text": "References\nThis study follows the methodology of:\nJukic, I., Prnjak, K., Helms, E. R., & McGuigan, M. R. (2024). Modeling the repetitions-in-reserve-velocity relationship: A valid method for resistance training monitoring and prescription, and fatigue management. Experimental Physiology, 109(2), 193-206."
+    "text": "References\n\nJukic, I., et al. (2024). Velocity-Based Training. Sports Medicine.\nZourdos, M. C., et al. (2016). Novel Resistance Training-Specific RPE Scale. Journal of Strength and Conditioning Research.\nPelland, J. C., et al. (2022). Using Load-Velocity Profiling. Sports Medicine.\nKoo, T. K., & Li, M. Y. (2016). A Guideline of Selecting and Reporting ICC. Journal of Chiropractic Medicine.\n\n\nStudy 6 of the Deadlift RIR-Velocity Research Project\nAnalysis performed using R R version 4.3.3 (2024-02-29) with custom R6 classes following SOLID principles"
+  },
+  {
+    "objectID": "index.html",
+    "href": "index.html",
+    "title": "RIR & Training Outcomes: A Research Compendium",
+    "section": "",
+    "text": "This research compendium explores a fundamental question in resistance training:\n\nHow close to failure should you train for optimal results?\n\nWe address this through:\n\nReplications of key published studies\nMeta-analysis of existing literature\nPractical guidance for training decisions"
+  },
+  {
+    "objectID": "index.html#what-this-project-investigates",
+    "href": "index.html#what-this-project-investigates",
+    "title": "RIR & Training Outcomes: A Research Compendium",
+    "section": "",
+    "text": "This research compendium explores a fundamental question in resistance training:\n\nHow close to failure should you train for optimal results?\n\nWe address this through:\n\nReplications of key published studies\nMeta-analysis of existing literature\nPractical guidance for training decisions"
+  },
+  {
+    "objectID": "index.html#key-concepts",
+    "href": "index.html#key-concepts",
+    "title": "RIR & Training Outcomes: A Research Compendium",
+    "section": "Key Concepts",
+    "text": "Key Concepts\n\nRepetitions in Reserve (RIR)\nRIR measures how close you are to muscular failure:\n\n\n\n\n\n\n\n\nRIR\nDescription\nExample\n\n\n\n\n0\nComplete failure\nCouldn’t complete another rep\n\n\n1-2\nNear failure\n1-2 reps left before failure\n\n\n3-4\nModerate intensity\nNoticeable fatigue but not close to failure\n\n\n5+\nLow intensity\nCould do many more reps\n\n\n\n\n\nVelocity-Based Training (VBT)\nAn objective approach to measuring effort using bar speed:\n\nFaster velocity = More reps remaining\nSlower velocity = Closer to failure\nVelocity loss = Fatigue accumulation within a set"
+  },
+  {
+    "objectID": "index.html#completed-analyses",
+    "href": "index.html#completed-analyses",
+    "title": "RIR & Training Outcomes: A Research Compendium",
+    "section": "Completed Analyses",
+    "text": "Completed Analyses\n\n1. Does Training to Failure Matter?\nPelland et al. (2024) Replication\nA meta-regression examining RIR and training outcomes across strength and hypertrophy studies.\nKey Finding: Training closer to failure benefits hypertrophy but not strength.\n\n\n\nOutcome\nRIR Effect\nSignificant?\n\n\n\n\nStrength\n~0\nNo\n\n\nHypertrophy\nNegative\nYes\n\n\n\n\n\n\n2. Can Bar Speed Predict Effort?\nPaulsen et al. (2025) Replication\nAnalysis of 2,972 observations examining velocity-RIR relationships.\nKey Finding: Velocity moderately predicts perceived effort (r ≈ 0.5), but varies substantially between individuals.\n\n\n\nMetric\nValue\n\n\n\n\nOverall correlation\nr = 0.45\n\n\nIndividual range\nr = 0.09 to 0.79\n\n\n\n\n\n\n3. Can We Model the RIR-Velocity Relationship?\nJukic et al. (2024) Replication\nAnalysis of 2,601 observations examining whether individual RIR-velocity models outperform general equations.\nKey Finding: Individual models explain ~2x more variance than general models (R² = 0.88 vs 0.50).\n\n\n\nModel Type\nMedian R²\nImplication\n\n\n\n\nGeneral\n0.50\nOne-size-fits-all loses precision\n\n\nIndividual\n0.88\nPersonalization is essential\n\n\n\n\n\n\n4. Does This Work for Deadlifts?\nDeadlift RIR-Velocity Study\nOriginal thesis research applying the same methodology to conventional deadlift with 406 observations from 19 participants.\nKey Finding: The RIR-velocity relationship holds for deadlifts, but with lower predictability than squats.\n\n\n\nExercise\nGeneral R²\nIndividual R²\nImprovement\n\n\n\n\nSquat (Study 3)\n0.50\n0.88\n1.8x\n\n\nDeadlift (Study 4)\n0.36\n0.71\n2x\n\n\n\nWhy lower for deadlifts? Binary failure patterns, grip fatigue, and lack of stretch-shortening cycle.\n\n\n\n5. Practical Velocity Tables for Deadlift Training\nLMM Analysis & Velocity Stop Tables\nLinear Mixed Effects analysis extending Study 4 with practical velocity thresholds for training.\nKey Finding: Load percentage does NOT significantly affect the velocity-RIR relationship. A single global velocity table is sufficient.\n\n\n\nTable Type\nMAE\nUse Case\n\n\n\n\nGeneral\n0.0599 m/s\nQuick reference, new athletes\n\n\nIndividual\n0.0395 m/s\nEstablished athletes with calibration\n\n\n\nImprovement from individualization: 34.0%\n\n\n\n6. Advanced Velocity-RIR Analyses\nAdvanced Velocity Analyses (H2-H6)\nFive novel analyses extending the deadlift velocity-RIR research with practical insights.\n\n\n\n\n\n\n\n\nAnalysis\nFinding\nPractical Implication\n\n\n\n\nMVT Variability\nCV = 30.8%\nIndividual calibration essential\n\n\nDay-to-Day Reliability\nSlope ICC = 0.72\nPeriodic recalibration needed\n\n\nModel Comparison\n26.3% prefer quadratic\nLinear model adequate\n\n\nVelocity Decay\nAccelerates\nDecay accelerates toward failure\n\n\nFailure Prediction\nMAE = 1.29 reps\nFirst rep velocity useful"
+  },
+  {
+    "objectID": "index.html#practical-implications",
+    "href": "index.html#practical-implications",
+    "title": "RIR & Training Outcomes: A Research Compendium",
+    "section": "Practical Implications",
+    "text": "Practical Implications\n\nFor Strength Training\nBased on the Pelland meta-regression:\n\nStop 2-3 reps short of failure on most sets\nFailure training is not necessary for strength gains\nThis allows higher training frequency and volume\n\n\n\nFor Muscle Building\nBased on the Pelland meta-regression:\n\nTrain closer to failure (0-2 RIR) for optimal hypertrophy\nThe relationship is statistically significant but effect size is modest\nBalance against recovery demands\n\n\n\nFor Velocity-Based Training\nBased on the Paulsen analysis:\n\nIndividual calibration is essential - Group averages don’t work for everyone\nExercise-specific targets - Bench press and squat need different thresholds\nUse as complement - Velocity + RPE together is better than either alone\n\n\n\nFor Deadlift Training\nBased on Study 4:\n\nVBT works, but with caveats - Expect ~1.4 rep prediction error (vs ~1 rep for squat)\nIndividual calibration still essential - 2x improvement over general equations\nLoad-specific thresholds - Different velocity targets for 80% vs 90% 1RM\nConsider grip fatigue - May affect velocity independently of target muscle fatigue"
+  },
+  {
+    "objectID": "index.html#data-sources",
+    "href": "index.html#data-sources",
+    "title": "RIR & Training Outcomes: A Research Compendium",
+    "section": "Data Sources",
+    "text": "Data Sources\n\n\n\nStudy\nData\nCode\n\n\n\n\nPelland et al. (2024)\nOSF Repository\nReplicated\n\n\nPaulsen et al. (2025)\nPeerJ Supplement\nReplicated\n\n\nJukic et al. (2024)\nOSF Repository\nReplicated\n\n\nDeadlift Thesis (2024)\nOriginal Data\nOriginal Research"
+  },
+  {
+    "objectID": "index.html#methodology",
+    "href": "index.html#methodology",
+    "title": "RIR & Training Outcomes: A Research Compendium",
+    "section": "Methodology",
+    "text": "Methodology\nAll analyses use:\n\nR for statistical computing\nmetafor for meta-analysis models\nQuarto for reproducible reports\nrenv for dependency management\n\n\nCode Architecture\nThe project follows SOLID principles with:\n\nR/domain/ - Domain objects (EffectSize, TreatmentGroup)\nR/calculators/ - Effect size calculation services\nscripts/ - Replication scripts\nanalyses/ - Quarto reports"
+  },
+  {
+    "objectID": "index.html#planned-analyses",
+    "href": "index.html#planned-analyses",
+    "title": "RIR & Training Outcomes: A Research Compendium",
+    "section": "Planned Analyses",
+    "text": "Planned Analyses\n\n\n\n\n\n\n\n\nAnalysis\nDescription\nStatus\n\n\n\n\nSensitivity Analysis\nRobustness checks\nPlanned\n\n\nPublication Bias\nBias assessment\nPlanned\n\n\nDeadlift-Specific\nApplication to deadlift training\nCompleted (Study 4)\n\n\nLMM & Velocity Tables\nPractical velocity thresholds\nCompleted (Study 5)\n\n\nAdvanced Velocity\nMVT, reliability, decay, prediction\nCompleted (Study 6)"
+  },
+  {
+    "objectID": "index.html#references",
+    "href": "index.html#references",
+    "title": "RIR & Training Outcomes: A Research Compendium",
+    "section": "References",
+    "text": "References\n\nRobinson ZH, Pelland JC, Zourdos MC, et al. (2024). Exploring the Dose-Response Relationship Between Estimated Resistance Training Proximity to Failure, Strength Gain, and Muscle Hypertrophy. Sports Medicine, 54, 2209-2231.\nPaulsen K, Seynnes O, van den Tillaar R. (2025). Exercise type, training load, velocity loss threshold, and sets affect the relationship between lifting velocity and perceived repetitions in reserve. PeerJ, 13:e19797.\nJukic I, Prnjak K, Helms ER, McGuigan MR. (2024). Modeling the repetitions-in-reserve-velocity relationship: A valid method for resistance training monitoring and prescription, and fatigue management. Experimental Physiology, 109(2), 193-206."
+  },
+  {
+    "objectID": "03_rir_velocity_modeling.html",
+    "href": "03_rir_velocity_modeling.html",
+    "title": "Can We Predict How Many Reps You Have Left?",
+    "section": "",
+    "text": "Imagine you’re in the middle of a heavy set of squats. Your coach asks: “How many reps do you have left?” If you could answer accurately, you’d have a powerful tool for managing training intensity and fatigue.\nThis is where Repetitions in Reserve (RIR) comes in—a way to quantify how close you are to failure. But can we do better than guessing? Can we use objective measurements like bar velocity to predict RIR?"
+  },
+  {
+    "objectID": "03_rir_velocity_modeling.html#the-question",
+    "href": "03_rir_velocity_modeling.html#the-question",
+    "title": "Can We Predict How Many Reps You Have Left?",
+    "section": "",
+    "text": "Imagine you’re in the middle of a heavy set of squats. Your coach asks: “How many reps do you have left?” If you could answer accurately, you’d have a powerful tool for managing training intensity and fatigue.\nThis is where Repetitions in Reserve (RIR) comes in—a way to quantify how close you are to failure. But can we do better than guessing? Can we use objective measurements like bar velocity to predict RIR?"
+  },
+  {
+    "objectID": "03_rir_velocity_modeling.html#the-study",
+    "href": "03_rir_velocity_modeling.html#the-study",
+    "title": "Can We Predict How Many Reps You Have Left?",
+    "section": "The Study",
+    "text": "The Study\nJukic et al. (2024) investigated whether the relationship between bar velocity and RIR could be used for training monitoring and prescription. They compared:\n\nGeneral models: One equation for everyone\nIndividual models: Personalized equations for each lifter\n\nTheir key findings: - Individual models explain about 2x more variance than general models - Polynomial (curved) relationships fit better than linear ones - Prediction accuracy is acceptable for practical use"
+  },
+  {
+    "objectID": "03_rir_velocity_modeling.html#our-data",
+    "href": "03_rir_velocity_modeling.html#our-data",
+    "title": "Can We Predict How Many Reps You Have Left?",
+    "section": "Our Data",
+    "text": "Our Data\nWe’re analyzing data from 46 resistance-trained individuals performing back squats at three intensities:\n\n\nShow code\nsummary_df &lt;- data.frame(\n  Metric = c(\"Participants\", \"Male\", \"Female\",\n             \"Observations\", \"Velocity Range (m/s)\",\n             \"RIR Range\", \"Relative Strength (1RM/BW)\"),\n  Value = c(\n    results$summary$n_participants,\n    round(results$summary$n_male),\n    round(results$summary$n_female),\n    results$summary$n_observations,\n    paste(round(results$summary$velocity_range, 2), collapse = \" - \"),\n    paste(results$summary$rir_range, collapse = \" - \"),\n    round(results$summary$mean_relative_strength, 2)\n  )\n)\n\nknitr::kable(summary_df, col.names = c(\"\", \"\"))\n\n\n\n\nTable 1: Participant Characteristics\n\n\n\n\n\n\nParticipants\n46\n\n\nMale\n30\n\n\nFemale\n16\n\n\nObservations\n2601\n\n\nVelocity Range (m/s)\n0.13 - 0.81\n\n\nRIR Range\n0 - 25\n\n\nRelative Strength (1RM/BW)\n1.6"
+  },
+  {
+    "objectID": "03_rir_velocity_modeling.html#the-velocity-rir-relationship",
+    "href": "03_rir_velocity_modeling.html#the-velocity-rir-relationship",
+    "title": "Can We Predict How Many Reps You Have Left?",
+    "section": "The Velocity-RIR Relationship",
+    "text": "The Velocity-RIR Relationship\nAs you get closer to failure, your bar speed slows down. This creates a relationship we can model:\n\n\nShow code\n# Create velocity-RIR scatter plot\nggplot(data, aes(x = mean_velocity, y = rir, color = set_type)) +\n  geom_point(alpha = 0.3, size = 1) +\n  geom_smooth(method = \"lm\", formula = y ~ poly(x, 2), se = FALSE, size = 1.2) +\n  facet_wrap(~set_type, labeller = labeller(set_type = c(\n    RTF70 = \"70% 1RM\",\n    RTF80 = \"80% 1RM\",\n    RTF90 = \"90% 1RM\"\n  ))) +\n  labs(\n    x = \"Mean Velocity (m/s)\",\n    y = \"Repetitions in Reserve\",\n    color = \"Load\"\n  ) +\n  theme_minimal() +\n  theme(\n    legend.position = \"none\",\n    strip.text = element_text(face = \"bold\", size = 12)\n  ) +\n  scale_color_manual(values = c(\"#E69F00\", \"#56B4E9\", \"#009E73\"))\n\n\n\n\n\n\n\n\nFigure 1: Velocity-RIR relationship across all participants and loads\n\n\n\n\n\nWhat you’re seeing: Each point is one repetition. As velocity decreases (moving left), RIR decreases (you’re closer to failure). The curves show polynomial fits for each load."
+  },
+  {
+    "objectID": "03_rir_velocity_modeling.html#general-vs-individual-models",
+    "href": "03_rir_velocity_modeling.html#general-vs-individual-models",
+    "title": "Can We Predict How Many Reps You Have Left?",
+    "section": "General vs Individual Models",
+    "text": "General vs Individual Models\nHere’s where it gets interesting. A “general” model uses everyone’s data to create one equation. An “individual” model creates a unique equation for each person.\n\n\nShow code\ncomparison_df &lt;- data.frame(\n  `Model Type` = c(\"General (Polynomial)\", \"Individual (Polynomial)\"),\n  `Median R²` = c(\n    round(results$comparison$general_r2, 3),\n    round(results$comparison$individual_r2, 3)\n  ),\n  `Interpretation` = c(\n    \"Explains ~50% of variance\",\n    \"Explains ~88% of variance\"\n  )\n)\n\nknitr::kable(comparison_df, col.names = c(\"Model Type\", \"Median R²\", \"Interpretation\"))\n\n\n\n\nTable 2: Model Fit Comparison: General vs Individual\n\n\n\n\n\n\nModel Type\nMedian R²\nInterpretation\n\n\n\n\nGeneral (Polynomial)\n0.495\nExplains ~50% of variance\n\n\nIndividual (Polynomial)\n0.884\nExplains ~88% of variance\n\n\n\n\n\n\n\n\nThe takeaway: Individual models explain 1.8x more variance than general models. This means personalized equations are much better at predicting your RIR."
+  },
+  {
+    "objectID": "03_rir_velocity_modeling.html#why-does-this-matter",
+    "href": "03_rir_velocity_modeling.html#why-does-this-matter",
+    "title": "Can We Predict How Many Reps You Have Left?",
+    "section": "Why Does This Matter?",
+    "text": "Why Does This Matter?\n\nFor Athletes and Coaches\nIf you can accurately predict RIR from velocity:\n\nAuto-regulate training: Stop a set when velocity indicates 2 RIR instead of guessing\nManage fatigue: Track velocity loss across a session to monitor accumulated fatigue\nOptimize intensity: Ensure you’re training at the intended proximity to failure\n\n\n\nFor Researchers\nThe strong individual relationships suggest:\n\nVelocity-based training is valid for monitoring RIR\nIndividualization is crucial—one-size-fits-all equations lose precision\nSimple technology (velocity trackers) can provide actionable data"
+  },
+  {
+    "objectID": "03_rir_velocity_modeling.html#model-details-by-load",
+    "href": "03_rir_velocity_modeling.html#model-details-by-load",
+    "title": "Can We Predict How Many Reps You Have Left?",
+    "section": "Model Details by Load",
+    "text": "Model Details by Load\n\n\nShow code\nload_df &lt;- data.frame(\n  Load = c(\"90% 1RM\", \"80% 1RM\", \"70% 1RM\"),\n  `Linear R²` = c(\n    round(results$general_results$RTF90$linear$r_squared, 3),\n    round(results$general_results$RTF80$linear$r_squared, 3),\n    round(results$general_results$RTF70$linear$r_squared, 3)\n  ),\n  `Polynomial R²` = c(\n    round(results$general_results$RTF90$polynomial$r_squared, 3),\n    round(results$general_results$RTF80$polynomial$r_squared, 3),\n    round(results$general_results$RTF70$polynomial$r_squared, 3)\n  ),\n  `RSE (reps)` = c(\n    round(results$general_results$RTF90$polynomial$rse, 2),\n    round(results$general_results$RTF80$polynomial$rse, 2),\n    round(results$general_results$RTF70$polynomial$rse, 2)\n  )\n)\n\nknitr::kable(load_df, col.names = c(\"Load\", \"Linear R²\", \"Polynomial R²\", \"RSE (reps)\"))\n\n\n\n\nTable 3: General Model Performance by Load\n\n\n\n\n\n\nLoad\nLinear R²\nPolynomial R²\nRSE (reps)\n\n\n\n\n90% 1RM\n0.466\n0.469\n1.22\n\n\n80% 1RM\n0.512\n0.516\n2.28\n\n\n70% 1RM\n0.500\n0.501\n3.43\n\n\n\n\n\n\n\n\nPattern: Heavier loads (90% 1RM) have lower RSE because there are fewer possible reps, making prediction easier in absolute terms."
+  },
+  {
+    "objectID": "03_rir_velocity_modeling.html#individual-model-distribution",
+    "href": "03_rir_velocity_modeling.html#individual-model-distribution",
+    "title": "Can We Predict How Many Reps You Have Left?",
+    "section": "Individual Model Distribution",
+    "text": "Individual Model Distribution\n\n\nShow code\n# Extract R² values from individual results\nr2_values &lt;- c()\nfor (id in names(results$general_results)) {\n  if (!is.null(results$general_results[[id]]$polynomial$r_squared)) {\n    r2_values &lt;- c(r2_values, results$general_results[[id]]$polynomial$r_squared)\n  }\n}\n\n# Create histogram using the summary data\nindividual_r2_median &lt;- results$polynomial_summary$median_r_squared\nindividual_r2_range &lt;- c(results$polynomial_summary$min_r_squared,\n                          results$polynomial_summary$max_r_squared)\n\n# Simple visualization\nggplot(data.frame(x = 1), aes(x = x)) +\n  annotate(\"rect\", xmin = 0.2, xmax = 1.0, ymin = 0, ymax = 1,\n           fill = \"steelblue\", alpha = 0.3) +\n  annotate(\"segment\", x = individual_r2_median, xend = individual_r2_median,\n           y = 0, yend = 1, color = \"darkblue\", size = 2) +\n  annotate(\"text\", x = individual_r2_median, y = 1.1,\n           label = paste(\"Median:\", round(individual_r2_median, 2)),\n           fontface = \"bold\") +\n  annotate(\"text\", x = individual_r2_range[1], y = 0.5,\n           label = paste(\"Min:\", round(individual_r2_range[1], 2))) +\n  annotate(\"text\", x = individual_r2_range[2], y = 0.5,\n           label = paste(\"Max:\", round(individual_r2_range[2], 2))) +\n  scale_x_continuous(limits = c(0, 1.1), breaks = seq(0, 1, 0.2)) +\n  labs(x = \"R² (Individual Models)\", y = \"\") +\n  theme_minimal() +\n  theme(\n    axis.text.y = element_blank(),\n    axis.ticks.y = element_blank(),\n    panel.grid.major.y = element_blank(),\n    panel.grid.minor.y = element_blank()\n  )\n\n\n\n\n\n\n\n\nFigure 2: Distribution of R² values for individual polynomial models\n\n\n\n\n\nKey insight: Most individual models achieve R² &gt; 0.80, meaning velocity explains over 80% of the variance in RIR for most people."
+  },
+  {
+    "objectID": "03_rir_velocity_modeling.html#validation-against-the-paper",
+    "href": "03_rir_velocity_modeling.html#validation-against-the-paper",
+    "title": "Can We Predict How Many Reps You Have Left?",
+    "section": "Validation Against the Paper",
+    "text": "Validation Against the Paper\n\n\n\nMetric\nPaper Finding\nOur Replication\nMatch?\n\n\n\n\nGeneral R²\n~0.50-0.60\n0.5\nYes\n\n\nIndividual R² (median)\n~0.85-0.95\n0.88\nYes\n\n\nImprovement factor\n~2x\n1.78x\nYes"
+  },
+  {
+    "objectID": "03_rir_velocity_modeling.html#practical-recommendations",
+    "href": "03_rir_velocity_modeling.html#practical-recommendations",
+    "title": "Can We Predict How Many Reps You Have Left?",
+    "section": "Practical Recommendations",
+    "text": "Practical Recommendations\nBased on these findings:\n\nBuild your own velocity-RIR curve: Perform sets to failure at different loads while tracking velocity. Use this data to create your personalized equation.\nUse polynomial models: The curved relationship captures the data better than a straight line, especially as you approach failure.\nRecalibrate periodically: Your velocity-RIR relationship may shift with training adaptations.\nAccept some error: Even good individual models have ~1 rep error. Use velocity as a guide, not gospel."
+  },
+  {
+    "objectID": "03_rir_velocity_modeling.html#technical-notes",
+    "href": "03_rir_velocity_modeling.html#technical-notes",
+    "title": "Can We Predict How Many Reps You Have Left?",
+    "section": "Technical Notes",
+    "text": "Technical Notes\nThis analysis used: - R6 classes for clean, object-oriented code - Linear and polynomial regression for model fitting - Cross-validation (Day 1 → Day 2 prediction) for practical validity\nData source: OSF Repository"
+  },
+  {
+    "objectID": "03_rir_velocity_modeling.html#references",
+    "href": "03_rir_velocity_modeling.html#references",
+    "title": "Can We Predict How Many Reps You Have Left?",
+    "section": "References",
+    "text": "References\nJukic, I., Prnjak, K., Helms, E. R., & McGuigan, M. R. (2024). Modeling the repetitions-in-reserve-velocity relationship: A valid method for resistance training monitoring and prescription, and fatigue management. Experimental Physiology, 109(2), 193-206."
   },
   {
     "objectID": "05_deadlift_lmm_analysis.html",
@@ -399,234 +364,276 @@
     "text": "References\nThis methodology follows:\nNakagawa, S., & Schielzeth, H. (2013). A general and simple method for obtaining R² from generalized linear mixed-effects models. Methods in Ecology and Evolution, 4(2), 133-142.\nLei, J., G’Sell, M., Rinaldo, A., Tibshirani, R. J., & Wasserman, L. (2018). Distribution-Free Predictive Inference for Regression. Journal of the American Statistical Association, 113(523), 1094-1111.\nJukic, I., Prnjak, K., Helms, E. R., & McGuigan, M. R. (2024). Modeling the repetitions-in-reserve-velocity relationship. Experimental Physiology, 109(2), 193-206."
   },
   {
-    "objectID": "03_rir_velocity_modeling.html",
-    "href": "03_rir_velocity_modeling.html",
-    "title": "Can We Predict How Many Reps You Have Left?",
+    "objectID": "04_deadlift_rir_velocity.html",
+    "href": "04_deadlift_rir_velocity.html",
+    "title": "Does the RIR-Velocity Relationship Hold for Deadlifts?",
     "section": "",
-    "text": "Imagine you’re in the middle of a heavy set of squats. Your coach asks: “How many reps do you have left?” If you could answer accurately, you’d have a powerful tool for managing training intensity and fatigue.\nThis is where Repetitions in Reserve (RIR) comes in—a way to quantify how close you are to failure. But can we do better than guessing? Can we use objective measurements like bar velocity to predict RIR?"
+    "text": "The squat study (Study 3) showed that bar velocity can predict Repetitions in Reserve (RIR) with high accuracy—especially when using individual calibration. But does this relationship hold for the deadlift?\nThe deadlift presents unique challenges:\n\nNo eccentric phase at the start (bar starts from the floor)\nGrip fatigue can limit performance independently of target muscles\nMore binary failure pattern (you can lift it or you can’t)\n\nThis study examines whether velocity-based training principles apply to the conventional deadlift."
   },
   {
-    "objectID": "03_rir_velocity_modeling.html#the-question",
-    "href": "03_rir_velocity_modeling.html#the-question",
-    "title": "Can We Predict How Many Reps You Have Left?",
+    "objectID": "04_deadlift_rir_velocity.html#the-question",
+    "href": "04_deadlift_rir_velocity.html#the-question",
+    "title": "Does the RIR-Velocity Relationship Hold for Deadlifts?",
     "section": "",
-    "text": "Imagine you’re in the middle of a heavy set of squats. Your coach asks: “How many reps do you have left?” If you could answer accurately, you’d have a powerful tool for managing training intensity and fatigue.\nThis is where Repetitions in Reserve (RIR) comes in—a way to quantify how close you are to failure. But can we do better than guessing? Can we use objective measurements like bar velocity to predict RIR?"
+    "text": "The squat study (Study 3) showed that bar velocity can predict Repetitions in Reserve (RIR) with high accuracy—especially when using individual calibration. But does this relationship hold for the deadlift?\nThe deadlift presents unique challenges:\n\nNo eccentric phase at the start (bar starts from the floor)\nGrip fatigue can limit performance independently of target muscles\nMore binary failure pattern (you can lift it or you can’t)\n\nThis study examines whether velocity-based training principles apply to the conventional deadlift."
   },
   {
-    "objectID": "03_rir_velocity_modeling.html#the-study",
-    "href": "03_rir_velocity_modeling.html#the-study",
-    "title": "Can We Predict How Many Reps You Have Left?",
-    "section": "The Study",
-    "text": "The Study\nJukic et al. (2024) investigated whether the relationship between bar velocity and RIR could be used for training monitoring and prescription. They compared:\n\nGeneral models: One equation for everyone\nIndividual models: Personalized equations for each lifter\n\nTheir key findings: - Individual models explain about 2x more variance than general models - Polynomial (curved) relationships fit better than linear ones - Prediction accuracy is acceptable for practical use"
+    "objectID": "04_deadlift_rir_velocity.html#methods",
+    "href": "04_deadlift_rir_velocity.html#methods",
+    "title": "Does the RIR-Velocity Relationship Hold for Deadlifts?",
+    "section": "Methods",
+    "text": "Methods\n\nParticipants\n\n\nShow code\nsummary_df &lt;- data.frame(\n  Metric = c(\"Total Participants\", \"Male\", \"Female\",\n             \"Observations\", \"Velocity Range (m/s)\",\n             \"RIR Range\", \"Weight Range (kg)\"),\n  Value = c(\n    results$summary$n_participants,\n    round(results$summary$n_male),\n    round(results$summary$n_female),\n    results$summary$n_observations,\n    paste(round(results$summary$velocity_range, 3), collapse = \" - \"),\n    paste(results$summary$rir_range, collapse = \" - \"),\n    paste(results$summary$weight_range, collapse = \" - \")\n  )\n)\n\nknitr::kable(summary_df, col.names = c(\"\", \"\"))\n\n\n\n\nTable 1: Participant Characteristics\n\n\n\n\n\n\nTotal Participants\n19\n\n\nMale\n15\n\n\nFemale\n4\n\n\nObservations\n406\n\n\nVelocity Range (m/s)\n0.119 - 0.675\n\n\nRIR Range\n0 - 7\n\n\nWeight Range (kg)\n85 - 210\n\n\n\n\n\n\n\n\n\n\nProtocol\n\nExercise: Conventional deadlift\nLoads: 80% and 90% of 1RM\nTesting Days: 2 (for cross-validation)\nData Collection: Velocity (m/s) and RIR for each repetition"
   },
   {
-    "objectID": "03_rir_velocity_modeling.html#our-data",
-    "href": "03_rir_velocity_modeling.html#our-data",
-    "title": "Can We Predict How Many Reps You Have Left?",
-    "section": "Our Data",
-    "text": "Our Data\nWe’re analyzing data from 46 resistance-trained individuals performing back squats at three intensities:\n\n\nShow code\nsummary_df &lt;- data.frame(\n  Metric = c(\"Participants\", \"Male\", \"Female\",\n             \"Observations\", \"Velocity Range (m/s)\",\n             \"RIR Range\", \"Relative Strength (1RM/BW)\"),\n  Value = c(\n    results$summary$n_participants,\n    round(results$summary$n_male),\n    round(results$summary$n_female),\n    results$summary$n_observations,\n    paste(round(results$summary$velocity_range, 2), collapse = \" - \"),\n    paste(results$summary$rir_range, collapse = \" - \"),\n    round(results$summary$mean_relative_strength, 2)\n  )\n)\n\nknitr::kable(summary_df, col.names = c(\"\", \"\"))\n\n\n\n\nTable 1: Participant Characteristics\n\n\n\n\n\n\nParticipants\n46\n\n\nMale\n30\n\n\nFemale\n16\n\n\nObservations\n2601\n\n\nVelocity Range (m/s)\n0.13 - 0.81\n\n\nRIR Range\n0 - 25\n\n\nRelative Strength (1RM/BW)\n1.6"
-  },
-  {
-    "objectID": "03_rir_velocity_modeling.html#the-velocity-rir-relationship",
-    "href": "03_rir_velocity_modeling.html#the-velocity-rir-relationship",
-    "title": "Can We Predict How Many Reps You Have Left?",
+    "objectID": "04_deadlift_rir_velocity.html#the-velocity-rir-relationship",
+    "href": "04_deadlift_rir_velocity.html#the-velocity-rir-relationship",
+    "title": "Does the RIR-Velocity Relationship Hold for Deadlifts?",
     "section": "The Velocity-RIR Relationship",
-    "text": "The Velocity-RIR Relationship\nAs you get closer to failure, your bar speed slows down. This creates a relationship we can model:\n\n\nShow code\n# Create velocity-RIR scatter plot\nggplot(data, aes(x = mean_velocity, y = rir, color = set_type)) +\n  geom_point(alpha = 0.3, size = 1) +\n  geom_smooth(method = \"lm\", formula = y ~ poly(x, 2), se = FALSE, size = 1.2) +\n  facet_wrap(~set_type, labeller = labeller(set_type = c(\n    RTF70 = \"70% 1RM\",\n    RTF80 = \"80% 1RM\",\n    RTF90 = \"90% 1RM\"\n  ))) +\n  labs(\n    x = \"Mean Velocity (m/s)\",\n    y = \"Repetitions in Reserve\",\n    color = \"Load\"\n  ) +\n  theme_minimal() +\n  theme(\n    legend.position = \"none\",\n    strip.text = element_text(face = \"bold\", size = 12)\n  ) +\n  scale_color_manual(values = c(\"#E69F00\", \"#56B4E9\", \"#009E73\"))\n\n\n\n\n\n\n\n\nFigure 1: Velocity-RIR relationship across all participants and loads\n\n\n\n\n\nWhat you’re seeing: Each point is one repetition. As velocity decreases (moving left), RIR decreases (you’re closer to failure). The curves show polynomial fits for each load."
+    "text": "The Velocity-RIR Relationship\nAs lifters approach failure, their bar speed decreases. Here’s what this looks like for the deadlift:\n\n\nShow code\nggplot(data, aes(x = mean_velocity, y = rir, color = load_percentage)) +\n  geom_point(alpha = 0.4, size = 2) +\n  geom_smooth(method = \"lm\", formula = y ~ poly(x, 2), se = FALSE, linewidth = 1.2) +\n  facet_wrap(~load_percentage, labeller = labeller(load_percentage = c(\n    `80%` = \"80% 1RM\",\n    `90%` = \"90% 1RM\"\n  ))) +\n  labs(\n    x = \"Mean Velocity (m/s)\",\n    y = \"Repetitions in Reserve\",\n    color = \"Load\"\n  ) +\n  theme_minimal() +\n  theme(\n    legend.position = \"none\",\n    strip.text = element_text(face = \"bold\", size = 12)\n  ) +\n  scale_color_manual(values = c(\"#E69F00\", \"#009E73\"))\n\n\n\n\n\n\n\n\nFigure 1: Velocity-RIR relationship for conventional deadlift\n\n\n\n\n\nObservation: The relationship is visible but with more scatter than typically seen in squat data, especially at 80% 1RM."
   },
   {
-    "objectID": "03_rir_velocity_modeling.html#general-vs-individual-models",
-    "href": "03_rir_velocity_modeling.html#general-vs-individual-models",
-    "title": "Can We Predict How Many Reps You Have Left?",
+    "objectID": "04_deadlift_rir_velocity.html#general-vs-individual-models",
+    "href": "04_deadlift_rir_velocity.html#general-vs-individual-models",
+    "title": "Does the RIR-Velocity Relationship Hold for Deadlifts?",
     "section": "General vs Individual Models",
-    "text": "General vs Individual Models\nHere’s where it gets interesting. A “general” model uses everyone’s data to create one equation. An “individual” model creates a unique equation for each person.\n\n\nShow code\ncomparison_df &lt;- data.frame(\n  `Model Type` = c(\"General (Polynomial)\", \"Individual (Polynomial)\"),\n  `Median R²` = c(\n    round(results$comparison$general_r2, 3),\n    round(results$comparison$individual_r2, 3)\n  ),\n  `Interpretation` = c(\n    \"Explains ~50% of variance\",\n    \"Explains ~88% of variance\"\n  )\n)\n\nknitr::kable(comparison_df, col.names = c(\"Model Type\", \"Median R²\", \"Interpretation\"))\n\n\n\n\nTable 2: Model Fit Comparison: General vs Individual\n\n\n\n\n\n\nModel Type\nMedian R²\nInterpretation\n\n\n\n\nGeneral (Polynomial)\n0.495\nExplains ~50% of variance\n\n\nIndividual (Polynomial)\n0.884\nExplains ~88% of variance\n\n\n\n\n\n\n\n\nThe takeaway: Individual models explain 1.8x more variance than general models. This means personalized equations are much better at predicting your RIR."
+    "text": "General vs Individual Models\n\n\nShow code\ncomparison_df &lt;- data.frame(\n  `Model Type` = c(\"General (Polynomial)\", \"Individual (Polynomial)\"),\n  `R²` = c(\n    round(results$comparison$general_r2, 3),\n    round(results$comparison$individual_r2, 3)\n  ),\n  `Interpretation` = c(\n    paste0(\"Explains ~\", round(results$comparison$general_r2 * 100), \"% of variance\"),\n    paste0(\"Explains ~\", round(results$comparison$individual_r2 * 100), \"% of variance\")\n  )\n)\n\nknitr::kable(comparison_df, col.names = c(\"Model Type\", \"Median R²\", \"Interpretation\"))\n\n\n\n\nTable 2: Model Fit Comparison\n\n\n\n\n\n\nModel Type\nMedian R²\nInterpretation\n\n\n\n\nGeneral (Polynomial)\n0.362\nExplains ~36% of variance\n\n\nIndividual (Polynomial)\n0.707\nExplains ~71% of variance\n\n\n\n\n\n\n\n\nKey Finding: Individual models explain 2x more variance than general models, consistent with the squat findings."
   },
   {
-    "objectID": "03_rir_velocity_modeling.html#why-does-this-matter",
-    "href": "03_rir_velocity_modeling.html#why-does-this-matter",
-    "title": "Can We Predict How Many Reps You Have Left?",
-    "section": "Why Does This Matter?",
-    "text": "Why Does This Matter?\n\nFor Athletes and Coaches\nIf you can accurately predict RIR from velocity:\n\nAuto-regulate training: Stop a set when velocity indicates 2 RIR instead of guessing\nManage fatigue: Track velocity loss across a session to monitor accumulated fatigue\nOptimize intensity: Ensure you’re training at the intended proximity to failure\n\n\n\nFor Researchers\nThe strong individual relationships suggest:\n\nVelocity-based training is valid for monitoring RIR\nIndividualization is crucial—one-size-fits-all equations lose precision\nSimple technology (velocity trackers) can provide actionable data"
+    "objectID": "04_deadlift_rir_velocity.html#how-does-deadlift-compare-to-squat",
+    "href": "04_deadlift_rir_velocity.html#how-does-deadlift-compare-to-squat",
+    "title": "Does the RIR-Velocity Relationship Hold for Deadlifts?",
+    "section": "How Does Deadlift Compare to Squat?",
+    "text": "How Does Deadlift Compare to Squat?\n\n\nShow code\nexercise_comparison &lt;- data.frame(\n  Metric = c(\n    \"Participants\",\n    \"Load Types\",\n    \"General R² (polynomial)\",\n    \"Individual R² (median)\",\n    \"Improvement Factor\"\n  ),\n  Squat = c(\n    \"46\",\n    \"70%, 80%, 90%\",\n    round(squat_results$comparison$general_r2, 2),\n    round(squat_results$comparison$individual_r2, 2),\n    paste0(round(squat_results$comparison$improvement_factor, 2), \"x\")\n  ),\n  Deadlift = c(\n    as.character(results$summary$n_participants),\n    \"80%, 90%\",\n    round(results$comparison$general_r2, 2),\n    round(results$comparison$individual_r2, 2),\n    paste0(round(results$comparison$improvement_factor, 2), \"x\")\n  )\n)\n\nknitr::kable(exercise_comparison, col.names = c(\"Metric\", \"Squat (Jukic)\", \"Deadlift (Thesis)\"))\n\n\n\n\nTable 3: Deadlift vs Squat RIR-Velocity Relationship\n\n\n\n\n\n\nMetric\nSquat (Jukic)\nDeadlift (Thesis)\n\n\n\n\nParticipants\n46\n19\n\n\nLoad Types\n70%, 80%, 90%\n80%, 90%\n\n\nGeneral R² (polynomial)\n0.5\n0.36\n\n\nIndividual R² (median)\n0.88\n0.71\n\n\nImprovement Factor\n1.78x\n1.95x\n\n\n\n\n\n\n\n\n\nWhy is Deadlift R² Lower?\nThe deadlift shows lower R² values than the squat. Possible explanations:\n\nBinary failure pattern: Deadlifts tend to fail suddenly rather than gradually grinding to a halt\nGrip fatigue: Can limit performance independently of target muscle fatigue\nNo stretch-shortening cycle: Less consistent velocity feedback\nTechnical breakdown: Form changes (back rounding) may affect velocity differently\nSample size: Smaller participant pool (19 vs 46)"
   },
   {
-    "objectID": "03_rir_velocity_modeling.html#model-details-by-load",
-    "href": "03_rir_velocity_modeling.html#model-details-by-load",
-    "title": "Can We Predict How Many Reps You Have Left?",
+    "objectID": "04_deadlift_rir_velocity.html#prediction-accuracy",
+    "href": "04_deadlift_rir_velocity.html#prediction-accuracy",
+    "title": "Does the RIR-Velocity Relationship Hold for Deadlifts?",
+    "section": "Prediction Accuracy",
+    "text": "Prediction Accuracy\nHow well does a Day 1 model predict Day 2 performance?\n\n\nShow code\naccuracy &lt;- results$general_prediction_accuracy\n\nprediction_df &lt;- data.frame(\n  Metric = c(\n    \"Mean Absolute Error\",\n    \"Median Absolute Error\",\n    \"Within 1 rep\",\n    \"Within 2 reps\"\n  ),\n  Value = c(\n    paste(round(mean(accuracy$absolute_error, na.rm = TRUE), 2), \"reps\"),\n    paste(round(median(accuracy$absolute_error, na.rm = TRUE), 2), \"reps\"),\n    paste0(round(mean(accuracy$absolute_error &lt;= 1, na.rm = TRUE) * 100, 1), \"%\"),\n    paste0(round(mean(accuracy$absolute_error &lt;= 2, na.rm = TRUE) * 100, 1), \"%\")\n  )\n)\n\nknitr::kable(prediction_df, col.names = c(\"Metric\", \"Value\"))\n\n\n\n\nTable 4: Cross-Day Prediction Accuracy\n\n\n\n\n\n\nMetric\nValue\n\n\n\n\nMean Absolute Error\n1.39 reps\n\n\nMedian Absolute Error\n1.15 reps\n\n\nWithin 1 rep\n46.8%\n\n\nWithin 2 reps\n72.2%"
+  },
+  {
+    "objectID": "04_deadlift_rir_velocity.html#velocity-characteristics-by-load",
+    "href": "04_deadlift_rir_velocity.html#velocity-characteristics-by-load",
+    "title": "Does the RIR-Velocity Relationship Hold for Deadlifts?",
+    "section": "Velocity Characteristics by Load",
+    "text": "Velocity Characteristics by Load\n\n\nShow code\nggplot(data, aes(x = factor(rir), y = mean_velocity, fill = load_percentage)) +\n  geom_boxplot(alpha = 0.5, outlier.shape = NA, width = 0.7) +\n  geom_point(\n    aes(color = load_percentage),\n    position = position_jitterdodge(jitter.width = 0.15, dodge.width = 0.7),\n    alpha = 0.6, size = 1.5\n  ) +\n  labs(\n    x = \"Repetitions in Reserve\",\n    y = \"Mean Velocity (m/s)\",\n    fill = \"Load\",\n    color = \"Load\"\n  ) +\n  theme_minimal() +\n  scale_fill_manual(values = c(\"#E69F00\", \"#009E73\")) +\n  scale_color_manual(values = c(\"#CC7A00\", \"#007A5E\")) +\n  theme(legend.position = \"bottom\") +\n  guides(fill = guide_legend(override.aes = list(alpha = 0.7)),\n         color = \"none\")\n\n\n\n\n\n\n\n\nFigure 2: Velocity distribution by load and RIR with individual observations\n\n\n\n\n\nObservation: - Higher load (90%) = lower velocities overall - Clear velocity decrease as RIR approaches 0 - Wide variability between individuals at the same RIR"
+  },
+  {
+    "objectID": "04_deadlift_rir_velocity.html#model-details-by-load",
+    "href": "04_deadlift_rir_velocity.html#model-details-by-load",
+    "title": "Does the RIR-Velocity Relationship Hold for Deadlifts?",
     "section": "Model Details by Load",
-    "text": "Model Details by Load\n\n\nShow code\nload_df &lt;- data.frame(\n  Load = c(\"90% 1RM\", \"80% 1RM\", \"70% 1RM\"),\n  `Linear R²` = c(\n    round(results$general_results$RTF90$linear$r_squared, 3),\n    round(results$general_results$RTF80$linear$r_squared, 3),\n    round(results$general_results$RTF70$linear$r_squared, 3)\n  ),\n  `Polynomial R²` = c(\n    round(results$general_results$RTF90$polynomial$r_squared, 3),\n    round(results$general_results$RTF80$polynomial$r_squared, 3),\n    round(results$general_results$RTF70$polynomial$r_squared, 3)\n  ),\n  `RSE (reps)` = c(\n    round(results$general_results$RTF90$polynomial$rse, 2),\n    round(results$general_results$RTF80$polynomial$rse, 2),\n    round(results$general_results$RTF70$polynomial$rse, 2)\n  )\n)\n\nknitr::kable(load_df, col.names = c(\"Load\", \"Linear R²\", \"Polynomial R²\", \"RSE (reps)\"))\n\n\n\n\nTable 3: General Model Performance by Load\n\n\n\n\n\n\nLoad\nLinear R²\nPolynomial R²\nRSE (reps)\n\n\n\n\n90% 1RM\n0.466\n0.469\n1.22\n\n\n80% 1RM\n0.512\n0.516\n2.28\n\n\n70% 1RM\n0.500\n0.501\n3.43\n\n\n\n\n\n\n\n\nPattern: Heavier loads (90% 1RM) have lower RSE because there are fewer possible reps, making prediction easier in absolute terms."
+    "text": "Model Details by Load\n\n\nShow code\nload_df &lt;- data.frame(\n  Load = names(results$general_results),\n  `Linear R²` = sapply(results$general_results, function(x) round(x$linear$r_squared, 3)),\n  `Polynomial R²` = sapply(results$general_results, function(x) round(x$polynomial$r_squared, 3)),\n  `RSE (reps)` = sapply(results$general_results, function(x) round(x$polynomial$rse, 2)),\n  N = sapply(results$general_results, function(x) x$polynomial$n)\n)\nrownames(load_df) &lt;- NULL\n\nknitr::kable(load_df, col.names = c(\"Load\", \"Linear R²\", \"Polynomial R²\", \"RSE (reps)\", \"N\"))\n\n\n\n\nTable 5: Model Performance by Load\n\n\n\n\n\n\nLoad\nLinear R²\nPolynomial R²\nRSE (reps)\nN\n\n\n\n\n90%\n0.398\n0.443\n1.2\n150\n\n\n80%\n0.251\n0.281\n1.8\n256\n\n\n\n\n\n\n\n\nPattern: 90% 1RM shows better model fit than 80% 1RM, likely because: - Fewer total reps (less fatigue accumulation variability) - More consistent near-failure performance"
   },
   {
-    "objectID": "03_rir_velocity_modeling.html#individual-model-distribution",
-    "href": "03_rir_velocity_modeling.html#individual-model-distribution",
-    "title": "Can We Predict How Many Reps You Have Left?",
-    "section": "Individual Model Distribution",
-    "text": "Individual Model Distribution\n\n\nShow code\n# Extract R² values from individual results\nr2_values &lt;- c()\nfor (id in names(results$general_results)) {\n  if (!is.null(results$general_results[[id]]$polynomial$r_squared)) {\n    r2_values &lt;- c(r2_values, results$general_results[[id]]$polynomial$r_squared)\n  }\n}\n\n# Create histogram using the summary data\nindividual_r2_median &lt;- results$polynomial_summary$median_r_squared\nindividual_r2_range &lt;- c(results$polynomial_summary$min_r_squared,\n                          results$polynomial_summary$max_r_squared)\n\n# Simple visualization\nggplot(data.frame(x = 1), aes(x = x)) +\n  annotate(\"rect\", xmin = 0.2, xmax = 1.0, ymin = 0, ymax = 1,\n           fill = \"steelblue\", alpha = 0.3) +\n  annotate(\"segment\", x = individual_r2_median, xend = individual_r2_median,\n           y = 0, yend = 1, color = \"darkblue\", size = 2) +\n  annotate(\"text\", x = individual_r2_median, y = 1.1,\n           label = paste(\"Median:\", round(individual_r2_median, 2)),\n           fontface = \"bold\") +\n  annotate(\"text\", x = individual_r2_range[1], y = 0.5,\n           label = paste(\"Min:\", round(individual_r2_range[1], 2))) +\n  annotate(\"text\", x = individual_r2_range[2], y = 0.5,\n           label = paste(\"Max:\", round(individual_r2_range[2], 2))) +\n  scale_x_continuous(limits = c(0, 1.1), breaks = seq(0, 1, 0.2)) +\n  labs(x = \"R² (Individual Models)\", y = \"\") +\n  theme_minimal() +\n  theme(\n    axis.text.y = element_blank(),\n    axis.ticks.y = element_blank(),\n    panel.grid.major.y = element_blank(),\n    panel.grid.minor.y = element_blank()\n  )\n\n\n\n\n\n\n\n\nFigure 2: Distribution of R² values for individual polynomial models\n\n\n\n\n\nKey insight: Most individual models achieve R² &gt; 0.80, meaning velocity explains over 80% of the variance in RIR for most people."
-  },
-  {
-    "objectID": "03_rir_velocity_modeling.html#validation-against-the-paper",
-    "href": "03_rir_velocity_modeling.html#validation-against-the-paper",
-    "title": "Can We Predict How Many Reps You Have Left?",
-    "section": "Validation Against the Paper",
-    "text": "Validation Against the Paper\n\n\n\nMetric\nPaper Finding\nOur Replication\nMatch?\n\n\n\n\nGeneral R²\n~0.50-0.60\n0.5\nYes\n\n\nIndividual R² (median)\n~0.85-0.95\n0.88\nYes\n\n\nImprovement factor\n~2x\n1.78x\nYes"
-  },
-  {
-    "objectID": "03_rir_velocity_modeling.html#practical-recommendations",
-    "href": "03_rir_velocity_modeling.html#practical-recommendations",
-    "title": "Can We Predict How Many Reps You Have Left?",
-    "section": "Practical Recommendations",
-    "text": "Practical Recommendations\nBased on these findings:\n\nBuild your own velocity-RIR curve: Perform sets to failure at different loads while tracking velocity. Use this data to create your personalized equation.\nUse polynomial models: The curved relationship captures the data better than a straight line, especially as you approach failure.\nRecalibrate periodically: Your velocity-RIR relationship may shift with training adaptations.\nAccept some error: Even good individual models have ~1 rep error. Use velocity as a guide, not gospel."
-  },
-  {
-    "objectID": "03_rir_velocity_modeling.html#technical-notes",
-    "href": "03_rir_velocity_modeling.html#technical-notes",
-    "title": "Can We Predict How Many Reps You Have Left?",
-    "section": "Technical Notes",
-    "text": "Technical Notes\nThis analysis used: - R6 classes for clean, object-oriented code - Linear and polynomial regression for model fitting - Cross-validation (Day 1 → Day 2 prediction) for practical validity\nData source: OSF Repository"
-  },
-  {
-    "objectID": "03_rir_velocity_modeling.html#references",
-    "href": "03_rir_velocity_modeling.html#references",
-    "title": "Can We Predict How Many Reps You Have Left?",
-    "section": "References",
-    "text": "References\nJukic, I., Prnjak, K., Helms, E. R., & McGuigan, M. R. (2024). Modeling the repetitions-in-reserve-velocity relationship: A valid method for resistance training monitoring and prescription, and fatigue management. Experimental Physiology, 109(2), 193-206."
-  },
-  {
-    "objectID": "index.html",
-    "href": "index.html",
-    "title": "RIR & Training Outcomes: A Research Compendium",
-    "section": "",
-    "text": "This research compendium explores a fundamental question in resistance training:\n\nHow close to failure should you train for optimal results?\n\nWe address this through:\n\nReplications of key published studies\nMeta-analysis of existing literature\nPractical guidance for training decisions"
-  },
-  {
-    "objectID": "index.html#what-this-project-investigates",
-    "href": "index.html#what-this-project-investigates",
-    "title": "RIR & Training Outcomes: A Research Compendium",
-    "section": "",
-    "text": "This research compendium explores a fundamental question in resistance training:\n\nHow close to failure should you train for optimal results?\n\nWe address this through:\n\nReplications of key published studies\nMeta-analysis of existing literature\nPractical guidance for training decisions"
-  },
-  {
-    "objectID": "index.html#key-concepts",
-    "href": "index.html#key-concepts",
-    "title": "RIR & Training Outcomes: A Research Compendium",
-    "section": "Key Concepts",
-    "text": "Key Concepts\n\nRepetitions in Reserve (RIR)\nRIR measures how close you are to muscular failure:\n\n\n\n\n\n\n\n\nRIR\nDescription\nExample\n\n\n\n\n0\nComplete failure\nCouldn’t complete another rep\n\n\n1-2\nNear failure\n1-2 reps left before failure\n\n\n3-4\nModerate intensity\nNoticeable fatigue but not close to failure\n\n\n5+\nLow intensity\nCould do many more reps\n\n\n\n\n\nVelocity-Based Training (VBT)\nAn objective approach to measuring effort using bar speed:\n\nFaster velocity = More reps remaining\nSlower velocity = Closer to failure\nVelocity loss = Fatigue accumulation within a set"
-  },
-  {
-    "objectID": "index.html#completed-analyses",
-    "href": "index.html#completed-analyses",
-    "title": "RIR & Training Outcomes: A Research Compendium",
-    "section": "Completed Analyses",
-    "text": "Completed Analyses\n\n1. Does Training to Failure Matter?\nPelland et al. (2024) Replication\nA meta-regression examining RIR and training outcomes across strength and hypertrophy studies.\nKey Finding: Training closer to failure benefits hypertrophy but not strength.\n\n\n\nOutcome\nRIR Effect\nSignificant?\n\n\n\n\nStrength\n~0\nNo\n\n\nHypertrophy\nNegative\nYes\n\n\n\n\n\n\n2. Can Bar Speed Predict Effort?\nPaulsen et al. (2025) Replication\nAnalysis of 2,972 observations examining velocity-RIR relationships.\nKey Finding: Velocity moderately predicts perceived effort (r ≈ 0.5), but varies substantially between individuals.\n\n\n\nMetric\nValue\n\n\n\n\nOverall correlation\nr = 0.45\n\n\nIndividual range\nr = 0.09 to 0.79\n\n\n\n\n\n\n3. Can We Model the RIR-Velocity Relationship?\nJukic et al. (2024) Replication\nAnalysis of 2,601 observations examining whether individual RIR-velocity models outperform general equations.\nKey Finding: Individual models explain ~2x more variance than general models (R² = 0.88 vs 0.50).\n\n\n\nModel Type\nMedian R²\nImplication\n\n\n\n\nGeneral\n0.50\nOne-size-fits-all loses precision\n\n\nIndividual\n0.88\nPersonalization is essential\n\n\n\n\n\n\n4. Does This Work for Deadlifts?\nDeadlift RIR-Velocity Study\nOriginal thesis research applying the same methodology to conventional deadlift with 406 observations from 19 participants.\nKey Finding: The RIR-velocity relationship holds for deadlifts, but with lower predictability than squats.\n\n\n\nExercise\nGeneral R²\nIndividual R²\nImprovement\n\n\n\n\nSquat (Study 3)\n0.50\n0.88\n1.8x\n\n\nDeadlift (Study 4)\n0.36\n0.71\n2x\n\n\n\nWhy lower for deadlifts? Binary failure patterns, grip fatigue, and lack of stretch-shortening cycle.\n\n\n\n5. Practical Velocity Tables for Deadlift Training\nLMM Analysis & Velocity Stop Tables\nLinear Mixed Effects analysis extending Study 4 with practical velocity thresholds for training.\nKey Finding: Load percentage does NOT significantly affect the velocity-RIR relationship. A single global velocity table is sufficient.\n\n\n\nTable Type\nMAE\nUse Case\n\n\n\n\nGeneral\n0.0599 m/s\nQuick reference, new athletes\n\n\nIndividual\n0.0395 m/s\nEstablished athletes with calibration\n\n\n\nImprovement from individualization: 34.0%\n\n\n\n6. Advanced Velocity-RIR Analyses\nAdvanced Velocity Analyses (H2-H6)\nFive novel analyses extending the deadlift velocity-RIR research with practical insights.\n\n\n\n\n\n\n\n\nAnalysis\nFinding\nPractical Implication\n\n\n\n\nMVT Variability\nCV = 30.8%\nIndividual calibration essential\n\n\nDay-to-Day Reliability\nSlope ICC = 0.72\nPeriodic recalibration needed\n\n\nModel Comparison\n26.3% prefer quadratic\nLinear model adequate\n\n\nVelocity Decay\nAccelerates\nDecay accelerates toward failure\n\n\nFailure Prediction\nMAE = 1.29 reps\nFirst rep velocity useful"
-  },
-  {
-    "objectID": "index.html#practical-implications",
-    "href": "index.html#practical-implications",
-    "title": "RIR & Training Outcomes: A Research Compendium",
+    "objectID": "04_deadlift_rir_velocity.html#practical-implications",
+    "href": "04_deadlift_rir_velocity.html#practical-implications",
+    "title": "Does the RIR-Velocity Relationship Hold for Deadlifts?",
     "section": "Practical Implications",
-    "text": "Practical Implications\n\nFor Strength Training\nBased on the Pelland meta-regression:\n\nStop 2-3 reps short of failure on most sets\nFailure training is not necessary for strength gains\nThis allows higher training frequency and volume\n\n\n\nFor Muscle Building\nBased on the Pelland meta-regression:\n\nTrain closer to failure (0-2 RIR) for optimal hypertrophy\nThe relationship is statistically significant but effect size is modest\nBalance against recovery demands\n\n\n\nFor Velocity-Based Training\nBased on the Paulsen analysis:\n\nIndividual calibration is essential - Group averages don’t work for everyone\nExercise-specific targets - Bench press and squat need different thresholds\nUse as complement - Velocity + RPE together is better than either alone\n\n\n\nFor Deadlift Training\nBased on Study 4:\n\nVBT works, but with caveats - Expect ~1.4 rep prediction error (vs ~1 rep for squat)\nIndividual calibration still essential - 2x improvement over general equations\nLoad-specific thresholds - Different velocity targets for 80% vs 90% 1RM\nConsider grip fatigue - May affect velocity independently of target muscle fatigue"
+    "text": "Practical Implications\n\nFor Deadlift Training\n\nIndividual calibration is essential: General equations lose significant precision\nAccept more prediction error: ~1.4 rep error vs ~1 rep for squat\nLoad-specific thresholds: Different velocity targets for 80% vs 90%\n\n\n\nVelocity Targets (Based on This Data)\n\n\nShow code\n# Calculate mean velocity at each RIR level by load\ntargets &lt;- aggregate(mean_velocity ~ rir + load_percentage, data = data, FUN = mean)\ntargets &lt;- reshape(targets, idvar = \"rir\", timevar = \"load_percentage\",\n                   direction = \"wide\", v.names = \"mean_velocity\")\nnames(targets) &lt;- c(\"RIR\", \"80% 1RM\", \"90% 1RM\")\ntargets &lt;- targets[order(-targets$RIR), ]\n\n# Round and display\ntargets$`80% 1RM` &lt;- round(targets$`80% 1RM`, 3)\ntargets$`90% 1RM` &lt;- round(targets$`90% 1RM`, 3)\n\nknitr::kable(targets, row.names = FALSE)\n\n\n\n\nTable 6: Suggested Velocity Thresholds for RIR Estimation\n\n\n\n\n\n\nRIR\n80% 1RM\n90% 1RM\n\n\n\n\n7\n0.376\n0.283\n\n\n6\n0.372\n0.380\n\n\n5\n0.340\n0.408\n\n\n4\n0.334\n0.339\n\n\n3\n0.325\n0.303\n\n\n2\n0.288\n0.268\n\n\n1\n0.258\n0.229\n\n\n0\n0.217\n0.196\n\n\n\n\n\n\n\n\nCaveat: These are population averages. Individual calibration will improve accuracy."
   },
   {
-    "objectID": "index.html#data-sources",
-    "href": "index.html#data-sources",
-    "title": "RIR & Training Outcomes: A Research Compendium",
-    "section": "Data Sources",
-    "text": "Data Sources\n\n\n\nStudy\nData\nCode\n\n\n\n\nPelland et al. (2024)\nOSF Repository\nReplicated\n\n\nPaulsen et al. (2025)\nPeerJ Supplement\nReplicated\n\n\nJukic et al. (2024)\nOSF Repository\nReplicated\n\n\nDeadlift Thesis (2024)\nOriginal Data\nOriginal Research"
-  },
-  {
-    "objectID": "index.html#methodology",
-    "href": "index.html#methodology",
-    "title": "RIR & Training Outcomes: A Research Compendium",
-    "section": "Methodology",
-    "text": "Methodology\nAll analyses use:\n\nR for statistical computing\nmetafor for meta-analysis models\nQuarto for reproducible reports\nrenv for dependency management\n\n\nCode Architecture\nThe project follows SOLID principles with:\n\nR/domain/ - Domain objects (EffectSize, TreatmentGroup)\nR/calculators/ - Effect size calculation services\nscripts/ - Replication scripts\nanalyses/ - Quarto reports"
-  },
-  {
-    "objectID": "index.html#planned-analyses",
-    "href": "index.html#planned-analyses",
-    "title": "RIR & Training Outcomes: A Research Compendium",
-    "section": "Planned Analyses",
-    "text": "Planned Analyses\n\n\n\n\n\n\n\n\nAnalysis\nDescription\nStatus\n\n\n\n\nSensitivity Analysis\nRobustness checks\nPlanned\n\n\nPublication Bias\nBias assessment\nPlanned\n\n\nDeadlift-Specific\nApplication to deadlift training\nCompleted (Study 4)\n\n\nLMM & Velocity Tables\nPractical velocity thresholds\nCompleted (Study 5)\n\n\nAdvanced Velocity\nMVT, reliability, decay, prediction\nCompleted (Study 6)"
-  },
-  {
-    "objectID": "index.html#references",
-    "href": "index.html#references",
-    "title": "RIR & Training Outcomes: A Research Compendium",
-    "section": "References",
-    "text": "References\n\nRobinson ZH, Pelland JC, Zourdos MC, et al. (2024). Exploring the Dose-Response Relationship Between Estimated Resistance Training Proximity to Failure, Strength Gain, and Muscle Hypertrophy. Sports Medicine, 54, 2209-2231.\nPaulsen K, Seynnes O, van den Tillaar R. (2025). Exercise type, training load, velocity loss threshold, and sets affect the relationship between lifting velocity and perceived repetitions in reserve. PeerJ, 13:e19797.\nJukic I, Prnjak K, Helms ER, McGuigan MR. (2024). Modeling the repetitions-in-reserve-velocity relationship: A valid method for resistance training monitoring and prescription, and fatigue management. Experimental Physiology, 109(2), 193-206."
-  },
-  {
-    "objectID": "06_advanced_velocity_analyses.html",
-    "href": "06_advanced_velocity_analyses.html",
-    "title": "Study 6: Advanced Velocity-RIR Analyses",
-    "section": "",
-    "text": "This study presents five novel analyses (H2-H6) that extend our understanding of the deadlift velocity-RIR relationship, addressing key gaps in the velocity-based training literature.\n\n\n\n\n\n\n\n\n\n\nAnalysis\nResult\nPractical Implication\n\n\n\n\nH2: MVT Variability\nCV = 30.8%\nIndividual calibration essential\n\n\nH3: Day Reliability\nSlope ICC = 0.72\nPeriodic recalibration needed\n\n\nH4: Model Comparison\n26.3% prefer quadratic\nLinear model adequate\n\n\nH5: Velocity Decay\nAccelerates (p = 0.035)\nNon-linear considerations\n\n\nH6: Failure Prediction\nMAE = 1.29 reps\nFirst rep velocity useful"
-  },
-  {
-    "objectID": "06_advanced_velocity_analyses.html#executive-summary",
-    "href": "06_advanced_velocity_analyses.html#executive-summary",
-    "title": "Study 6: Advanced Velocity-RIR Analyses",
-    "section": "",
-    "text": "This study presents five novel analyses (H2-H6) that extend our understanding of the deadlift velocity-RIR relationship, addressing key gaps in the velocity-based training literature.\n\n\n\n\n\n\n\n\n\n\nAnalysis\nResult\nPractical Implication\n\n\n\n\nH2: MVT Variability\nCV = 30.8%\nIndividual calibration essential\n\n\nH3: Day Reliability\nSlope ICC = 0.72\nPeriodic recalibration needed\n\n\nH4: Model Comparison\n26.3% prefer quadratic\nLinear model adequate\n\n\nH5: Velocity Decay\nAccelerates (p = 0.035)\nNon-linear considerations\n\n\nH6: Failure Prediction\nMAE = 1.29 reps\nFirst rep velocity useful"
-  },
-  {
-    "objectID": "06_advanced_velocity_analyses.html#experimental-setup",
-    "href": "06_advanced_velocity_analyses.html#experimental-setup",
-    "title": "Study 6: Advanced Velocity-RIR Analyses",
-    "section": "Experimental Setup",
-    "text": "Experimental Setup\n\nStudy Design\n\n\nParticipants: 19 \n\n\nTotal observations: 406 \n\n\nTotal sets: 74 \n\n\nReps per set: 1 - 8 (mean: 5.5 )\n\n\nProtocol:\n\nParticipants: 19 resistance-trained individuals (15 male, 4 female)\nExercise: Conventional deadlift\nLoads: 80% and 90% of 1RM\nTesting days: 2 separate days\nProtocol: Each participant performed sets to muscular failure at both loads on both days\nMeasurement: Mean concentric velocity (MCV) for each repetition using linear position transducer\n\nData Structure:\nEach observation represents a single repetition within a set to failure:\n\n\n\nSample data structure (first 10 rows)\n\n\n\n\n\n\n\n\n\n\n\n\nid\nday\nload_percentage\nset_id\nrep_number\nrir\nmean_velocity\nreps_to_failure\n\n\n\n\nSebastião\nDay 1\n90%\nSebastião_Day1_90pct_S1\n1\n3\n0.333\n4\n\n\nSebastião\nDay 1\n90%\nSebastião_Day1_90pct_S1\n2\n2\n0.293\n4\n\n\nSebastião\nDay 1\n90%\nSebastião_Day1_90pct_S1\n3\n1\n0.235\n4\n\n\nSebastião\nDay 1\n90%\nSebastião_Day1_90pct_S1\n4\n0\n0.246\n4\n\n\nSebastião\nDay 1\n80%\nSebastião_Day1_80pct_S2\n1\n5\n0.398\n6\n\n\nSebastião\nDay 1\n80%\nSebastião_Day1_80pct_S2\n2\n4\n0.363\n6\n\n\nSebastião\nDay 1\n80%\nSebastião_Day1_80pct_S2\n3\n3\n0.386\n6\n\n\nSebastião\nDay 1\n80%\nSebastião_Day1_80pct_S2\n4\n2\n0.387\n6\n\n\nSebastião\nDay 1\n80%\nSebastião_Day1_80pct_S2\n5\n1\n0.325\n6\n\n\nSebastião\nDay 1\n80%\nSebastião_Day1_80pct_S2\n6\n0\n0.206\n6"
-  },
-  {
-    "objectID": "06_advanced_velocity_analyses.html#h2-minimum-velocity-threshold-mvt-variability",
-    "href": "06_advanced_velocity_analyses.html#h2-minimum-velocity-threshold-mvt-variability",
-    "title": "Study 6: Advanced Velocity-RIR Analyses",
-    "section": "H2: Minimum Velocity Threshold (MVT) Variability",
-    "text": "H2: Minimum Velocity Threshold (MVT) Variability\n\nResearch Question\nHow variable is the velocity at muscular failure (RIR=0) across individuals?\n\n\nWhy This Matters\nThe Minimum Velocity Threshold (MVT) is the velocity at which an athlete reaches muscular failure. Understanding MVT variability has critical implications:\n\nIf MVT is consistent across individuals (~0.15-0.20 m/s for all), it could serve as a universal failure indicator\nIf MVT varies widely, individual calibration is essential before using velocity-based prescriptions\nPractical question: Can coaches use a single “stop velocity” for all athletes?\n\n\n\nMethods\n\nExtracted all observations at RIR = 0 (failure reps)\nCalculated population-level MVT statistics (mean, SD, CV, IQR)\nCalculated individual MVT for each participant\nTested for sex differences using Mann-Whitney U test\nTested for load differences (80% vs 90%) using paired comparison\n\n\n\nResults\n\n\nPopulation MVT Statistics:\n\n\n  Mean: 0.206 m/s\n\n\n  SD: 0.063 m/s\n\n\n  CV: 30.8 %\n\n\n  IQR: 0.082 m/s\n\n\n  Range: 0.119 - 0.402 m/s\n\n\n\n\nShow code\n# Extract failure data\nfailure_data &lt;- data[data$rir == 0, ]\n\n# Density plot\nggplot(failure_data, aes(x = mean_velocity)) +\n  geom_histogram(aes(y = after_stat(density)), bins = 20, fill = \"steelblue\", alpha = 0.7) +\n  geom_density(color = \"darkred\", linewidth = 1) +\n  geom_vline(xintercept = mvt_result$population_stats$mean,\n             linetype = \"dashed\", color = \"black\", linewidth = 1) +\n  annotate(\"text\", x = mvt_result$population_stats$mean + 0.02, y = 5,\n           label = paste(\"Mean =\", round(mvt_result$population_stats$mean, 3), \"m/s\"),\n           hjust = 0) +\n  labs(x = \"Velocity at Failure (m/s)\", y = \"Density\",\n       title = \"MVT Distribution Across All Failure Observations\") +\n  theme_minimal()\n\n\n\n\n\nDistribution of Minimum Velocity Threshold (MVT) at failure\n\n\n\n\n\n\nShow code\n# Individual MVT plot\nind_mvt &lt;- mvt_result$individual_stats\nind_mvt &lt;- ind_mvt[order(ind_mvt$mean_mvt), ]\nind_mvt$id &lt;- factor(ind_mvt$id, levels = ind_mvt$id)\n\nggplot(ind_mvt, aes(x = id, y = mean_mvt, color = sex)) +\n  geom_point(size = 3) +\n  geom_errorbar(aes(ymin = mean_mvt - sd_mvt, ymax = mean_mvt + sd_mvt),\n                width = 0.3) +\n  geom_hline(yintercept = mvt_result$population_stats$mean,\n             linetype = \"dashed\", color = \"gray50\") +\n  coord_flip() +\n  labs(x = \"Participant\", y = \"MVT (m/s)\",\n       title = \"Individual MVT with Standard Deviation\",\n       color = \"Sex\") +\n  scale_color_manual(values = c(\"female\" = \"#E41A1C\", \"male\" = \"#377EB8\")) +\n  theme_minimal()\n\n\n\n\n\nIndividual MVT values showing between-participant variability\n\n\n\n\nLoad Comparison:\n\n\n80% 1RM MVT: 0.217 ± 0.066 m/s\n\n\n90% 1RM MVT: 0.196 ± 0.061 m/s\n\n\nDifference: 0.021 m/s\n\n\np-value: 0.148 \n\n\nSignificant: FALSE \n\n\n\n\nInterpretation\nThe coefficient of variation (CV = 30.8%) indicates high inter-individual variability in MVT. This finding has important practical implications:\n\nA single MVT value cannot be applied to all athletes - using a population mean (0.21 m/s) would underestimate capacity for some and overshoot for others\nIndividual calibration is essential - each athlete needs their own MVT determined through testing to failure\nNo significant load effect - MVT appears similar at 80% and 90% 1RM, suggesting MVT is an individual characteristic independent of load"
-  },
-  {
-    "objectID": "06_advanced_velocity_analyses.html#h3-day-to-day-reliability",
-    "href": "06_advanced_velocity_analyses.html#h3-day-to-day-reliability",
-    "title": "Study 6: Advanced Velocity-RIR Analyses",
-    "section": "H3: Day-to-Day Reliability",
-    "text": "H3: Day-to-Day Reliability\n\nResearch Question\nAre individual velocity-RIR relationships stable across testing days?\n\n\nWhy This Matters\nIf velocity profiles are reliable day-to-day: - A single calibration session is sufficient to establish individual velocity zones - Athletes don’t need frequent retesting\nIf velocity profiles are unreliable: - Athletes need frequent recalibration (perhaps weekly or monthly) - Session-to-session factors (fatigue, recovery, motivation) may affect velocity targets\n\n\nMethods\n\nFit individual linear models (velocity ~ RIR) for Day 1 and Day 2 separately\nExtract slopes (velocity loss per RIR) and intercepts (baseline velocity)\nCalculate MVT predictions for each day (predicted velocity at RIR = 0)\nCompute ICC(2,1) - two-way random effects model\nCalculate SEM (Standard Error of Measurement) and MDC95 (Minimal Detectable Change)\n\nICC Interpretation (Koo & Li, 2016):\n\n\n\nICC\nInterpretation\n\n\n\n\n&lt; 0.50\nPoor\n\n\n0.50-0.75\nModerate\n\n\n0.75-0.90\nGood\n\n\n&gt; 0.90\nExcellent\n\n\n\n\n\nResults\n\n\nSlope ICC (velocity loss per RIR):\n\n\n  ICC: 0.72 \n\n\n  95% CI: 0.644 - 0.796 \n\n\n  Interpretation: Moderate \n\n\nMVT ICC (predicted failure velocity):\n\n\n  ICC: 0.498 \n\n\n  95% CI: 0.379 - 0.617 \n\n\n  Interpretation: Poor \n\n\n  SEM: 0.024 m/s\n\n\n  MDC95: 0.0666 m/s\n\n\n\n\nShow code\nday_params &lt;- reliability$day_parameters\n\n# Slopes comparison\nggplot(day_params, aes(x = slope_day1, y = slope_day2)) +\n  geom_point(size = 3, alpha = 0.7) +\n  geom_abline(slope = 1, intercept = 0, linetype = \"dashed\", color = \"gray50\") +\n  geom_smooth(method = \"lm\", se = TRUE, color = \"steelblue\") +\n  labs(x = \"Slope Day 1 (m/s per RIR)\", y = \"Slope Day 2 (m/s per RIR)\",\n       title = \"Day-to-Day Reliability of Individual Slopes\",\n       subtitle = paste(\"ICC =\", round(reliability$slope_icc$icc, 2))) +\n  theme_minimal()\n\n\n\n\n\nDay 1 vs Day 2 comparison of individual slopes\n\n\n\n\n\n\nShow code\nggplot(day_params, aes(x = mvt_day1, y = mvt_day2)) +\n  geom_point(size = 3, alpha = 0.7) +\n  geom_abline(slope = 1, intercept = 0, linetype = \"dashed\", color = \"gray50\") +\n  geom_smooth(method = \"lm\", se = TRUE, color = \"steelblue\") +\n  labs(x = \"MVT Day 1 (m/s)\", y = \"MVT Day 2 (m/s)\",\n       title = \"Day-to-Day Reliability of Predicted MVT\",\n       subtitle = paste(\"ICC =\", round(reliability$mvt_icc$icc, 2))) +\n  theme_minimal()\n\n\n\n\n\nDay 1 vs Day 2 comparison of predicted MVT\n\n\n\n\n\n\nInterpretation\n\nSlope reliability is moderate (ICC = 0.72), suggesting the rate of velocity decline per RIR is reasonably consistent\nMVT reliability is poor (ICC = 0.5), indicating that predicted failure velocity varies substantially between days\nMDC95 = 0.067 m/s - changes in MVT smaller than this may represent measurement error rather than true change\n\nPractical recommendation: Consider periodic recalibration (every 2-4 weeks) rather than relying on a single test session."
-  },
-  {
-    "objectID": "06_advanced_velocity_analyses.html#h4-polynomial-vs-linear-model-comparison",
-    "href": "06_advanced_velocity_analyses.html#h4-polynomial-vs-linear-model-comparison",
-    "title": "Study 6: Advanced Velocity-RIR Analyses",
-    "section": "H4: Polynomial vs Linear Model Comparison",
-    "text": "H4: Polynomial vs Linear Model Comparison\n\nResearch Question\nDoes a quadratic model fit the velocity-RIR relationship better than linear?\n\n\nWhy This Matters\n\nLinear assumption: Velocity decreases at a constant rate with each rep (each rep costs the same velocity)\nQuadratic model: Velocity loss accelerates near failure (fatigue compounds)\n\nIf quadratic is substantially better, this suggests: - The velocity-RIR relationship is non-linear - Simple linear velocity zones may underestimate proximity to failure in the final reps - Coaches should use curvilinear charts or adjust expectations near failure\n\n\nMethods\n\nFor each participant, fit:\n\nLinear: velocity ~ RIR\nQuadratic: velocity ~ RIR + RIR²\n\nCompare using adjusted R², AIC, and BIC\nFit population-level LMM versions and conduct likelihood ratio test\nCount how many participants show significantly better fit with quadratic\n\n\n\nResults\n\n\nIndividual Model Comparison:\n\n\n  Participants analyzed: 19 \n\n\n  Linear preferred: 14 \n\n\n  Quadratic preferred: 5 ( 26.3 %)\n\n\n  Avg R² improvement (quad - linear): 0.0164 \n\n\n\n\nShow code\nind_results &lt;- poly_result$individual_results\n\nggplot(ind_results, aes(x = reorder(id, delta_aic), y = delta_aic, fill = best_model)) +\n  geom_col() +\n  geom_hline(yintercept = -2, linetype = \"dashed\", color = \"red\") +\n  geom_hline(yintercept = 2, linetype = \"dashed\", color = \"red\") +\n  annotate(\"text\", x = 1, y = -3, label = \"Quadratic better\", hjust = 0, color = \"gray40\") +\n  annotate(\"text\", x = 1, y = 3, label = \"Linear better\", hjust = 0, color = \"gray40\") +\n  coord_flip() +\n  labs(x = \"Participant\", y = \"ΔAIC (Quadratic - Linear)\",\n       title = \"Model Comparison by Participant\",\n       subtitle = \"Negative values favor quadratic model\",\n       fill = \"Best Model\") +\n  scale_fill_manual(values = c(\"linear\" = \"steelblue\", \"quadratic\" = \"coral\")) +\n  theme_minimal()\n\n\n\n\n\nAIC comparison between linear and quadratic models by participant\n\n\n\n\n\n\nShow code\nggplot(ind_results, aes(x = r2_adj_linear, y = r2_adj_quad)) +\n  geom_point(aes(color = best_model), size = 3) +\n  geom_abline(slope = 1, intercept = 0, linetype = \"dashed\") +\n  labs(x = \"Adjusted R² (Linear)\", y = \"Adjusted R² (Quadratic)\",\n       title = \"Model Fit Comparison\",\n       color = \"Best Model\") +\n  scale_color_manual(values = c(\"linear\" = \"steelblue\", \"quadratic\" = \"coral\")) +\n  theme_minimal()\n\n\n\n\n\nR² comparison between linear and quadratic models\n\n\n\n\n\n\nInterpretation\nOnly 26.3% of participants show a meaningfully better fit with the quadratic model. This suggests:\n\nLinear model is generally adequate for describing the velocity-RIR relationship\nThe additional complexity of a quadratic term is not justified for most individuals\nPractitioners can confidently use linear velocity zones for training prescription\n\nNote: While a minority of individuals may benefit from quadratic modeling, the linear approximation provides sufficient accuracy for practical applications."
-  },
-  {
-    "objectID": "06_advanced_velocity_analyses.html#h5-velocity-decay-rate-within-sets",
-    "href": "06_advanced_velocity_analyses.html#h5-velocity-decay-rate-within-sets",
-    "title": "Study 6: Advanced Velocity-RIR Analyses",
-    "section": "H5: Velocity Decay Rate Within Sets",
-    "text": "H5: Velocity Decay Rate Within Sets\n\nResearch Question\nHow does velocity loss per rep change as a set progresses?\n\n\nWhy This Matters\nUnderstanding velocity decay patterns informs: - When to stop a set - if decay accelerates, stopping earlier preserves movement quality - Model selection - constant decay supports linear models; accelerating decay suggests non-linear approaches - Fatigue thresholds - identifying the rep where decay sharply increases\n\n\nMethods\n\nCalculate rep-to-rep velocity change (Δv = v_n - v_{n-1})\nModel decay rate vs rep number: Δv ~ rep_number\nTest if decay accelerates (negative slope = accelerating fatigue)\nDetect breakpoint where decay notably increases\n\n\n\nResults\n\n\nVelocity Decay Summary:\n\n\n  Average decay per rep: -0.0283 m/s\n\n\n  Early reps (1-3): -0.0206 m/s\n\n\n  Late reps (4+): -0.0338 m/s\n\n\n  Acceleration: -0.0132 m/s\n\n\nAcceleration Test:\n\n\n  Slope: -0.00318 \n\n\n  p-value: 0.03495 \n\n\n  Interpretation: Decay accelerates toward failure \n\n\n\n\nShow code\n# Create spaghetti plot of velocity trajectories\nggplot(data, aes(x = rep_number, y = mean_velocity, group = set_id)) +\n  geom_line(alpha = 0.3, color = \"steelblue\") +\n  stat_summary(aes(group = 1), fun = mean, geom = \"line\",\n               color = \"darkred\", linewidth = 1.5) +\n  stat_summary(aes(group = 1), fun = mean, geom = \"point\",\n               color = \"darkred\", size = 3) +\n  labs(x = \"Rep Number\", y = \"Mean Velocity (m/s)\",\n       title = \"Velocity Trajectories Across Sets\",\n       subtitle = \"Individual sets (blue) with population mean (red)\") +\n  theme_minimal()\n\n\n\n\n\nVelocity trajectories for individual sets\n\n\n\n\n\n\nShow code\n# Decay by rep number\ndecay_data &lt;- decay$set_trajectories\n\nggplot(decay_data, aes(x = factor(rep_number), y = delta_v)) +\n  geom_boxplot(fill = \"steelblue\", alpha = 0.7) +\n  geom_hline(yintercept = 0, linetype = \"dashed\", color = \"gray50\") +\n  labs(x = \"Rep Number\", y = \"Velocity Change from Previous Rep (m/s)\",\n       title = \"Rep-to-Rep Velocity Change\",\n       subtitle = \"Negative values indicate velocity loss\") +\n  theme_minimal()\n\n\n\n\n\nRep-to-rep velocity change by rep number\n\n\n\n\n\n\nInterpretation\nVelocity decay accelerates as the set progresses (p = 0.035):\n\nEarly reps (1-3): Average decay = 20.6 mm/s per rep\nLate reps (4+): Average decay = 33.8 mm/s per rep\n\nThis 13.2 mm/s acceleration in decay rate suggests:\n\nFatigue compounds near failure - the last few reps cost more velocity than earlier reps\nVelocity thresholds are conservative early - athletes have more “buffer” in early reps\nQuality deteriorates rapidly near failure - this supports stopping 1-2 reps before failure for technique preservation"
-  },
-  {
-    "objectID": "06_advanced_velocity_analyses.html#h6-early-rep-velocity-for-failure-prediction",
-    "href": "06_advanced_velocity_analyses.html#h6-early-rep-velocity-for-failure-prediction",
-    "title": "Study 6: Advanced Velocity-RIR Analyses",
-    "section": "H6: Early Rep Velocity for Failure Prediction",
-    "text": "H6: Early Rep Velocity for Failure Prediction\n\nResearch Question\nCan the first 1-3 rep velocities predict when failure will occur?\n\n\nWhy This Matters\nThis is perhaps the most practically valuable analysis: - Real-time autoregulation: Predict total reps from the first rep velocity - No rep counting needed: Know when to stop based on velocity alone - Pre-set planning: Estimate how many reps are possible before starting\n\n\nMethods\n\nFor each set, extract: v1 (first rep velocity), v2, v3, and total reps\nBuild prediction models:\n\nModel 1: reps ~ v1\nModel 2: reps ~ v1 + v2\nModel 3: reps ~ v1 + v2 + v3\nModel 4: reps ~ v1 + load\n\nEvaluate with leave-one-set-out cross-validation\nCreate practical lookup table\n\n\n\nResults\n\n\nLeave-One-Set-Out Cross-Validation:\n\n\n  Sets analyzed: 66 \n\n\n  MAE: 1.29 reps\n\n\n  RMSE: 1.53 reps\n\n\n  R²: 0.065 \n\n\n  Within ±1 rep: 42.4 %\n\n\n  Within ±2 reps: 75.8 %\n\n\n\n\n\nPractical Lookup Table: First Rep Velocity → Predicted Reps\n\n\nFirst Rep Velocity (m/s)\nPredicted Reps\nLower 95%\nUpper 95%\n\n\n\n\n0.1\n4.9\n1.8\n8.0\n\n\n0.2\n5.2\n2.1\n8.3\n\n\n0.2\n5.4\n2.4\n8.5\n\n\n0.3\n5.7\n2.6\n8.7\n\n\n0.3\n6.0\n2.9\n9.0\n\n\n0.4\n6.2\n3.2\n9.3\n\n\n0.5\n6.5\n3.4\n9.6\n\n\n0.5\n6.8\n3.7\n9.9\n\n\n0.6\n7.0\n3.9\n10.2\n\n\n\n\n\n\n\nShow code\n# Prepare set-level data\nset_data &lt;- do.call(rbind, lapply(unique(data$set_id), function(sid) {\n  s &lt;- data[data$set_id == sid, ]\n  s &lt;- s[order(s$rep_number), ]\n  if (nrow(s) &lt; 1) return(NULL)\n  data.frame(\n    set_id = sid,\n    v1 = s$mean_velocity[1],\n    reps_to_failure = s$reps_to_failure[1],\n    load_percentage = s$load_percentage[1]\n  )\n}))\n\nggplot(set_data, aes(x = v1, y = reps_to_failure, color = load_percentage)) +\n  geom_point(size = 3, alpha = 0.7) +\n  geom_smooth(method = \"lm\", se = TRUE, aes(group = 1), color = \"black\") +\n  labs(x = \"First Rep Velocity (m/s)\", y = \"Total Reps to Failure\",\n       title = \"Relationship Between First Rep Velocity and Set Capacity\",\n       color = \"Load\") +\n  scale_color_manual(values = c(\"80%\" = \"#E41A1C\", \"90%\" = \"#377EB8\")) +\n  theme_minimal()\n\n\n\n\n\nFirst rep velocity vs total reps completed\n\n\n\n\n\n\nInterpretation\nThe first rep velocity provides a reasonable prediction of set capacity:\n\nMAE = 1.29 reps means predictions are typically within ~1 rep of actual\n75.8% accuracy within ±2 reps is sufficient for practical autoregulation\nEach +0.1 m/s in first rep velocity → ~0.5 additional reps expected\n\nPractical Application: Use the lookup table to estimate available reps from your first rep velocity. For example: - First rep at 0.30 m/s → Expect ~6 reps (95% PI: 3-9) - First rep at 0.45 m/s → Expect ~7 reps (95% PI: 3-10)"
-  },
-  {
-    "objectID": "06_advanced_velocity_analyses.html#practical-implications",
-    "href": "06_advanced_velocity_analyses.html#practical-implications",
-    "title": "Study 6: Advanced Velocity-RIR Analyses",
-    "section": "Practical Implications",
-    "text": "Practical Implications\n\nSummary of Recommendations\n\n\n\n\n\n\n\nFinding\nPractical Recommendation\n\n\n\n\nHigh MVT variability (CV = 31%)\nCalibrate MVT individually for each athlete\n\n\nModerate slope reliability (ICC = 0.72)\nRecalibrate velocity zones every 2-4 weeks\n\n\nLinear model adequate\nUse simple linear velocity zones\n\n\nDecay accelerates near failure\nStop 1-2 reps from failure for quality\n\n\nFirst rep predicts set capacity\nUse first rep velocity for autoregulation\n\n\n\n\n\nImplementation Steps\n\nInitial Calibration: Test each athlete to failure at submaximal loads (75-85% 1RM) to establish individual MVT\nSet Up Zones: Create linear velocity zones from MVT to maximum velocity\nMonitor First Rep: Use first rep velocity to estimate available reps\nStop Before Failure: Given acceleration of velocity loss, target stopping 1-2 reps before predicted failure\nRecalibrate Periodically: Update velocity zones every 2-4 weeks or after significant training blocks"
-  },
-  {
-    "objectID": "06_advanced_velocity_analyses.html#limitations",
-    "href": "06_advanced_velocity_analyses.html#limitations",
-    "title": "Study 6: Advanced Velocity-RIR Analyses",
+    "objectID": "04_deadlift_rir_velocity.html#limitations",
+    "href": "04_deadlift_rir_velocity.html#limitations",
+    "title": "Does the RIR-Velocity Relationship Hold for Deadlifts?",
     "section": "Limitations",
-    "text": "Limitations\n\nSample size: 19 participants limits generalizability\nExercise specificity: Results apply to deadlift; other exercises may differ\nLoad range: Only 80% and 90% 1RM tested; lighter loads may show different patterns\nTraining status: Participants were resistance-trained; novices may differ\nDay-to-day factors: Only 2 testing days; longer-term reliability unknown"
+    "text": "Limitations\n\nSample size: 19 participants vs 46 in the squat study\nLoad range: Only 80% and 90% tested (no 70%)\nPopulation: Portuguese lifters—may not generalize globally\nEquipment: Specific velocity measurement device used"
   },
   {
-    "objectID": "06_advanced_velocity_analyses.html#references",
-    "href": "06_advanced_velocity_analyses.html#references",
-    "title": "Study 6: Advanced Velocity-RIR Analyses",
+    "objectID": "04_deadlift_rir_velocity.html#conclusions",
+    "href": "04_deadlift_rir_velocity.html#conclusions",
+    "title": "Does the RIR-Velocity Relationship Hold for Deadlifts?",
+    "section": "Conclusions",
+    "text": "Conclusions\n\nThe RIR-velocity relationship exists for deadlifts, but with more variability than squats\nIndividual models still outperform general models (~2x improvement)\nPrediction accuracy is acceptable for practical use (~1.4 rep error)\nDeadlift-specific factors (grip, binary failure) may reduce predictability"
+  },
+  {
+    "objectID": "04_deadlift_rir_velocity.html#further-analyses",
+    "href": "04_deadlift_rir_velocity.html#further-analyses",
+    "title": "Does the RIR-Velocity Relationship Hold for Deadlifts?",
+    "section": "Further Analyses",
+    "text": "Further Analyses\nThis foundational study is extended with more advanced analyses:\n\n\n\nAnalysis\nStudy\nKey Findings\n\n\n\n\nLinear Mixed Effects Models\nStudy 5\nGlobal vs individual velocity tables, load effect testing\n\n\nMVT Variability\nStudy 6\nMinimum velocity threshold variation across individuals\n\n\nDay-to-Day Reliability\nStudy 6\nICC analysis of velocity profile stability\n\n\nPolynomial vs Linear\nStudy 6\nModel comparison with AIC/BIC\n\n\nVelocity Decay Patterns\nStudy 6\nWithin-set fatigue dynamics\n\n\nFailure Prediction\nStudy 6\nLOOCV prediction from early rep velocities\n\n\n\nThese extensions provide practical velocity tables, reliability metrics, and predictive models for real-world training applications."
+  },
+  {
+    "objectID": "04_deadlift_rir_velocity.html#technical-notes",
+    "href": "04_deadlift_rir_velocity.html#technical-notes",
+    "title": "Does the RIR-Velocity Relationship Hold for Deadlifts?",
+    "section": "Technical Notes",
+    "text": "Technical Notes\nThis analysis used: - R6 classes following SOLID principles - Reused RirVelocityModeler from Study 3 (exercise-agnostic) - Custom DeadliftRirDataLoader for thesis data format - Cross-validation using Day 1 → Day 2 prediction"
+  },
+  {
+    "objectID": "04_deadlift_rir_velocity.html#references",
+    "href": "04_deadlift_rir_velocity.html#references",
+    "title": "Does the RIR-Velocity Relationship Hold for Deadlifts?",
     "section": "References",
-    "text": "References\n\nJukic, I., et al. (2024). Velocity-Based Training. Sports Medicine.\nZourdos, M. C., et al. (2016). Novel Resistance Training-Specific RPE Scale. Journal of Strength and Conditioning Research.\nPelland, J. C., et al. (2022). Using Load-Velocity Profiling. Sports Medicine.\nKoo, T. K., & Li, M. Y. (2016). A Guideline of Selecting and Reporting ICC. Journal of Chiropractic Medicine.\n\n\nStudy 6 of the Deadlift RIR-Velocity Research Project\nAnalysis performed using R R version 4.3.3 (2024-02-29) with custom R6 classes following SOLID principles"
+    "text": "References\nThis study follows the methodology of:\nJukic, I., Prnjak, K., Helms, E. R., & McGuigan, M. R. (2024). Modeling the repetitions-in-reserve-velocity relationship: A valid method for resistance training monitoring and prescription, and fatigue management. Experimental Physiology, 109(2), 193-206."
+  },
+  {
+    "objectID": "02_velocity_rir_relationship.html",
+    "href": "02_velocity_rir_relationship.html",
+    "title": "Can Bar Speed Tell You How Hard a Set Was?",
+    "section": "",
+    "text": "Imagine if your barbell could tell you exactly how hard a set was - not based on your feelings, but on objective physics.\nVelocity-Based Training (VBT) makes this promise:\n\nMeasure bar speed during each rep\nSlower speeds = more fatigue\nUse this to autoregulate training intensity\n\nBut there’s a catch: Does bar velocity actually reflect how hard you’re working?"
+  },
+  {
+    "objectID": "02_velocity_rir_relationship.html#the-promise-of-velocity-based-training",
+    "href": "02_velocity_rir_relationship.html#the-promise-of-velocity-based-training",
+    "title": "Can Bar Speed Tell You How Hard a Set Was?",
+    "section": "",
+    "text": "Imagine if your barbell could tell you exactly how hard a set was - not based on your feelings, but on objective physics.\nVelocity-Based Training (VBT) makes this promise:\n\nMeasure bar speed during each rep\nSlower speeds = more fatigue\nUse this to autoregulate training intensity\n\nBut there’s a catch: Does bar velocity actually reflect how hard you’re working?"
+  },
+  {
+    "objectID": "02_velocity_rir_relationship.html#the-core-question",
+    "href": "02_velocity_rir_relationship.html#the-core-question",
+    "title": "Can Bar Speed Tell You How Hard a Set Was?",
+    "section": "The Core Question",
+    "text": "The Core Question\nResearchers wanted to know if bar velocity correlates with perceived Repetitions in Reserve (pRIR) - how many reps people think they have left.\nIf velocity and perceived effort align, VBT could replace subjective fatigue monitoring."
+  },
+  {
+    "objectID": "02_velocity_rir_relationship.html#the-study-design",
+    "href": "02_velocity_rir_relationship.html#the-study-design",
+    "title": "Can Bar Speed Tell You How Hard a Set Was?",
+    "section": "The Study Design",
+    "text": "The Study Design\n\nParticipants\n\n\nShow code\nn_participants &lt;- length(unique(df$id))\nn_obs &lt;- nrow(df)\n\n\n\n19 trained individuals\n2,972 total observations\nBoth squat and bench press tested\n\n\n\nWhat They Measured\nEach set, researchers recorded:\n\nMean velocity - How fast the bar moved (m/s)\nPerceived RIR - How many reps the lifter thought they had left\nVelocity loss - How much slower the last rep was vs the first"
+  },
+  {
+    "objectID": "02_velocity_rir_relationship.html#the-key-finding-velocity-predicts-rir-mostly",
+    "href": "02_velocity_rir_relationship.html#the-key-finding-velocity-predicts-rir-mostly",
+    "title": "Can Bar Speed Tell You How Hard a Set Was?",
+    "section": "The Key Finding: Velocity Predicts RIR (Mostly)",
+    "text": "The Key Finding: Velocity Predicts RIR (Mostly)\n\n\nShow code\noverall_r &lt;- cor(df$mean_velocity_, df$perceived_reps_in_reserve_, use = \"complete.obs\")\n\n\nOverall correlation: r = 0.45\nThis means:\n\nFaster bar speed → Higher perceived RIR (more reps left)\nThe relationship is moderate - not perfect\n\n\n\nShow code\nggplot(df, aes(x = mean_velocity_, y = perceived_reps_in_reserve_, color = exercise)) +\n  geom_point(alpha = 0.2, size = 1) +\n  geom_smooth(method = \"lm\", se = TRUE) +\n  scale_color_manual(values = c(\"Bench press\" = \"#E41A1C\", \"Squat\" = \"#377EB8\")) +\n  labs(\n    x = \"Mean Velocity (m/s)\",\n    y = \"Perceived Repetitions in Reserve\",\n    title = \"Bar Speed vs Perceived Effort\",\n    subtitle = \"Higher velocity generally means more reps left\",\n    color = \"Exercise\"\n  ) +\n  theme_minimal(base_size = 14) +\n  theme(legend.position = \"bottom\")\n\n\n\n\n\n\n\n\nFigure 1: Velocity vs Perceived RIR: Each Point is One Set"
+  },
+  {
+    "objectID": "02_velocity_rir_relationship.html#individual-variation-not-everyone-is-the-same",
+    "href": "02_velocity_rir_relationship.html#individual-variation-not-everyone-is-the-same",
+    "title": "Can Bar Speed Tell You How Hard a Set Was?",
+    "section": "Individual Variation: Not Everyone is the Same",
+    "text": "Individual Variation: Not Everyone is the Same\n\n\nShow code\n# Calculate per-participant correlations\nparticipant_cors &lt;- aggregate(\n  cbind(mean_velocity_, perceived_reps_in_reserve_) ~ id,\n  data = df,\n  FUN = function(x) x\n)\n\ncors_by_id &lt;- sapply(unique(df$id), function(pid) {\n  sub_df &lt;- df[df$id == pid, ]\n  cor(sub_df$mean_velocity_, sub_df$perceived_reps_in_reserve_, use = \"complete.obs\")\n})\n\nmean_r &lt;- mean(cors_by_id, na.rm = TRUE)\nsd_r &lt;- sd(cors_by_id, na.rm = TRUE)\nmin_r &lt;- min(cors_by_id, na.rm = TRUE)\nmax_r &lt;- max(cors_by_id, na.rm = TRUE)\n\n\nHere’s where it gets interesting. The average correlation was r = 0.5 ± 0.21, but:\n\nStrongest: r = 0.79 (velocity explains 62% of RIR variation)\nWeakest: r = 0.09 (velocity explains only 1% of RIR variation)\n\n\n\nShow code\ncors_df &lt;- data.frame(\n  participant = factor(seq_along(cors_by_id)),\n  r = cors_by_id\n)\ncors_df &lt;- cors_df[order(cors_df$r), ]\ncors_df$rank &lt;- seq_len(nrow(cors_df))\n\nggplot(cors_df, aes(x = rank, y = r)) +\n  geom_bar(stat = \"identity\", fill = ifelse(cors_df$r &gt; 0.5, \"#377EB8\", \"#999999\")) +\n  geom_hline(yintercept = mean_r, linetype = \"dashed\", color = \"red\", linewidth = 1) +\n  annotate(\"text\", x = 5, y = mean_r + 0.05, label = paste0(\"Mean r = \", round(mean_r, 2)),\n           color = \"red\", hjust = 0) +\n  labs(\n    x = \"Participant (ranked by correlation)\",\n    y = \"Velocity-RIR Correlation (r)\",\n    title = \"Some People's Velocity Tracks Their Effort Better\",\n    subtitle = \"Blue bars = strong correlation (r &gt; 0.5)\"\n  ) +\n  theme_minimal(base_size = 14)\n\n\n\n\n\n\n\n\nFigure 2: Individual Variation in Velocity-RIR Correlation\n\n\n\n\n\n\n\n\n\n\n\nThe Calibration Problem\n\n\n\nFor some individuals, bar velocity is a poor indicator of fatigue. Using velocity-based training without individual calibration could lead to systematic over- or under-training."
+  },
+  {
+    "objectID": "02_velocity_rir_relationship.html#exercise-differences-bench-vs-squat",
+    "href": "02_velocity_rir_relationship.html#exercise-differences-bench-vs-squat",
+    "title": "Can Bar Speed Tell You How Hard a Set Was?",
+    "section": "Exercise Differences: Bench vs Squat",
+    "text": "Exercise Differences: Bench vs Squat\n\n\nShow code\nbench_df &lt;- df[df$exercise == \"Bench press\", ]\nsquat_df &lt;- df[df$exercise == \"Squat\", ]\n\nbench_r &lt;- cor(bench_df$mean_velocity_, bench_df$perceived_reps_in_reserve_, use = \"complete.obs\")\nsquat_r &lt;- cor(squat_df$mean_velocity_, squat_df$perceived_reps_in_reserve_, use = \"complete.obs\")\n\nbench_mean_vel &lt;- mean(bench_df$mean_velocity_, na.rm = TRUE)\nsquat_mean_vel &lt;- mean(squat_df$mean_velocity_, na.rm = TRUE)\n\n\n\n\nShow code\nexercise_summary &lt;- data.frame(\n  Exercise = c(\"Bench Press\", \"Squat\"),\n  Correlation = c(bench_r, squat_r),\n  Mean_Velocity = c(bench_mean_vel, squat_mean_vel),\n  N = c(nrow(bench_df), nrow(squat_df))\n)\n\nggplot(exercise_summary, aes(x = Exercise, y = Correlation, fill = Exercise)) +\n  geom_bar(stat = \"identity\", width = 0.6) +\n  geom_text(aes(label = paste0(\"r = \", round(Correlation, 2))),\n            vjust = -0.5, size = 5) +\n  scale_fill_manual(values = c(\"Bench Press\" = \"#E41A1C\", \"Squat\" = \"#377EB8\")) +\n  ylim(0, 0.7) +\n  labs(\n    x = NULL,\n    y = \"Correlation with Perceived RIR\",\n    title = \"Both Exercises Show Moderate Velocity-RIR Correlation\"\n  ) +\n  theme_minimal(base_size = 14) +\n  theme(legend.position = \"none\")\n\n\n\n\n\n\n\n\nFigure 3: Velocity-RIR Relationship by Exercise\n\n\n\n\n\n\nWhy the Difference?\nThe exercises have different minimum velocities at 1RM:\n\n\n\nExercise\nTypical 1RM Velocity\nMean Velocity in Study\n\n\n\n\nBench Press\n~0.10-0.17 m/s\n0.26 m/s\n\n\nSquat\n~0.20-0.35 m/s\n0.43 m/s\n\n\n\nAt the same velocity (say, 0.3 m/s):\n\nA squat at 0.3 m/s might be near failure\nA bench press at 0.3 m/s has more reps in reserve"
+  },
+  {
+    "objectID": "02_velocity_rir_relationship.html#summary-statistics",
+    "href": "02_velocity_rir_relationship.html#summary-statistics",
+    "title": "Can Bar Speed Tell You How Hard a Set Was?",
+    "section": "Summary Statistics",
+    "text": "Summary Statistics\n\n\nShow code\nsummary_df &lt;- data.frame(\n  Metric = c(\n    \"Total observations\",\n    \"Participants\",\n    \"Overall correlation\",\n    \"Per-participant mean r\",\n    \"Per-participant SD r\",\n    \"Bench press correlation\",\n    \"Squat correlation\"\n  ),\n  Value = c(\n    format(n_obs, big.mark = \",\"),\n    n_participants,\n    round(overall_r, 3),\n    round(mean_r, 3),\n    round(sd_r, 3),\n    round(bench_r, 3),\n    round(squat_r, 3)\n  )\n)\n\nknitr::kable(summary_df)\n\n\n\n\nTable 1: Summary of Velocity-RIR Analysis\n\n\n\n\n\n\nMetric\nValue\n\n\n\n\nTotal observations\n2,972\n\n\nParticipants\n19\n\n\nOverall correlation\n0.448\n\n\nPer-participant mean r\n0.5\n\n\nPer-participant SD r\n0.211\n\n\nBench press correlation\n0.586\n\n\nSquat correlation\n0.527"
+  },
+  {
+    "objectID": "02_velocity_rir_relationship.html#replication-validation",
+    "href": "02_velocity_rir_relationship.html#replication-validation",
+    "title": "Can Bar Speed Tell You How Hard a Set Was?",
+    "section": "Replication Validation",
+    "text": "Replication Validation\nOur results match the published paper:\n\n\n\nFinding\nPaper\nOur Replication\n\n\n\n\nPer-participant r\n0.6 ± 0.2\n0.5 ± 0.21\n\n\nSquat r range\n0.3 - 0.9\n0.09 - 0.79\n\n\nExercise difference\nYes\nYes"
+  },
+  {
+    "objectID": "02_velocity_rir_relationship.html#practical-implications",
+    "href": "02_velocity_rir_relationship.html#practical-implications",
+    "title": "Can Bar Speed Tell You How Hard a Set Was?",
+    "section": "Practical Implications",
+    "text": "Practical Implications\n\nFor Velocity-Based Training\n\nIndividual calibration is essential - Group-level velocity targets may not work for everyone\nExercise-specific thresholds - Don’t use the same velocity targets for bench and squat\nComplement, don’t replace - Use velocity alongside RPE, not instead of it\n\n\n\nFor Research\n\nAccount for individual differences - Random effects models are necessary\nConsider exercise type - Biomechanics matter for velocity interpretation\nVelocity loss may be more reliable - Some research suggests velocity loss (% decline within a set) is more consistent than absolute velocity"
+  },
+  {
+    "objectID": "02_velocity_rir_relationship.html#the-bottom-line",
+    "href": "02_velocity_rir_relationship.html#the-bottom-line",
+    "title": "Can Bar Speed Tell You How Hard a Set Was?",
+    "section": "The Bottom Line",
+    "text": "The Bottom Line\n\n\n\n\n\n\nKey Takeaway\n\n\n\nBar velocity moderately predicts perceived effort, but the relationship varies substantially between individuals. Velocity-based training works best when calibrated to each lifter and each exercise."
+  },
+  {
+    "objectID": "02_velocity_rir_relationship.html#methods-summary",
+    "href": "02_velocity_rir_relationship.html#methods-summary",
+    "title": "Can Bar Speed Tell You How Hard a Set Was?",
+    "section": "Methods Summary",
+    "text": "Methods Summary\n\nData Collection\n\nTrained participants performed squat and bench press\nMean velocity measured with validated device\nPerceived RIR recorded after each set\n\n\n\nStatistical Analysis\n\nPearson correlations (overall and per-participant)\nLinear mixed models accounting for repeated measures\nExercise-specific subgroup analysis"
+  },
+  {
+    "objectID": "02_velocity_rir_relationship.html#source",
+    "href": "02_velocity_rir_relationship.html#source",
+    "title": "Can Bar Speed Tell You How Hard a Set Was?",
+    "section": "Source",
+    "text": "Source\n\nOriginal paper: Paulsen et al. (2025) PeerJ\nSupplementary data available from the article"
+  },
+  {
+    "objectID": "01_pelland_meta_regression.html",
+    "href": "01_pelland_meta_regression.html",
+    "title": "Does Training to Failure Matter?",
+    "section": "",
+    "text": "Should I push every set to complete failure, or stop a few reps short?\nThis question has practical implications:\n\nTraining to failure is harder and requires more recovery\nIf stopping short gives the same results, you could train more frequently\nBut if failure is necessary for gains, stopping short wastes your time\n\nPelland and colleagues tackled this question by analyzing all available research on the topic."
+  },
+  {
+    "objectID": "01_pelland_meta_regression.html#the-question-every-lifter-asks",
+    "href": "01_pelland_meta_regression.html#the-question-every-lifter-asks",
+    "title": "Does Training to Failure Matter?",
+    "section": "",
+    "text": "Should I push every set to complete failure, or stop a few reps short?\nThis question has practical implications:\n\nTraining to failure is harder and requires more recovery\nIf stopping short gives the same results, you could train more frequently\nBut if failure is necessary for gains, stopping short wastes your time\n\nPelland and colleagues tackled this question by analyzing all available research on the topic."
+  },
+  {
+    "objectID": "01_pelland_meta_regression.html#what-is-proximity-to-failure",
+    "href": "01_pelland_meta_regression.html#what-is-proximity-to-failure",
+    "title": "Does Training to Failure Matter?",
+    "section": "What is “Proximity to Failure”?",
+    "text": "What is “Proximity to Failure”?\nResearchers use Repetitions in Reserve (RIR) to measure how close you are to failure:\n\n\n\nRIR\nMeaning\n\n\n\n\n0\nComplete failure - couldn’t do another rep\n\n\n1\nStopped with 1 rep “left in the tank”\n\n\n2\nStopped with 2 reps remaining\n\n\n3+\nStopped well short of failure\n\n\n\nThe key question: Does RIR predict training outcomes?"
+  },
+  {
+    "objectID": "01_pelland_meta_regression.html#the-study-design",
+    "href": "01_pelland_meta_regression.html#the-study-design",
+    "title": "Does Training to Failure Matter?",
+    "section": "The Study Design",
+    "text": "The Study Design\n\nMeta-Regression: Analyzing All the Evidence\nRather than running a single study, the authors performed a meta-regression - a statistical technique that:\n\nGathers effect sizes from many individual studies\nWeights each study by its precision (larger studies count more)\nModels how a predictor (RIR) relates to outcomes across all studies\nAccounts for non-independence (multiple effects from the same study)\n\n\n\nThe Data\n\n\nShow code\ndata.frame(\n  Outcome = c(\"Strength\", \"Hypertrophy\"),\n  `Effect Sizes` = c(nrow(results$data_strength), nrow(results$data_hypertrophy)),\n  `Imputed Correlation` = c(\n    round(results$correlation_strength, 3),\n    round(results$correlation_hypertrophy, 3)\n  ),\n  check.names = FALSE\n) |&gt; knitr::kable()\n\n\n\n\nTable 1: Summary of included effect sizes\n\n\n\n\n\n\nOutcome\nEffect Sizes\nImputed Correlation\n\n\n\n\nStrength\n243\n0.866\n\n\nHypertrophy\n140\n0.875\n\n\n\n\n\n\n\n\nThe analysis included 243 strength effect sizes and 140 hypertrophy effect sizes."
+  },
+  {
+    "objectID": "01_pelland_meta_regression.html#the-key-finding-strength-vs-hypertrophy-differ",
+    "href": "01_pelland_meta_regression.html#the-key-finding-strength-vs-hypertrophy-differ",
+    "title": "Does Training to Failure Matter?",
+    "section": "The Key Finding: Strength vs Hypertrophy Differ",
+    "text": "The Key Finding: Strength vs Hypertrophy Differ\n\nStrength Gains\n\n\nShow code\nstr_mod &lt;- results$strength_model\nstr_rir_b &lt;- str_mod$b[\"avg.rir\", 1]\nstr_rir_p &lt;- str_mod$pval[rownames(str_mod$b) == \"avg.rir\"]\n\n\nFor strength gains, RIR showed:\n\nCoefficient: 0.0018 (effect per 1 RIR increase)\nP-value: 0.784\nInterpretation: Not statistically significant\n\n\n\n\n\n\n\nWhat This Means for Strength Training\n\n\n\nTraining closer to failure does not produce significantly greater strength gains. You can stop 2-3 reps short and still get similar strength improvements.\n\n\n\n\nMuscle Hypertrophy\n\n\nShow code\nhyp_mod &lt;- results$hypertrophy_model\nhyp_rir_b &lt;- hyp_mod$b[\"avg.rir\", 1]\nhyp_rir_p &lt;- hyp_mod$pval[rownames(hyp_mod$b) == \"avg.rir\"]\n\n\nFor muscle growth, RIR showed:\n\nCoefficient: -0.0193 (effect per 1 RIR increase)\nP-value: 0.0042\nInterpretation: Statistically significant and negative\n\n\n\n\n\n\n\nWhat This Means for Muscle Building\n\n\n\nTraining closer to failure does produce greater muscle hypertrophy. Each RIR reduction (getting closer to failure) is associated with slightly more muscle growth."
+  },
+  {
+    "objectID": "01_pelland_meta_regression.html#visualizing-the-difference",
+    "href": "01_pelland_meta_regression.html#visualizing-the-difference",
+    "title": "Does Training to Failure Matter?",
+    "section": "Visualizing the Difference",
+    "text": "Visualizing the Difference\n\n\nShow code\n# Create comparison data\ncomparison_df &lt;- data.frame(\n  Outcome = c(\"Strength\", \"Hypertrophy\"),\n  Estimate = c(str_rir_b, hyp_rir_b),\n  SE = c(str_mod$se[rownames(str_mod$b) == \"avg.rir\"],\n         hyp_mod$se[rownames(hyp_mod$b) == \"avg.rir\"]),\n  Significant = c(\"No\", \"Yes\")\n)\n\ncomparison_df$Lower &lt;- comparison_df$Estimate - 1.96 * comparison_df$SE\ncomparison_df$Upper &lt;- comparison_df$Estimate + 1.96 * comparison_df$SE\n\nggplot(comparison_df, aes(x = Outcome, y = Estimate, color = Significant)) +\n  geom_point(size = 4) +\n  geom_errorbar(aes(ymin = Lower, ymax = Upper), width = 0.2, linewidth = 1) +\n  geom_hline(yintercept = 0, linetype = \"dashed\", color = \"gray50\") +\n  scale_color_manual(values = c(\"No\" = \"gray50\", \"Yes\" = \"#E41A1C\")) +\n  labs(\n    x = NULL,\n    y = \"RIR Coefficient (Hedge's g per RIR)\",\n    title = \"Effect of RIR on Training Outcomes\",\n    subtitle = \"Negative values = closer to failure is better\"\n  ) +\n  theme_minimal(base_size = 14) +\n  theme(legend.position = \"bottom\")\n\n\n\n\n\n\n\n\nFigure 1: RIR Effect on Strength vs Hypertrophy Outcomes\n\n\n\n\n\nThe figure shows:\n\nStrength (gray): Confidence interval includes zero - no significant effect\nHypertrophy (red): Entirely below zero - significant negative effect"
+  },
+  {
+    "objectID": "01_pelland_meta_regression.html#replication-validation",
+    "href": "01_pelland_meta_regression.html#replication-validation",
+    "title": "Does Training to Failure Matter?",
+    "section": "Replication Validation",
+    "text": "Replication Validation\nOur replication matches the published findings:\n\n\nShow code\ndata.frame(\n  Outcome = c(\"Strength\", \"Hypertrophy\"),\n  `Paper Claim` = c(\n    \"CI contains null (not significant)\",\n    \"Negative slope, CI excludes null\"\n  ),\n  `Our Result` = c(\n    paste0(\"p = \", round(str_rir_p, 3), \" (not significant)\"),\n    paste0(\"b = \", round(hyp_rir_b, 3), \", p = \", round(hyp_rir_p, 3))\n  ),\n  Match = c(\"Yes\", \"Yes\"),\n  check.names = FALSE\n) |&gt; knitr::kable()\n\n\n\n\nTable 2: Replication vs Published Results\n\n\n\n\n\n\n\n\n\n\n\n\nOutcome\nPaper Claim\nOur Result\nMatch\n\n\n\n\nStrength\nCI contains null (not significant)\np = 0.784 (not significant)\nYes\n\n\nHypertrophy\nNegative slope, CI excludes null\nb = -0.019, p = 0.004\nYes"
+  },
+  {
+    "objectID": "01_pelland_meta_regression.html#practical-implications",
+    "href": "01_pelland_meta_regression.html#practical-implications",
+    "title": "Does Training to Failure Matter?",
+    "section": "Practical Implications",
+    "text": "Practical Implications\n\nFor Strength Training\n\nStop 2-3 reps short of failure on most sets\nReserve failure training for testing or peaking phases\nThis allows higher frequency and volume\n\n\n\nFor Muscle Building\n\nTrain closer to failure for optimal hypertrophy\n0-2 RIR appears beneficial\nBalance this against recovery demands\n\n\n\nThe Trade-Off\n\n\nShow code\n# Conceptual illustration\nrir_seq &lt;- 0:5\nconcept_df &lt;- data.frame(\n  RIR = rep(rir_seq, 2),\n  Outcome = rep(c(\"Strength Gain\", \"Muscle Growth\"), each = length(rir_seq)),\n  Benefit = c(\n    rep(1, length(rir_seq)),  # Strength: flat line (no effect)\n    1 - 0.15 * rir_seq        # Hypertrophy: decreasing line\n  )\n)\n\nggplot(concept_df, aes(x = RIR, y = Benefit, color = Outcome)) +\n  geom_line(linewidth = 1.5) +\n  geom_point(size = 3) +\n  scale_x_reverse() +\n  scale_color_manual(values = c(\"Strength Gain\" = \"#377EB8\", \"Muscle Growth\" = \"#E41A1C\")) +\n  labs(\n    x = \"Repetitions in Reserve (RIR)\",\n    y = \"Relative Benefit\",\n    title = \"Conceptual Model: RIR Effects by Outcome\",\n    subtitle = \"Lower RIR = closer to failure\"\n  ) +\n  theme_minimal(base_size = 14) +\n  theme(legend.position = \"bottom\")\n\n\n\n\n\n\n\n\nFigure 2: The Strength-Hypertrophy Trade-off with RIR"
+  },
+  {
+    "objectID": "01_pelland_meta_regression.html#methods-summary",
+    "href": "01_pelland_meta_regression.html#methods-summary",
+    "title": "Does Training to Failure Matter?",
+    "section": "Methods Summary",
+    "text": "Methods Summary\n\nStatistical Model\nWe used a multi-level meta-regression with:\n\nFixed effects: RIR, load, volume equating, duration, training status\nRandom effects: Nested structure (~1|study/group/obs)\nEffect sizes: Hedge’s g (bias-corrected standardized mean change)\nEstimation: REML with t-distribution tests\n\n\n\nPre-Post Correlation Imputation\nMissing pre-post correlations were imputed via meta-analysis:\n\nStrength: r = 0.866\nHypertrophy: r = 0.875"
+  },
+  {
+    "objectID": "01_pelland_meta_regression.html#references",
+    "href": "01_pelland_meta_regression.html#references",
+    "title": "Does Training to Failure Matter?",
+    "section": "References",
+    "text": "References"
+  },
+  {
+    "objectID": "01_pelland_meta_regression.html#source",
+    "href": "01_pelland_meta_regression.html#source",
+    "title": "Does Training to Failure Matter?",
+    "section": "Source",
+    "text": "Source\n\nOriginal paper: Pelland et al. (2024) Sports Medicine\nData and code: OSF Repository"
   }
 ]
