@@ -1,6 +1,17 @@
 # _common.R
 # Shared utilities for all Quarto reports in the Deadlift Study project
 # Source this file in setup chunks: source("_common.R")
+#
+# ==============================================================================
+# DESIGN PRINCIPLES (from CLAUDE.md)
+# ==============================================================================
+# This file provides a functional API for backward compatibility with QMD files,
+# but internally delegates to the testable R6 class DiagnosticPlotter.
+# This follows SOLID principles:
+# - SRP: This file only provides the API bridge
+# - OCP: New methods can be added to DiagnosticPlotter without changing this file
+# - DIP: We depend on abstractions (the plotter interface) not implementations
+# ==============================================================================
 
 # ==============================================================================
 # PACKAGES
@@ -9,8 +20,27 @@ suppressPackageStartupMessages({
   library(ggplot2)
   library(knitr)
   library(dplyr)
+  library(tidyr)
   library(scales)
+  library(patchwork)
+  library(R6)
 })
+
+# ==============================================================================
+# R6 VISUALIZER IMPORT
+# ==============================================================================
+# Import the testable R6 visualization class
+# Uses box::use() for clean module imports
+box::use(
+  ../R/visualizers/diagnostic_plotter[
+    DiagnosticPlotter,
+    BlandAltmanResult,
+    PLOT_COLORS
+  ]
+)
+
+# Create singleton plotter instance for use by wrapper functions
+.plotter <- DiagnosticPlotter$new()
 
 # ==============================================================================
 # GLOBAL OPTIONS
@@ -326,4 +356,120 @@ plot_coefficients <- function(data, title = "Model Coefficients") {
     scale_color_significance() +
     coord_flip() +
     labs(title = title, x = NULL, y = "Estimate")
+}
+
+# ==============================================================================
+# ADVANCED VISUALIZATION FUNCTIONS
+# ==============================================================================
+
+#' Create spaghetti plot showing individual velocity-RIR trajectories
+#'
+#' @param data Data frame with id, rir, mean_velocity columns
+#' @param highlight_population Logical, whether to show population average
+#' @param title Plot title
+#' @return ggplot object
+#' @note Delegates to DiagnosticPlotter R6 class for testability
+plot_spaghetti <- function(data,
+                           highlight_population = TRUE,
+                           title = "Individual Velocity-RIR Trajectories") {
+  .plotter$plot_spaghetti(
+    data = data,
+    highlight_population = highlight_population,
+    title = title
+  )
+}
+
+#' Create LMM diagnostic panel (Q-Q plot and residuals vs fitted)
+#'
+#' @param residuals Vector of model residuals
+#' @param fitted Vector of fitted values
+#' @return Combined ggplot object (patchwork)
+#' @note Delegates to DiagnosticPlotter R6 class for testability
+plot_diagnostics_panel <- function(residuals, fitted) {
+  .plotter$plot_diagnostics_panel(
+    residuals = residuals,
+    fitted = fitted
+  )
+}
+
+#' Create Bland-Altman plot for assessing agreement/reliability
+#'
+#' @param day1 Vector of Day 1 measurements
+#' @param day2 Vector of Day 2 measurements
+#' @param title Plot title
+#' @param y_label Label for what is being measured
+#' @return ggplot object
+#' @note Delegates to DiagnosticPlotter R6 class for testability
+plot_bland_altman <- function(day1, day2,
+                              title = "Bland-Altman Plot",
+                              y_label = "Measurement") {
+  .plotter$plot_bland_altman(
+    day1 = day1,
+    day2 = day2,
+    title = title,
+    y_label = y_label
+  )
+}
+
+#' Create caterpillar plot for random effects (BLUPs)
+#'
+#' @param random_effects Data frame with id, estimate, lower, upper columns
+#' @param title Plot title
+#' @return ggplot object
+#' @note Delegates to DiagnosticPlotter R6 class for testability
+plot_caterpillar <- function(random_effects, title = "Individual Random Effects") {
+  .plotter$plot_caterpillar(
+    random_effects = random_effects,
+    title = title
+  )
+}
+
+#' Create bootstrap distribution plot
+#'
+#' @param bootstrap_samples Vector of bootstrap samples
+#' @param observed_value Observed estimate
+#' @param ci_lower Lower confidence interval bound
+#' @param ci_upper Upper confidence interval bound
+#' @param title Plot title
+#' @param x_label Label for x-axis
+#' @return ggplot object
+#' @note Delegates to DiagnosticPlotter R6 class for testability
+plot_bootstrap_distribution <- function(bootstrap_samples,
+                                         observed_value,
+                                         ci_lower,
+                                         ci_upper,
+                                         title = "Bootstrap Distribution",
+                                         x_label = "Estimate") {
+  .plotter$plot_bootstrap_distribution(
+    bootstrap_samples = bootstrap_samples,
+    observed_value = observed_value,
+    ci_lower = ci_lower,
+    ci_upper = ci_upper,
+    title = title,
+    x_label = x_label
+  )
+}
+
+#' Create velocity zone chart for practitioners
+#'
+#' @param velocity_table Data frame with rir and velocity columns
+#' @param conformal_intervals Data frame with prediction intervals (optional)
+#' @param title Plot title
+#' @return ggplot object
+#' @note Delegates to DiagnosticPlotter R6 class for testability
+plot_velocity_zones <- function(velocity_table,
+                                conformal_intervals = NULL,
+                                title = "Velocity-Based RIR Zones") {
+  # Merge conformal intervals into velocity table if provided
+  if (!is.null(conformal_intervals)) {
+    velocity_thresholds <- velocity_table |>
+      left_join(conformal_intervals, by = "rir")
+  } else {
+    velocity_thresholds <- velocity_table
+  }
+
+  .plotter$plot_velocity_zones(
+    velocity_thresholds = velocity_thresholds,
+    title = title
+  )
 }

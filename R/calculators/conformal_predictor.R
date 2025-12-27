@@ -1,9 +1,38 @@
 # R/calculators/conformal_predictor.R
 # Service: Conformal Prediction for Distribution-Free Intervals
 #
-# SOLID Principles Applied:
-# - SRP: Single responsibility - generate conformal prediction intervals
+# =============================================================================
+# PRINCIPLES APPLIED (from CLAUDE.md)
+# =============================================================================
+#
+# NAMING PRINCIPLES:
+# - Understandability: Domain terms (conformal, calibration, coverage)
+# - Consistency: All public methods verb-based (fit, predict, calibrate)
+# - Distinguishability: predict_interval vs predict_point
+# - Conciseness: cp for Conformal Prediction, ci for Confidence Interval
+#
+# SOLID PRINCIPLES:
+# - SRP: Single responsibility - generate distribution-free prediction intervals
 # - OCP: Open for extension with different conformity score functions
+# - DIP: Depends on model abstractions (predict function), not implementations
+#
+# CUPID PRINCIPLES:
+# - Composable: fit -> calibrate -> predict pipeline
+# - Unix: Each method does one thing (fit, calibrate, predict)
+# - Predictable: Given calibration data -> deterministic intervals
+# - Idiomatic: Follows R conventions for prediction methods
+# - Domain-based: Names reflect statistical concepts (conformal, nonconformity)
+#
+# SCIENTIFIC VALIDITY:
+# - Split conformal prediction: Vovk et al. (2005)
+# - Guaranteed coverage: P(Y ∈ C(X)) ≥ 1-α for any distribution
+# - Nonconformity score: |y - ŷ| (absolute residual)
+# - Calibration: Use held-out calibration set to determine quantile
+#
+# TESTABILITY:
+# - Coverage guarantees can be verified empirically
+# - Calibration is deterministic given residuals
+# =============================================================================
 
 box::use(
   R6[R6Class]

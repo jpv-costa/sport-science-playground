@@ -1,9 +1,39 @@
 # R/calculators/lmm_analyzer.R
 # Service: Linear Mixed Effects Model Analysis
 #
-# SOLID Principles Applied:
-# - SRP: Single responsibility - fit and evaluate LMM models
+# =============================================================================
+# PRINCIPLES APPLIED (from CLAUDE.md)
+# =============================================================================
+#
+# NAMING PRINCIPLES:
+# - Understandability: Domain terms (lmm, random_effects, fixed_effects)
+# - Consistency: All public methods verb-based (fit, compare, test, predict)
+# - Distinguishability: fit vs fit_robust, test_assumptions vs test_variable_importance
+# - Conciseness: lmm for Linear Mixed Model, ci for Confidence Interval
+#
+# SOLID PRINCIPLES:
+# - SRP: Single responsibility - fit and evaluate LMM models (one actor: statistician)
 # - OCP: Open for extension with different random effect structures
+# - DIP: Depends on lme4 abstractions (lmer), not specific implementations
+#
+# CUPID PRINCIPLES:
+# - Composable: Methods chain (fit -> compare_models -> test_assumptions)
+# - Unix: Each method does one thing (fit, compare, diagnose, predict)
+# - Predictable: Same data + formula -> same model fit (REML/ML deterministic)
+# - Idiomatic: Follows R conventions, formula syntax, S4 methods
+# - Domain-based: Names reflect statistical modeling concepts
+#
+# SCIENTIFIC VALIDITY:
+# - R² calculation: Nakagawa & Schielzeth (2013) marginal/conditional
+# - Bayes Factor approximation: Raftery (1995) BF ≈ exp(-0.5 * delta_BIC)
+# - Bayes Factor interpretation: Jeffreys (1961) scale
+# - Model comparison: Likelihood ratio test for nested models
+#
+# TESTABILITY:
+# - All private methods are pure functions (input -> output)
+# - Result classes are value objects with clear interfaces
+# - Each method can be tested with synthetic data
+# =============================================================================
 
 box::use(
   R6[R6Class]
@@ -672,66 +702,14 @@ LmmAnalyzer <- R6Class(
                                       "random_intercept" = ~1 | id,
                                       "random_slope" = ~1 + rir | id
                                     )) {
-      results <- list()
-
-      for (name in names(random_formulas)) {
-        rf <- random_formulas[[name]]
-        result <- tryCatch({
-          self$fit(data, base_formula, rf, name, REML = TRUE)
-        }, error = function(e) {
-          warning("Model ", name, " failed: ", e$message)
-          NULL
-        })
-
-        if (!is.null(result)) {
-          results[[name]] <- result
-        }
-      }
-
-      # Extract key coefficient (RIR effect)
-      rir_effects <- data.frame(
-        model = character(),
-        rir_estimate = numeric(),
-        rir_se = numeric(),
-        aic = numeric(),
-        bic = numeric(),
-        r2_marginal = numeric(),
-        r2_conditional = numeric(),
-        stringsAsFactors = FALSE
-      )
-
-      for (name in names(results)) {
-        r <- results[[name]]
-        coefs <- self$get_fixed_effects(r)
-        rir_row <- coefs[coefs$term == "rir", ]
-
-        rir_effects <- rbind(rir_effects, data.frame(
-          model = name,
-          rir_estimate = rir_row$estimate,
-          rir_se = rir_row$std_error,
-          aic = r$aic,
-          bic = r$bic,
-          r2_marginal = r$r2_marginal,
-          r2_conditional = r$r2_conditional,
-          stringsAsFactors = FALSE
-        ))
-      }
-
-      # Calculate summary statistics
-      rir_mean <- mean(rir_effects$rir_estimate)
-      rir_sd <- stats::sd(rir_effects$rir_estimate)
-      rir_range <- diff(range(rir_effects$rir_estimate))
+      results <- private$.fit_sensitivity_models(data, base_formula, random_formulas)
+      rir_effects <- private$.extract_rir_effects(results)
+      summary <- private$.calculate_sensitivity_summary(rir_effects)
 
       list(
         model_results = results,
         rir_effects = rir_effects,
-        summary = list(
-          rir_mean = rir_mean,
-          rir_sd = rir_sd,
-          rir_range = rir_range,
-          rir_cv = 100 * rir_sd / abs(rir_mean),
-          conclusions_robust = rir_range / abs(rir_mean) < 0.1  # <10% variation
-        )
+        summary = summary
       )
     }
   ),
@@ -852,6 +830,75 @@ LmmAnalyzer <- R6Class(
       } else {
         "Decisive evidence for complex model"
       }
+    },
+
+    #' Fit models with different random effect specifications
+    .fit_sensitivity_models = function(data, base_formula, random_formulas) {
+      results <- list()
+
+      for (name in names(random_formulas)) {
+        rf <- random_formulas[[name]]
+        result <- tryCatch({
+          self$fit(data, base_formula, rf, name, REML = TRUE)
+        }, error = function(e) {
+          warning("Model ", name, " failed: ", e$message)
+          NULL
+        })
+
+        if (!is.null(result)) {
+          results[[name]] <- result
+        }
+      }
+
+      results
+    },
+
+    #' Extract RIR effects from fitted models
+    .extract_rir_effects = function(results) {
+      rir_effects <- data.frame(
+        model = character(),
+        rir_estimate = numeric(),
+        rir_se = numeric(),
+        aic = numeric(),
+        bic = numeric(),
+        r2_marginal = numeric(),
+        r2_conditional = numeric(),
+        stringsAsFactors = FALSE
+      )
+
+      for (name in names(results)) {
+        r <- results[[name]]
+        coefs <- self$get_fixed_effects(r)
+        rir_row <- coefs[coefs$term == "rir", ]
+
+        rir_effects <- rbind(rir_effects, data.frame(
+          model = name,
+          rir_estimate = rir_row$estimate,
+          rir_se = rir_row$std_error,
+          aic = r$aic,
+          bic = r$bic,
+          r2_marginal = r$r2_marginal,
+          r2_conditional = r$r2_conditional,
+          stringsAsFactors = FALSE
+        ))
+      }
+
+      rir_effects
+    },
+
+    #' Calculate summary statistics for sensitivity analysis
+    .calculate_sensitivity_summary = function(rir_effects) {
+      rir_mean <- mean(rir_effects$rir_estimate)
+      rir_sd <- stats::sd(rir_effects$rir_estimate)
+      rir_range <- diff(range(rir_effects$rir_estimate))
+
+      list(
+        rir_mean = rir_mean,
+        rir_sd = rir_sd,
+        rir_range = rir_range,
+        rir_cv = 100 * rir_sd / abs(rir_mean),
+        conclusions_robust = rir_range / abs(rir_mean) < 0.1  # <10% variation
+      )
     }
   )
 )

@@ -1,9 +1,37 @@
 # R/calculators/rir_velocity_modeler.R
 # Service: RIR-Velocity Relationship Modeling
 #
-# SOLID Principles Applied:
+# =============================================================================
+# PRINCIPLES APPLIED (from CLAUDE.md)
+# =============================================================================
+#
+# NAMING PRINCIPLES:
+# - Understandability: Domain terms (rir, velocity, slope, intercept)
+# - Consistency: All public methods verb-based (fit, compare, predict)
+# - Distinguishability: fit_linear vs fit_polynomial, fit vs fit_grouped
+# - Conciseness: rir for Repetitions in Reserve, rse for Residual Standard Error
+#
+# SOLID PRINCIPLES:
 # - SRP: Single responsibility - fit and evaluate RIR-velocity models
-# - OCP: Open for extension with different model types
+# - OCP: Open for extension with different model types (linear, poly, mixed)
+# - DIP: Depends on data frame abstractions, not specific data sources
+#
+# CUPID PRINCIPLES:
+# - Composable: Results are R6 objects that can be combined (fit -> compare)
+# - Unix: Each method does one thing (fit model, compare models, predict)
+# - Predictable: Same data -> same model fit (deterministic OLS)
+# - Idiomatic: Follows R conventions, formula syntax
+# - Domain-based: Names reflect VBT research concepts (RIR, velocity, slope)
+#
+# SCIENTIFIC VALIDITY:
+# - Linear: velocity = intercept + slope * RIR (standard VBT model)
+# - Polynomial: velocity = a + b*RIR + c*RIR² (for nonlinear relationships)
+# - Model comparison uses AIC, BIC, and R² for selection
+#
+# TESTABILITY:
+# - All public methods return testable result objects
+# - Result classes are value objects with clear interfaces
+# =============================================================================
 
 box::use(
   R6[R6Class]

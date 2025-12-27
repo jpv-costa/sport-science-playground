@@ -1,9 +1,38 @@
 # R/calculators/velocity_stop_table_generator.R
 # Service: Velocity Stop Table Generation for VBT
 #
-# SOLID Principles Applied:
+# =============================================================================
+# PRINCIPLES APPLIED (from CLAUDE.md)
+# =============================================================================
+#
+# NAMING PRINCIPLES:
+# - Understandability: Domain terms (velocity_threshold, rir_zone, stop_velocity)
+# - Consistency: All public methods verb-based (generate, format, export)
+# - Distinguishability: generate_table vs generate_zones
+# - Conciseness: vbt for Velocity-Based Training
+#
+# SOLID PRINCIPLES:
 # - SRP: Single responsibility - generate velocity thresholds for training
-# - OCP: Open for extension with different table formats
+# - OCP: Open for extension with different table formats and export types
+# - DIP: Depends on LmmAnalyzer abstraction, not specific model implementations
+#
+# CUPID PRINCIPLES:
+# - Composable: Uses LmmAnalyzer output to generate practitioner tables
+# - Unix: Each method does one thing (generate, format, export)
+# - Predictable: Same model -> same velocity thresholds
+# - Idiomatic: Follows R conventions for data frame output
+# - Domain-based: Names reflect VBT practitioner concepts (zones, thresholds)
+#
+# SCIENTIFIC VALIDITY:
+# - Velocity thresholds derived from population LMM fixed effects
+# - Prediction intervals from model standard error
+# - RIR zones based on literature (0-1: failure, 2-3: effective, 4+: submaximal)
+#
+# PRACTICAL APPLICATION:
+# - Generates autoregulation tables for strength coaches
+# - Provides velocity targets for each RIR level
+# - Includes prediction intervals for practical guidance
+# =============================================================================
 
 box::use(
   R6[R6Class],

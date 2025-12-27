@@ -1,10 +1,41 @@
 # R/loaders/deadlift_rir_data_loader.R
-# Loader: Deadlift RIR-Velocity Data (Thesis Research)
+# Service: Deadlift RIR-Velocity Data Loading and Preprocessing
 #
-# SOLID Principles Applied:
-# - SRP: Single responsibility - load and preprocess deadlift RIR-velocity data
+# =============================================================================
+# PRINCIPLES APPLIED (from CLAUDE.md)
+# =============================================================================
 #
-# Output columns:
+# NAMING PRINCIPLES:
+# - Understandability: Problem domain terms (rir, velocity, set_id, day)
+# - Consistency: All public methods verb-based (load, filter_by_X, summarize)
+# - Distinguishability: filter_by_day vs filter_by_load (clear differences)
+# - Conciseness: Short meaningful names (rir for Repetitions in Reserve)
+#
+# SOLID PRINCIPLES:
+# - SRP: Single responsibility - Excel parsing and preprocessing (one actor)
+# - OCP: Open for extension with new filter methods, closed for modification
+# - DIP: Depends on abstractions (data frames), not concrete implementations
+#
+# CUPID PRINCIPLES:
+# - Composable: Filter methods can be chained (filter_by_day |> filter_by_load)
+# - Unix: Each method does one thing (load, filter, summarize)
+# - Predictable: Same data file -> same output (deterministic)
+# - Idiomatic: Follows R conventions, proper roxygen docs
+# - Domain-based: Names reflect VBT research concepts (RIR, velocity, sets)
+#
+# SCIENTIFIC VALIDITY:
+# - RIR=0 represents muscular failure (validated in biomechanics literature)
+# - Set ID formation ensures traceability from raw Excel to processed data
+# - Rep numbering maintains temporal sequence for within-set analysis
+#
+# TESTABILITY:
+# - All private methods are pure functions (input -> output)
+# - No side effects in data transformation
+# - Each method can be tested in isolation
+#
+# =============================================================================
+# OUTPUT COLUMNS
+# =============================================================================
 # - id: Participant identifier (string)
 # - sex: "male" or "female"
 # - day: "Day 1" or "Day 2"
@@ -15,6 +46,7 @@
 # - set_id: Unique set identifier (e.g., "Alexia_Day1_90pct_S1")
 # - rep_number: Position in set (1, 2, 3, ... n)
 # - reps_to_failure: Total reps completed in that set
+# =============================================================================
 
 box::use(
   R6[R6Class]
@@ -103,85 +135,104 @@ DeadliftRirDataLoader <- R6Class(
     .data_path = NULL,
 
     #' Parse a single participant sheet into long format
+    #' Orchestrates sheet parsing using smaller focused methods
     .parse_participant_sheet = function(sheet_name) {
-      raw_data <- as.data.frame(
+      raw_data <- private$.read_sheet_data(sheet_name)
+      conditions <- private$.parse_headers(as.character(raw_data[1, ]))
+
+      if (length(conditions) == 0) return(NULL)
+
+      participant <- private$.extract_participant_info(sheet_name)
+      data_rows <- raw_data[3:nrow(raw_data), ]
+
+      observations <- private$.parse_all_conditions(
+        conditions, data_rows, participant
+      )
+
+      if (length(observations) == 0) return(NULL)
+      do.call(rbind, observations)
+    },
+
+    #' Read raw Excel sheet data
+    .read_sheet_data = function(sheet_name) {
+      as.data.frame(
         readxl::read_excel(
           private$.data_path,
           sheet = sheet_name,
           col_names = FALSE
         )
       )
+    },
 
-      # Extract condition info from row 1 headers
-      headers <- as.character(raw_data[1, ])
-      conditions <- private$.parse_headers(headers)
+    #' Extract participant ID and sex from sheet name
+    .extract_participant_info = function(sheet_name) {
+      list(
+        sex = ifelse(grepl("^Mulheres_", sheet_name), "female", "male"),
+        id = gsub("^Mulheres_", "", sheet_name)
+      )
+    },
 
-      if (length(conditions) == 0) {
-        return(NULL)
-      }
+    #' Parse all conditions for a participant
+    .parse_all_conditions = function(conditions, data_rows, participant) {
+      observations <- list()
 
-      # Data starts at row 3 (row 1 = headers, row 2 = column labels)
-      data_rows <- raw_data[3:nrow(raw_data), ]
-
-      # Determine participant sex from sheet name
-      sex <- ifelse(grepl("^Mulheres_", sheet_name), "female", "male")
-
-      # Clean participant name
-      id <- gsub("^Mulheres_", "", sheet_name)
-
-      # Parse each condition (set of 3 columns)
-      all_observations <- list()
-
-      for (i in seq_along(conditions)) {
-        condition <- conditions[[i]]
-        col_start <- condition$col_start
-
-        # Extract RIR and MCV columns
-        rir_col <- col_start + 1
-        mcv_col <- col_start + 2
-
-        rir_values <- as.numeric(data_rows[, rir_col])
-        mcv_values <- as.numeric(data_rows[, mcv_col])
-
-        # Filter to rows with actual data
-        valid_rows <- !is.na(rir_values) & !is.na(mcv_values)
-        n_valid <- sum(valid_rows)
-
-        if (n_valid == 0) {
-          next
-        }
-
-        # Create unique set_id: "id_DayX_YYpct_SZ"
-        day_code <- gsub("Day ", "Day", condition$day)
-        load_code <- gsub("%", "pct", condition$load_pct)
-        series_code <- paste0("S", condition$series_num)
-        set_id <- paste(id, day_code, load_code, series_code, sep = "_")
-
-        # Rep numbers are 1, 2, 3, ... within the set
-        # The first row in the data corresponds to the first rep
-        rep_numbers <- seq_len(n_valid)
-
-        condition_data <- data.frame(
-          id = id,
-          sex = sex,
-          day = condition$day,
-          load_percentage = condition$load_pct,
-          weight_kg = condition$weight_kg,
-          rir = rir_values[valid_rows],
-          mean_velocity = mcv_values[valid_rows],
-          set_id = set_id,
-          rep_number = rep_numbers,
-          stringsAsFactors = FALSE
+      for (condition in conditions) {
+        condition_obs <- private$.parse_single_condition(
+          condition, data_rows, participant
         )
-
-        all_observations <- c(all_observations, list(condition_data))
+        if (!is.null(condition_obs)) {
+          observations <- c(observations, list(condition_obs))
+        }
       }
 
-      if (length(all_observations) == 0) {
-        return(NULL)
-      }
+      observations
+    },
 
-      do.call(rbind, all_observations)
+    #' Parse a single condition (set) into observations
+    .parse_single_condition = function(condition, data_rows, participant) {
+      values <- private$.extract_rir_velocity_values(condition, data_rows)
+
+      if (values$n_valid == 0) return(NULL)
+
+      set_id <- private$.build_set_id(participant$id, condition)
+
+      data.frame(
+        id = participant$id,
+        sex = participant$sex,
+        day = condition$day,
+        load_percentage = condition$load_pct,
+        weight_kg = condition$weight_kg,
+        rir = values$rir,
+        mean_velocity = values$velocity,
+        set_id = set_id,
+        rep_number = seq_len(values$n_valid),
+        stringsAsFactors = FALSE
+      )
+    },
+
+    #' Extract RIR and velocity values from data columns
+    .extract_rir_velocity_values = function(condition, data_rows) {
+      rir_col <- condition$col_start + 1
+      mcv_col <- condition$col_start + 2
+
+      rir_values <- as.numeric(data_rows[, rir_col])
+      mcv_values <- as.numeric(data_rows[, mcv_col])
+
+      valid_rows <- !is.na(rir_values) & !is.na(mcv_values)
+
+      list(
+        rir = rir_values[valid_rows],
+        velocity = mcv_values[valid_rows],
+        n_valid = sum(valid_rows)
+      )
+    },
+
+    #' Build unique set identifier
+    .build_set_id = function(participant_id, condition) {
+      day_code <- gsub("Day ", "Day", condition$day)
+      load_code <- gsub("%", "pct", condition$load_pct)
+      series_code <- paste0("S", condition$series_num)
+      paste(participant_id, day_code, load_code, series_code, sep = "_")
     },
 
     #' Parse header row to extract condition information

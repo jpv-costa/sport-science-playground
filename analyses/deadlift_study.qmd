@@ -59,6 +59,22 @@ This research investigates whether velocity-based training (VBT) principles, wel
 | **Day-to-day reliability?** | Moderate (ICC ~0.5-0.7) | Recalibrate every 2-4 weeks |
 | **First-rep prediction?** | MAE = `r if(!is.null(advanced_results)) round(advanced_results$failure_prediction$cv_results$mae, 2) else "~1.5"` reps | Useful for real-time autoregulation |
 
+### The Core Finding: Individual Variability
+
+```{r fig-hero-spaghetti}
+#| label: fig-hero-spaghetti
+#| fig-cap: "Individual Velocity-RIR Trajectories: Each gray line represents one athlete's unique velocity-RIR relationship. The red line shows the population average."
+#| fig-height: 5
+
+plot_spaghetti(
+  data,
+  highlight_population = TRUE,
+  title = "Why Individual Calibration Matters"
+)
+```
+
+This visualization captures our central finding: while velocity decreases as athletes approach failure (the general trend), **each individual has a unique pattern**. Using population averages (red line) instead of individual calibration introduces substantial prediction error—this is why individual ~2x more accurate than general models.
+
 ---
 
 ## 1. Introduction
@@ -481,7 +497,14 @@ if (!is.null(lmm_results)) {
   )
 
   format_table(comparison_df, col.names = c("Approach", "MAE (mm/s)", "RMSE (mm/s)"))
+}
+```
 
+```{r individual-improvement}
+#| results: asis
+
+if (!is.null(lmm_results)) {
+  ic <- lmm_results$individual_comparison
   cat("\n**Improvement from individualization**:", round(ic$mae_improvement_pct, 1), "%\n")
 }
 ```
@@ -921,6 +944,48 @@ if (!is.null(advanced_results) && !is.null(advanced_results$reliability$day_para
     labs(x = "MVT Day 1 (m/s)", y = "MVT Day 2 (m/s)",
          title = "Day-to-Day Reliability of Predicted MVT",
          subtitle = paste("ICC =", round(advanced_results$reliability$mvt_icc$icc, 2)))
+}
+```
+
+#### Bland-Altman Analysis
+
+The Bland-Altman plot provides additional insight beyond ICC by showing:
+
+- **Systematic bias**: Is there a consistent difference between days?
+- **Limits of agreement**: What range of day-to-day variation should we expect?
+- **Proportional bias**: Does variability depend on the magnitude of the measurement?
+
+```{r fig-bland-altman-slope}
+#| label: fig-bland-altman-slope
+#| fig-cap: "Bland-Altman Plot for Velocity-RIR Slopes: Assesses systematic bias and limits of agreement between testing days."
+#| fig-height: 5
+
+if (!is.null(advanced_results) && !is.null(advanced_results$reliability$day_parameters)) {
+  day_params <- advanced_results$reliability$day_parameters
+
+  plot_bland_altman(
+    day1 = day_params$slope_day1,
+    day2 = day_params$slope_day2,
+    title = "Bland-Altman: Velocity-RIR Slope Reliability",
+    y_label = "(m/s per RIR)"
+  )
+}
+```
+
+```{r fig-bland-altman-mvt}
+#| label: fig-bland-altman-mvt
+#| fig-cap: "Bland-Altman Plot for MVT: Shows day-to-day variability in minimum velocity threshold estimates."
+#| fig-height: 5
+
+if (!is.null(advanced_results) && !is.null(advanced_results$reliability$day_parameters)) {
+  day_params <- advanced_results$reliability$day_parameters
+
+  plot_bland_altman(
+    day1 = day_params$mvt_day1,
+    day2 = day_params$mvt_day2,
+    title = "Bland-Altman: MVT Reliability",
+    y_label = "(m/s)"
+  )
 }
 ```
 
@@ -1512,6 +1577,25 @@ if (!is.null(lmm_results) && !is.null(lmm_results$diagnostics)) {
 }
 ```
 
+#### Visual Diagnostic Assessment
+
+```{r fig-diagnostics-panel}
+#| label: fig-diagnostics-panel
+#| fig-cap: "LMM Diagnostic Plots: Q-Q plot assesses residual normality; Residuals vs Fitted identifies heteroscedasticity patterns."
+#| fig-height: 5
+#| fig-width: 12
+
+if (!is.null(lmm_results) && !is.null(lmm_results$diagnostics_full)) {
+  diag_full <- lmm_results$diagnostics_full
+  plot_diagnostics_panel(
+    residuals = diag_full$residuals,
+    fitted = diag_full$fitted
+  )
+}
+```
+
+The Q-Q plot shows how closely residuals follow a normal distribution (deviations at the tails are common and not problematic). The residuals vs fitted plot checks for heteroscedasticity—a flat, even spread is ideal. Any "funnel" pattern would suggest non-constant variance.
+
 ### 5.3 Sensitivity Analysis
 
 #### The Question
@@ -1619,49 +1703,69 @@ if (!is.null(lmm_results) && !is.null(lmm_results$sensitivity)) {
 
 ### 5.4 Robustness Summary
 
-```{r robustness-summary}
-#| results: asis
+```{r tbl-robustness-summary}
+#| label: tbl-robustness-summary
+#| tbl-cap: "Robustness Check Summary"
 
-cat("| Check | Result | Conclusion |\n")
-cat("|-------|--------|------------|\n")
+# Build robustness summary data frame
+robustness_rows <- list()
 
 # Robust SE
 if (!is.null(lmm_results) && !is.null(lmm_results$robust_se)) {
   se_ratio <- max(lmm_results$robust_se$se_ratio)
-  if (se_ratio < 1.2) {
-    cat(sprintf("| Cluster-Robust SE | Ratio = %.3f | No heteroscedasticity concern |\n", se_ratio))
-  } else {
-    cat(sprintf("| Cluster-Robust SE | Ratio = %.3f | Some heteroscedasticity present |\n", se_ratio))
-  }
+  conclusion <- if (se_ratio < 1.2) "No heteroscedasticity concern" else "Some heteroscedasticity present"
+  robustness_rows[[1]] <- data.frame(
+    Check = "Cluster-Robust SE",
+    Result = sprintf("Ratio = %.3f", se_ratio),
+    Conclusion = conclusion
+  )
 } else {
-  cat("| Cluster-Robust SE | Pending | Run full analysis pipeline |\n")
+  robustness_rows[[1]] <- data.frame(
+    Check = "Cluster-Robust SE",
+    Result = "Pending",
+    Conclusion = "Run full analysis pipeline"
+  )
 }
 
 # Bootstrap CI
 if (!is.null(lmm_results) && !is.null(lmm_results$bootstrap_ci)) {
   rir_ci <- lmm_results$bootstrap_ci[lmm_results$bootstrap_ci$term == "rir", ]
-  cat(sprintf("| Bootstrap CI | [%.3f, %.3f] | Effect significant (CI excludes 0) |\n",
-              rir_ci$ci_lower, rir_ci$ci_upper))
+  robustness_rows[[2]] <- data.frame(
+    Check = "Bootstrap CI",
+    Result = sprintf("[%.3f, %.3f]", rir_ci$ci_lower, rir_ci$ci_upper),
+    Conclusion = "Effect significant (CI excludes 0)"
+  )
 } else {
-  cat("| Bootstrap CI | Pending | Run full analysis pipeline |\n")
+  robustness_rows[[2]] <- data.frame(
+    Check = "Bootstrap CI",
+    Result = "Pending",
+    Conclusion = "Run full analysis pipeline"
+  )
 }
 
 # Sensitivity
 if (!is.null(lmm_results) && !is.null(lmm_results$sensitivity)) {
   rir_estimates <- lmm_results$sensitivity$rir_effects$rir_estimate
   cv <- (sd(rir_estimates) / mean(rir_estimates)) * 100
-  if (cv < 10) {
-    cat(sprintf("| Sensitivity Analysis | CV = %.1f%% | Robust to model choice |\n", cv))
-  } else {
-    cat(sprintf("| Sensitivity Analysis | CV = %.1f%% | Some sensitivity to model |\n", cv))
-  }
+  conclusion <- if (cv < 10) "Robust to model choice" else "Some sensitivity to model"
+  robustness_rows[[3]] <- data.frame(
+    Check = "Sensitivity Analysis",
+    Result = sprintf("CV = %.1f%%", cv),
+    Conclusion = conclusion
+  )
 } else {
-  cat("| Sensitivity Analysis | Pending | Run full analysis pipeline |\n")
+  robustness_rows[[3]] <- data.frame(
+    Check = "Sensitivity Analysis",
+    Result = "Pending",
+    Conclusion = "Run full analysis pipeline"
+  )
 }
 
-cat("\n**Overall Conclusion**: The velocity-RIR relationship is robust across all checks. ",
-    "Our findings are not artifacts of specific modeling choices.\n")
+robustness_df <- do.call(rbind, robustness_rows)
+format_table(robustness_df, col.names = c("Check", "Result", "Conclusion"))
 ```
+
+**Overall Conclusion**: The velocity-RIR relationship is robust across all checks. Our findings are not artifacts of specific modeling choices.
 
 #### The Finding
 
@@ -1710,8 +1814,9 @@ names(targets) <- c("RIR", "80% 1RM", "90% 1RM")
 targets <- targets[order(-targets$RIR), ]
 targets$`80% 1RM` <- round(targets$`80% 1RM`, 3)
 targets$`90% 1RM` <- round(targets$`90% 1RM`, 3)
+rownames(targets) <- NULL
 
-format_table(targets)
+format_table(targets, col.names = c("RIR", "80% 1RM (m/s)", "90% 1RM (m/s)"))
 ```
 
 *These are population averages. Individual calibration will substantially improve accuracy.*

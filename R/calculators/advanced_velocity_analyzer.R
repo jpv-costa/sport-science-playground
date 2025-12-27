@@ -1,16 +1,48 @@
 # R/calculators/advanced_velocity_analyzer.R
-# Advanced Velocity-RIR Analyses for Study 6
+# Service: Advanced Velocity-RIR Analyses for Study 6
 #
-# Implements 5 novel analyses (H2-H6) that extend the deadlift velocity-RIR research:
+# =============================================================================
+# PRINCIPLES APPLIED (from CLAUDE.md)
+# =============================================================================
+#
+# NAMING PRINCIPLES:
+# - Understandability: Domain terms (mvt, icc, decay_rate, failure_prediction)
+# - Consistency: All public methods verb-based (analyze, calculate, compare, build)
+# - Distinguishability: analyze_mvt_variability vs analyze_velocity_decay
+# - Conciseness: mvt for Minimum Velocity Threshold, icc for Intraclass Correlation
+#
+# SOLID PRINCIPLES:
+# - SRP: Each public method handles one hypothesis (H2-H6), one actor (researcher)
+# - OCP: New analyses can be added without modifying existing code
+# - DIP: Depends on data frames (abstractions), not specific data sources
+#
+# CUPID PRINCIPLES:
+# - Composable: Results are R6 objects that can be combined and compared
+# - Unix: Each method does one thing (one hypothesis per method)
+# - Predictable: Same data -> same results (deterministic statistical tests)
+# - Idiomatic: Follows R conventions, proper roxygen docs, R6 classes
+# - Domain-based: Names reflect VBT research concepts (MVT, ICC, decay, prediction)
+#
+# SCIENTIFIC VALIDITY:
+# - ICC(2,1): Two-way random effects, single measurement (Shrout & Fleiss, 1979)
+# - Interpretation thresholds from Koo & Li (2016): Poor/Moderate/Good/Excellent
+# - SEM and MDC95 formulas follow COSMIN guidelines
+# - Model comparison uses AIC with >2 difference threshold (Burnham & Anderson)
+#
+# TESTABILITY:
+# - All private methods are pure functions (input -> output)
+# - No side effects in statistical calculations
+# - Each method can be tested in isolation with synthetic data
+#
+# =============================================================================
+# ANALYSES IMPLEMENTED (Hypotheses H2-H6)
+# =============================================================================
 # - H2: Minimum Velocity Threshold (MVT) variability at failure
 # - H3: Day-to-day reliability of individual velocity profiles
 # - H4: Polynomial vs linear model comparison
 # - H5: Velocity decay rate within sets
 # - H6: Early rep velocity for failure prediction
-#
-# SOLID Principles Applied:
-# - SRP: Each method handles one specific analysis
-# - OCP: New analyses can be added without modifying existing code
+# =============================================================================
 
 box::use(
   R6[R6Class],
@@ -517,79 +549,102 @@ AdvancedVelocityAnalyzer <- R6Class(
       do.call(rbind, results)
     },
 
+    #' Calculate ICC(2,1) - Two-way random effects, single measurement
+    #' Orchestrates ICC calculation using smaller focused methods
+    #' Based on Shrout & Fleiss (1979)
     .calculate_icc = function(values1, values2, name) {
-      # ICC(2,1) - Two-way random effects, single measurement
-      # Using formula from Shrout & Fleiss (1979)
-
       n <- length(values1)
-      if (n < 3) {
-        return(list(
-          icc = NA,
-          ci_lower = NA,
-          ci_upper = NA,
-          sem = NA,
-          mdc95 = NA,
-          interpretation = "Insufficient data"
-        ))
+
+      if (!private$.is_sufficient_for_icc(n)) {
+        return(private$.create_insufficient_icc_result())
       }
 
-      # Combine into matrix format
       ratings <- cbind(values1, values2)
-
-      # Calculate variance components
-      grand_mean <- mean(ratings)
-      subject_means <- rowMeans(ratings)
-      rater_means <- colMeans(ratings)
-
-      # Between-subjects variance
-      ms_between <- var(subject_means) * 2  # k=2 raters
-      # Within-subjects variance
-      ms_within <- mean(apply(ratings, 1, var))
-      # Total variance
-      ms_total <- var(as.vector(ratings))
-
-      # ICC(2,1) formula
-      icc <- (ms_between - ms_within) / (ms_between + ms_within)
-      icc <- max(0, min(1, icc))  # Bound between 0 and 1
-
-      # Standard error of measurement
-      pooled_sd <- sqrt(ms_within)
-      sem <- pooled_sd * sqrt(1 - icc)
-
-      # Minimal detectable change (95% CI)
-      mdc95 <- sem * 1.96 * sqrt(2)
-
-      # Confidence intervals (simplified approximation)
-      se_icc <- sqrt(2 * (1 - icc)^2 * (1 + icc)^2 / (n * (n - 1)))
-      ci_lower <- max(0, icc - 1.96 * se_icc)
-      ci_upper <- min(1, icc + 1.96 * se_icc)
-
-      # Interpretation based on Koo & Li (2016)
-      interpretation <- if (icc < 0.50) {
-        "Poor"
-      } else if (icc < 0.75) {
-        "Moderate"
-      } else if (icc < 0.90) {
-        "Good"
-      } else {
-        "Excellent"
-      }
+      variance <- private$.calculate_icc_variance_components(ratings)
+      icc <- private$.calculate_icc_value(variance)
+      reliability <- private$.calculate_reliability_measures(icc, variance$ms_within)
+      ci <- private$.calculate_icc_confidence_interval(icc, n)
+      interpretation <- private$.interpret_icc(icc)
 
       list(
         icc = icc,
-        ci_lower = ci_lower,
-        ci_upper = ci_upper,
-        sem = sem,
-        mdc95 = mdc95,
+        ci_lower = ci$lower,
+        ci_upper = ci$upper,
+        sem = reliability$sem,
+        mdc95 = reliability$mdc95,
         interpretation = interpretation,
         n = n
       )
+    },
+
+    #' Check if sample size is sufficient for ICC calculation
+    .is_sufficient_for_icc = function(n) {
+      n >= 3
+    },
+
+    #' Create result object for insufficient data
+    .create_insufficient_icc_result = function() {
+      list(
+        icc = NA,
+        ci_lower = NA,
+        ci_upper = NA,
+        sem = NA,
+        mdc95 = NA,
+        interpretation = "Insufficient data"
+      )
+    },
+
+    #' Calculate variance components for ICC
+    .calculate_icc_variance_components = function(ratings) {
+      subject_means <- rowMeans(ratings)
+      ms_between <- var(subject_means) * 2  # k=2 raters
+      ms_within <- mean(apply(ratings, 1, var))
+
+      list(
+        ms_between = ms_between,
+        ms_within = ms_within
+      )
+    },
+
+    #' Calculate ICC value from variance components
+    .calculate_icc_value = function(variance) {
+      icc <- (variance$ms_between - variance$ms_within) /
+        (variance$ms_between + variance$ms_within)
+      max(0, min(1, icc))  # Bound between 0 and 1
+    },
+
+    #' Calculate SEM and MDC95 (COSMIN guidelines)
+    .calculate_reliability_measures = function(icc, ms_within) {
+      pooled_sd <- sqrt(ms_within)
+      sem <- pooled_sd * sqrt(1 - icc)
+      mdc95 <- sem * 1.96 * sqrt(2)
+
+      list(sem = sem, mdc95 = mdc95)
+    },
+
+    #' Calculate confidence interval for ICC
+    .calculate_icc_confidence_interval = function(icc, n) {
+      se_icc <- sqrt(2 * (1 - icc)^2 * (1 + icc)^2 / (n * (n - 1)))
+      list(
+        lower = max(0, icc - 1.96 * se_icc),
+        upper = min(1, icc + 1.96 * se_icc)
+      )
+    },
+
+    #' Interpret ICC based on Koo & Li (2016) thresholds
+    .interpret_icc = function(icc) {
+      if (icc < 0.50) "Poor"
+      else if (icc < 0.75) "Moderate"
+      else if (icc < 0.90) "Good"
+      else "Excellent"
     },
 
     # =========================================================================
     # H4: Model Comparison Private Methods
     # =========================================================================
 
+    #' Compare linear vs polynomial models for each participant
+    #' Orchestrates individual model comparison using smaller focused methods
     .compare_individual_models = function(data) {
       participants <- unique(data$id)
       results <- list()
@@ -597,56 +652,74 @@ AdvancedVelocityAnalyzer <- R6Class(
       for (pid in participants) {
         pid_data <- data[data$id == pid, ]
 
-        if (nrow(pid_data) < 4) {
+        if (!private$.has_sufficient_observations(pid_data, min_obs = 4)) {
           next
         }
 
-        # Fit models
-        model_linear <- lm(mean_velocity ~ rir, data = pid_data)
-        model_quad <- lm(mean_velocity ~ rir + I(rir^2), data = pid_data)
+        models <- private$.fit_velocity_models(pid_data)
+        metrics <- private$.calculate_model_comparison_metrics(models)
+        best_model <- private$.select_best_model(metrics)
 
-        # Only fit cubic if enough data
-        model_cubic <- NULL
-        if (nrow(pid_data) >= 6) {
-          model_cubic <- lm(mean_velocity ~ rir + I(rir^2) + I(rir^3), data = pid_data)
-        }
-
-        # Calculate metrics
-        n <- nrow(pid_data)
-        rmse_linear <- sqrt(mean(residuals(model_linear)^2))
-        rmse_quad <- sqrt(mean(residuals(model_quad)^2))
-
-        # Adjusted R-squared
-        r2_adj_linear <- summary(model_linear)$adj.r.squared
-        r2_adj_quad <- summary(model_quad)$adj.r.squared
-
-        # AIC/BIC
-        aic_linear <- AIC(model_linear)
-        aic_quad <- AIC(model_quad)
-        bic_linear <- BIC(model_linear)
-        bic_quad <- BIC(model_quad)
-
-        # Best model based on AIC
-        best_model <- if (aic_quad < aic_linear - 2) "quadratic" else "linear"
-
-        results[[pid]] <- data.frame(
-          id = pid,
-          n_obs = n,
-          r2_adj_linear = r2_adj_linear,
-          r2_adj_quad = r2_adj_quad,
-          rmse_linear = rmse_linear,
-          rmse_quad = rmse_quad,
-          aic_linear = aic_linear,
-          aic_quad = aic_quad,
-          bic_linear = bic_linear,
-          bic_quad = bic_quad,
-          delta_aic = aic_quad - aic_linear,
-          best_model = best_model,
-          stringsAsFactors = FALSE
+        results[[pid]] <- private$.build_model_comparison_result(
+          pid, nrow(pid_data), metrics, best_model
         )
       }
 
       do.call(rbind, results)
+    },
+
+    #' Check if participant has sufficient observations
+    .has_sufficient_observations = function(data, min_obs) {
+      nrow(data) >= min_obs
+    },
+
+    #' Fit linear and quadratic velocity-RIR models
+    .fit_velocity_models = function(data) {
+      list(
+        linear = lm(mean_velocity ~ rir, data = data),
+        quadratic = lm(mean_velocity ~ rir + I(rir^2), data = data)
+      )
+    },
+
+    #' Calculate comparison metrics for fitted models
+    .calculate_model_comparison_metrics = function(models) {
+      linear <- models$linear
+      quad <- models$quadratic
+
+      list(
+        rmse_linear = sqrt(mean(residuals(linear)^2)),
+        rmse_quad = sqrt(mean(residuals(quad)^2)),
+        r2_adj_linear = summary(linear)$adj.r.squared,
+        r2_adj_quad = summary(quad)$adj.r.squared,
+        aic_linear = AIC(linear),
+        aic_quad = AIC(quad),
+        bic_linear = BIC(linear),
+        bic_quad = BIC(quad)
+      )
+    },
+
+    #' Select best model based on AIC (>2 threshold per Burnham & Anderson)
+    .select_best_model = function(metrics) {
+      if (metrics$aic_quad < metrics$aic_linear - 2) "quadratic" else "linear"
+    },
+
+    #' Build result data frame for model comparison
+    .build_model_comparison_result = function(pid, n_obs, metrics, best_model) {
+      data.frame(
+        id = pid,
+        n_obs = n_obs,
+        r2_adj_linear = metrics$r2_adj_linear,
+        r2_adj_quad = metrics$r2_adj_quad,
+        rmse_linear = metrics$rmse_linear,
+        rmse_quad = metrics$rmse_quad,
+        aic_linear = metrics$aic_linear,
+        aic_quad = metrics$aic_quad,
+        bic_linear = metrics$bic_linear,
+        bic_quad = metrics$bic_quad,
+        delta_aic = metrics$aic_quad - metrics$aic_linear,
+        best_model = best_model,
+        stringsAsFactors = FALSE
+      )
     },
 
     .compare_population_models = function(data) {
