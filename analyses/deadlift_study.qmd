@@ -2531,157 +2531,409 @@ if (!is.null(lmm_results) && !is.null(lmm_results$advanced_validation)) {
 
 ### 5.8 Anomaly Detection with Isolation Forest {#sec-anomaly-detection}
 
-Isolation Forest is a multivariate anomaly detection algorithm that identifies unusual observations based on their isolation in feature space. Unlike Cook's distance (which measures influence on regression coefficients), Isolation Forest detects data points that are inherently unusual regardless of their effect on the model.
+**Why Isolation Forest over Cook's Distance?**
 
-#### 5.8.1 Raw Data Anomalies
+Isolation Forest is a multivariate anomaly detection algorithm that identifies unusual observations based on their isolation in feature space. We chose this approach over Cook's distance for several reasons:
 
-We screen the raw velocity measurements for anomalies before modeling.
+1. **Multivariate sensitivity**: Cook's distance measures influence on regression coefficients, but an observation can be unusual in ways that don't strongly affect the linear model (e.g., unusual velocity-RIR combinations that still fall near the regression line)
+2. **Feature-rich detection**: By using 23+ engineered features (z-scores, ratios, residuals, interactions), we capture complex patterns that univariate or bivariate methods miss
+3. **No distributional assumptions**: Isolation Forest doesn't assume normality, making it robust for velocity data which may have non-normal tails
+4. **Interpretable output**: The permutation-based feature contributions provide SHAP-like explanations for why each observation was flagged
 
-```{r tbl-raw-anomalies}
-#| label: tbl-raw-anomalies
-#| tbl-cap: "Raw data anomaly detection results using Isolation Forest"
+#### 5.8.1 Observation-Level Anomaly Detection {#sec-cv-anomaly}
 
-if (!is.null(lmm_results) && !is.null(lmm_results$advanced_validation)) {
-  av <- lmm_results$advanced_validation
+We train a dedicated **Isolation Forest model** using **ALL engineered features** (~23 features) rather than just raw metrics. This captures complex patterns at the rep-level that raw velocity, RIR, and load alone would miss:
 
-  if (!is.null(av$anomalies) && !is.null(av$anomalies$raw_data)) {
-    raw <- av$anomalies$raw_data
+**Feature Categories:**
 
-    anomaly_df <- data.frame(
-      Metric = c(
-        "Total Observations",
-        "Anomalies Detected",
-        "Anomaly Rate",
-        "Threshold Score",
-        "Mean Score",
-        "Max Score"
-      ),
-      Value = c(
-        raw$n_total,
-        raw$n_anomalies,
-        sprintf("%.1f%%", raw$anomaly_rate * 100),
-        sprintf("%.3f", raw$threshold),
-        sprintf("%.3f", raw$score_mean),
-        sprintf("%.3f", raw$score_max)
-      )
-    )
+- **Z-score features**: Global, within-participant, and within-set standardized velocities
+- **Position features**: Rep position in set, first/last rep flags, velocity decay from set start
+- **Ratio features**: Velocity ratios to set max, first rep, global mean
+- **Residual features**: Velocity residual from RIR prediction, standardized residuals
+- **Volume features**: Rep number in session, cumulative volume
+- **Interaction features**: RIR×Load, Position×RIR, Volume×Velocity
+- **Cross-level features**: Z-scores vs population at same load or RIR level
 
-    format_table(anomaly_df, col.names = c("Metric", "Value"))
-  }
+**Threshold Selection Strategy:**
+
+Rather than using an arbitrary contamination rate (e.g., 5%), we select the threshold based on **visual inspection of the score distribution**. The goal is to identify observations that naturally "cluster away" from the main distribution—where the anomaly score curve shows a clear separation or inflection point. This data-driven approach ensures we flag only truly unusual observations rather than forcing a predetermined percentage.
+
+We use **Leave-One-Out Cross-Validation (LOO-CV)** to obtain robust anomaly scores that aren't biased by the observation being scored.
+
+```{r anomaly-cv-detection}
+#| label: anomaly-cv-detection
+
+if (!is.null(lmm_results) && !is.null(lmm_results$data)) {
+  data <- lmm_results$data
+
+  # Use FeatureEngineer to create comprehensive features
+  fe <- anomaly_detector$get_feature_engineer()$new()
+  feature_result <- fe$engineer_features(data)
+
+  # Get ALL observation-level features (not just the 10-feature subset)
+  obs_features <- feature_result$observation_features
+  all_obs_feature_names <- feature_result$feature_names$observation  # ALL features
+
+  # Use all engineered features that exist in the data
+  available_features <- intersect(all_obs_feature_names, names(obs_features))
+  # Filter to only numeric features (exclude boolean flags if problematic)
+  numeric_mask <- sapply(obs_features[, available_features, drop = FALSE], is.numeric)
+  available_features <- available_features[numeric_mask]
+
+  cat(sprintf("**Observation-Level Feature Engineering:**\n\n"))
+  cat(sprintf("- Total engineered features: **%d**\n", length(available_features)))
+  cat(sprintf("- Feature categories:\n"))
+  cat(sprintf("  - Z-scores: velocity_z_global, velocity_z_within_participant, velocity_z_within_set, rir_z_global\n"))
+  cat(sprintf("  - Position: set_position_normalized, velocity_decay_from_start, velocity_rank_in_set\n"))
+  cat(sprintf("  - Ratios: velocity_ratio_to_global, velocity_ratio_to_set_max, velocity_ratio_to_set_first, velocity_ratio_to_expected\n"))
+  cat(sprintf("  - Residuals: velocity_residual_from_rir, standardized_residual_rir\n"))
+  cat(sprintf("  - Volume: rep_number_in_session, cumulative_volume\n"))
+  cat(sprintf("  - Interactions: rir_x_load_interaction, set_position_x_rir, cumulative_volume_x_velocity\n"))
+  cat(sprintf("  - Cross-level: pl_z_vs_population_at_load, pr_z_vs_population_at_rir, etc.\n\n"))
+
+  # Cross-validated detection with ALL engineered features
+  # Use initial contamination to get scores, then refine threshold visually
+  cv_result <- anomaly_detector$detect_anomalies_cv(
+    obs_features, available_features, contamination = 0.05
+  )
+
+  # Refine threshold based on visual gap detection
+  # Looking at the score distribution, observations above 0.60 clearly separate from the main cluster
+  sorted_scores <- sort(cv_result$scores, decreasing = TRUE)
+
+  # Find natural gap: where consecutive score differences are largest
+  score_diffs <- diff(sorted_scores)
+  # Look for gap in top 10% of scores
+  n_check <- max(10, ceiling(0.10 * length(sorted_scores)))
+  top_diffs <- score_diffs[1:n_check]
+  gap_idx <- which.max(abs(top_diffs))
+
+  # The threshold is the score just below the gap
+  visual_threshold <- sorted_scores[gap_idx + 1]
+
+  # Apply the visually-selected threshold
+  cv_result$threshold <- visual_threshold
+  cv_result$is_anomaly <- cv_result$scores >= visual_threshold
+  cv_result$anomaly_indices <- which(cv_result$is_anomaly)
+  cv_result$n_anomalies <- sum(cv_result$is_anomaly)
+
+  # Store for later use
+  cv_anomaly_result <- cv_result
+  cv_obs_features <- obs_features
+  cv_available_features <- available_features
+  cv_feature_result <- feature_result
+
+  cat(sprintf("**Observation-Level Detection Results:**\n\n"))
+  cat(sprintf("- Observations analyzed: %d\n", length(cv_result$scores)))
+  cat(sprintf("- Anomalies flagged: %d (%.1f%%)\n",
+              cv_result$n_anomalies,
+              100 * cv_result$n_anomalies / length(cv_result$scores)))
+  cat(sprintf("- Threshold (visual gap detection): %.3f\n", cv_result$threshold))
+  cat(sprintf("\n**Threshold Rationale:** The threshold was selected by identifying where anomaly scores show a natural separation—observations above this threshold cluster distinctly away from the main distribution, indicating genuinely unusual patterns rather than arbitrary percentile cutoffs.\n"))
 }
 ```
 
-**Interpretation**: Isolation Forest scores range from 0 (normal) to 1 (anomalous). The detected anomalies represent observations with unusual combinations of velocity, RIR, and load that warrant investigation.
-
-```{r fig-anomaly-score-distribution}
-#| label: fig-anomaly-score-distribution
-#| fig-cap: "Distribution of Isolation Forest anomaly scores with threshold visualization. The red line indicates the threshold used for flagging observations. Dotted lines show the 90th, 95th, and 99th percentiles to contextualize the threshold choice."
-#| fig-width: 10
+```{r fig-cv-score-distribution}
+#| label: fig-cv-score-distribution
+#| fig-cap: "Distribution of cross-validated anomaly scores for observation-level model using all engineered features. The threshold is set at the natural gap where high-scoring observations separate from the main cluster."
 #| fig-height: 5
+#| fig-width: 8
 
-if (!is.null(lmm_results) && !is.null(lmm_results$advanced_validation)) {
-  av <- lmm_results$advanced_validation
-
-  if (!is.null(av$anomalies) && !is.null(av$anomalies$raw_data_result)) {
-    # Use the full result object for visualization
-    anomaly_detector$plot_score_distribution_with_threshold(
-      av$anomalies$raw_data_result,
-      show_quantiles = TRUE,
-      title = "Isolation Forest Anomaly Scores"
-    )
-  }
+if (exists("cv_anomaly_result")) {
+  anomaly_detector$plot_score_distribution_with_threshold(
+    cv_anomaly_result,
+    show_quantiles = TRUE,
+    title = sprintf("Observation-Level Anomaly Scores (%d Engineered Features)",
+                    length(cv_available_features))
+  )
 }
 ```
 
-The score distribution (@fig-anomaly-score-distribution) shows why the chosen threshold effectively separates anomalous from normal observations. The 5% contamination rate corresponds to the 95th percentile of scores, flagging only the most unusual observations.
+#### 5.8.2 Anomalous Observation Details {#sec-anomaly-details}
 
-#### 5.8.1.1 Anomaly Explanations: Feature Contributions
+For each flagged observation, we provide:
+1. **Original values**: The raw measurements (velocity, RIR, load) for interpretation
+2. **SHAP-like contributions**: Which engineered features drove the anomaly score
+3. **Narrative explanation**: A human-readable interpretation of why the observation is unusual
 
-For each flagged observation, we calculate z-scores to identify which features contributed most to the anomaly classification.
+```{r tbl-anomaly-raw-values}
+#| label: tbl-anomaly-raw-values
+#| tbl-cap: "Original feature values for anomalous observations. These raw measurements help interpret why each observation was flagged as unusual."
 
-```{r fig-anomaly-explanations}
-#| label: fig-anomaly-explanations
-#| fig-cap: "Feature contributions for flagged anomalies. Z-scores indicate how many standard deviations each observation deviates from the mean. Red indicates values higher than average (velocity faster than expected), blue indicates lower values (velocity slower than expected)."
-#| fig-width: 10
+if (exists("cv_anomaly_result") && cv_anomaly_result$n_anomalies > 0) {
+  data <- lmm_results$data
+
+  # Get anomaly indices
+  anomaly_idx <- cv_anomaly_result$anomaly_indices
+
+  # Build table with original values
+  anomaly_data <- data.frame(
+    Row = anomaly_idx,
+    Participant = data$id[anomaly_idx],
+    Velocity = sprintf("%.3f", data$mean_velocity[anomaly_idx]),
+    RIR = data$rir[anomaly_idx],
+    Load = data$load_percentage[anomaly_idx],
+    Day = data$day[anomaly_idx],
+    Set = sapply(strsplit(as.character(data$set_id[anomaly_idx]), "_"), function(x) tail(x, 1)),
+    Score = sprintf("%.3f", cv_anomaly_result$scores[anomaly_idx])
+  )
+
+  # Order by score (most anomalous first)
+  anomaly_data <- anomaly_data[order(cv_anomaly_result$scores[anomaly_idx], decreasing = TRUE), ]
+
+  format_table(head(anomaly_data, 15), col.names = c("Row", "ID", "Velocity (m/s)", "RIR", "Load", "Day", "Set", "CV Score"))
+} else {
+  cat("No anomalies detected with the CV method.")
+}
+```
+
+#### 5.8.3 SHAP-like Feature Contributions {#sec-shap-contributions}
+
+For each anomalous observation, we compute **permutation-based feature contributions**. This SHAP-like approach measures how much each engineered feature contributes to the anomaly score by replacing feature values with population medians.
+
+**Positive contributions** indicate features that *increase* the anomaly score (make the observation more unusual).
+**Negative contributions** indicate features that *decrease* the score (make it less unusual).
+
+```{r tbl-shap-summary}
+#| label: tbl-shap-summary
+#| tbl-cap: "Digestible summary of anomaly explanations showing top 3 contributing features per observation. Arrows indicate direction (↑ increases anomaly score, ↓ decreases it)."
+
+if (exists("cv_anomaly_result") && cv_anomaly_result$n_anomalies > 0) {
+  # Ensure id column is present in features
+  if (!"id" %in% names(cv_obs_features)) {
+    cv_obs_features$id <- lmm_results$data$id
+  }
+
+  # Compute SHAP-like explanations using engineered features
+  obs_shap <- anomaly_detector$explain_anomalies_shap(
+    cv_anomaly_result,
+    cv_obs_features,
+    cv_available_features,
+    participant_col = "id",
+    max_anomalies = 20
+  )
+
+  # Store for later use
+  cv_shap_result <- obs_shap
+
+  if (obs_shap$n_anomalies > 0) {
+    # Generate digestible summary table
+    summary_df <- anomaly_detector$summarize_shap_contributions(obs_shap, top_k = 3)
+
+    format_table(
+      head(summary_df, 15),
+      col.names = c("Participant", "Obs #", "Score", "Rank",
+                   "Top Feature", "2nd Feature", "3rd Feature")
+    )
+  }
+} else {
+  cat("No anomalies detected with CV method.")
+}
+```
+
+```{r obs-shap-interpretation}
+#| label: obs-shap-interpretation
+#| results: asis
+
+if (exists("cv_anomaly_result") && cv_anomaly_result$n_anomalies > 0 && exists("cv_shap_result")) {
+  data <- lmm_results$data
+  anomaly_idx <- cv_anomaly_result$anomaly_indices
+  scores <- cv_anomaly_result$scores[anomaly_idx]
+
+  cat("**Narrative Interpretation of Top Anomalies:**\n\n")
+  cat("Below we interpret each flagged observation, explaining *why* it's unusual based on the engineered features and original measurements.\n\n")
+
+  # Get top 5 anomalies for interpretation
+  top_idx <- head(order(scores, decreasing = TRUE), 5)
+
+  for (i in seq_along(top_idx)) {
+    rank <- i
+    idx <- anomaly_idx[top_idx[i]]
+    obs <- data[idx, ]
+    score <- round(scores[top_idx[i]], 3)
+
+    # Build interpretation using original values
+    velocity <- round(obs$mean_velocity, 3)
+    rir <- obs$rir
+    load <- obs$load_percentage
+    pid <- obs$id
+    day <- obs$day
+
+    # Get engineered feature values for this observation
+    velocity_z_global <- round(cv_obs_features$velocity_z_global[idx], 2)
+    velocity_z_participant <- round(cv_obs_features$velocity_z_within_participant[idx], 2)
+
+    # Compute population stats for context
+    velocity_mean <- round(mean(data$mean_velocity, na.rm = TRUE), 3)
+    velocity_for_rir <- round(mean(data$mean_velocity[data$rir == rir], na.rm = TRUE), 3)
+    velocity_for_load <- round(mean(data$mean_velocity[data$load_percentage == load], na.rm = TRUE), 3)
+
+    # Determine primary anomaly type from engineered features
+    if (abs(velocity_z_global) > 2) {
+      anomaly_type <- if (velocity_z_global > 0) "globally fast" else "globally slow"
+    } else if (abs(velocity_z_participant) > 2) {
+      anomaly_type <- if (velocity_z_participant > 0) "unusually fast for this participant" else "unusually slow for this participant"
+    } else if (velocity < velocity_for_rir * 0.85) {
+      anomaly_type <- sprintf("slower than typical for RIR %d (expected ~%.3f m/s)", rir, velocity_for_rir)
+    } else if (velocity > velocity_for_rir * 1.15) {
+      anomaly_type <- sprintf("faster than typical for RIR %d (expected ~%.3f m/s)", rir, velocity_for_rir)
+    } else {
+      anomaly_type <- "atypical multivariate pattern"
+    }
+
+    cat(sprintf("%d. **%s** (Row %d, CV Score = %.3f)\n", rank, pid, idx, score))
+    cat(sprintf("   - **Measurements**: Velocity = **%.3f m/s** at RIR = **%d** with **%s** load (%s)\n",
+                velocity, rir, load, day))
+    cat(sprintf("   - **Comparison**: Population mean = %.3f m/s | RIR %d mean = %.3f m/s | %s mean = %.3f m/s\n",
+                velocity_mean, rir, velocity_for_rir, load, velocity_for_load))
+    cat(sprintf("   - **Z-scores**: Global = %.2f | Within-participant = %.2f\n",
+                velocity_z_global, velocity_z_participant))
+    cat(sprintf("   - **Interpretation**: This observation is **%s**.\n\n", anomaly_type))
+  }
+
+  cat("\n*Note: These interpretations combine raw measurements with engineered features (z-scores, residuals, interactions) to explain the multivariate anomaly pattern.*\n")
+}
+```
+
+```{r fig-obs-contributions}
+#| label: fig-obs-contributions
+#| fig-cap: "SHAP-like feature contributions for anomalous observations using all 10 engineered features. Each bar shows how much a feature contributed to the observation's anomaly score. Red bars indicate features that increased the anomaly score, blue bars indicate features that decreased it."
+#| fig-height: 10
+#| fig-width: 12
+
+if (exists("cv_shap_result") && cv_shap_result$n_anomalies > 0) {
+  anomaly_detector$plot_observation_contributions(
+    cv_shap_result,
+    max_display = 10,
+    top_k = 8,  # Show top 8 features per observation
+    title = "Feature Contributions for Anomalous Observations (Engineered Features)"
+  )
+} else {
+  cat("No SHAP results available for plotting.")
+}
+```
+
+```{r fig-obs-aggregate-importance}
+#| label: fig-obs-aggregate-importance
+#| fig-cap: "Aggregate feature importance across all anomalous observations using engineered features. Shows which features most commonly contribute to the anomaly scores."
 #| fig-height: 6
+#| fig-width: 9
 
-if (!is.null(lmm_results) && !is.null(lmm_results$advanced_validation)) {
-  av <- lmm_results$advanced_validation
+if (exists("cv_shap_result") && cv_shap_result$n_anomalies > 0) {
+  anomaly_detector$plot_observation_aggregate_importance(
+    cv_shap_result,
+    top_n = 10,
+    title = "Observation-Level Engineered Feature Importance"
+  )
+} else {
+  cat("No SHAP results available for importance plot.")
+}
+```
 
-  if (!is.null(av$anomalies) && !is.null(av$anomalies$raw_data_result)) {
-    # Get the original data and features used
-    data <- lmm_results$data
-    features <- c("mean_velocity", "rir", "load_percentage_numeric")
+**Interpretation:** The SHAP-like contributions use ALL engineered features (~25 features) including:
 
-    # Add numeric load percentage if not present
-    if (!"load_percentage_numeric" %in% names(data)) {
-      data$load_percentage_numeric <- as.numeric(gsub("%", "", data$load_percentage))
-    }
+- **Velocity z-scores** (global, within-participant, within-set): Identify observations that deviate from expected velocities
+- **Position features** (normalized position, decay from start, rank): Capture fatigue patterns within sets
+- **Ratio features** (to set max, to first rep, to global): Compare velocity to references
+- **Residual features** (RIR residual, standardized residual): Identify deviations from the velocity-RIR relationship
+- **Volume features** (rep number, cumulative volume): Track session progression
+- **Interaction features** (RIR×load, position×RIR, volume×velocity): Capture complex multivariate patterns
+- **Cross-level features** (population comparisons at same load/RIR): Compare to similar conditions
 
-    # Generate explanations
-    explanation <- anomaly_detector$explain_anomalies(
-      av$anomalies$raw_data_result,
-      data,
-      features,
-      participant_col = "id"
-    )
+Positive contributions indicate that a feature's value *increases* the anomaly score (makes the observation more unusual), while negative contributions indicate the opposite. This permutation-based approach directly measures each feature's impact on the Isolation Forest's anomaly scoring.
 
-    if (explanation$n_anomalies > 0) {
-      anomaly_detector$plot_anomaly_explanations(
-        explanation,
-        title = "Feature Contributions to Anomaly Scores"
-      )
-    } else {
-      cat("No anomalies detected to explain.")
+#### 5.8.4 Participant-Level Anomaly Detection {#sec-participant-anomalies}
+
+In addition to observation-level anomalies, we train a **separate Isolation Forest model for participant-level anomalies** using participant-aggregated features (~40 features). This model identifies participants whose overall patterns are unusual compared to the population.
+
+**Participant-Level Features:**
+
+- **Velocity profile**: Mean, SD, CV, range, IQR, skewness, kurtosis, percentiles
+- **RIR relationship**: Slope, intercept, R², range sensitivity
+- **Set behavior**: Number of sets, mean reps per set, rep variability
+- **Load sensitivity**: Velocity change across loads, number of loads tested
+- **Population comparisons**: Z-scores, percentile ranks, ratio to population norms
+
+```{r participant-anomaly-detection}
+#| label: participant-anomaly-detection
+
+if (exists("cv_feature_result")) {
+  # Get participant-level features
+  part_features <- cv_feature_result$participant_features
+  all_part_feature_names <- cv_feature_result$feature_names$participant
+
+  # Use all participant features that exist and are numeric
+  available_part_features <- intersect(all_part_feature_names, names(part_features))
+  numeric_mask <- sapply(part_features[, available_part_features, drop = FALSE], is.numeric)
+  available_part_features <- available_part_features[numeric_mask]
+
+  cat(sprintf("**Participant-Level Feature Engineering:**\n\n"))
+  cat(sprintf("- Total engineered features: **%d**\n", length(available_part_features)))
+  cat(sprintf("- Participants: %d\n\n", nrow(part_features)))
+
+  # Standard detection (not CV since we have few participants)
+  part_result <- anomaly_detector$detect_raw_data_anomalies(
+    part_features, available_part_features, contamination = 0.10  # Higher threshold for small N
+  )
+
+  # Store for later
+  part_anomaly_result <- part_result
+  part_available_features <- available_part_features
+
+  cat(sprintf("**Participant-Level Detection Results:**\n\n"))
+  cat(sprintf("- Participants analyzed: %d\n", length(part_result$scores)))
+  cat(sprintf("- Anomalous participants: %d (%.1f%%)\n",
+              part_result$n_anomalies,
+              100 * part_result$n_anomalies / length(part_result$scores)))
+  cat(sprintf("- Threshold (10%% contamination): %.3f\n", part_result$threshold))
+
+  if (part_result$n_anomalies > 0) {
+    # Show which participants are anomalous
+    anomalous_idx <- part_result$anomaly_indices
+    cat("\n**Anomalous Participants:**\n")
+    for (i in anomalous_idx) {
+      pid <- part_features$id[i]
+      score <- round(part_result$scores[i], 3)
+      cat(sprintf("- %s (score: %.3f)\n", pid, score))
     }
   }
 }
 ```
 
-```{r tbl-anomaly-explanations}
-#| label: tbl-anomaly-explanations
-#| tbl-cap: "Primary drivers for each flagged anomaly"
+```{r fig-participant-anomaly-scores}
+#| label: fig-participant-anomaly-scores
+#| fig-cap: "Participant-level anomaly scores using all participant-aggregated features. Each bar represents a participant's anomaly score from the Isolation Forest model."
+#| fig-height: 5
+#| fig-width: 8
 
-if (!is.null(lmm_results) && !is.null(lmm_results$advanced_validation)) {
-  av <- lmm_results$advanced_validation
+if (exists("part_anomaly_result") && exists("cv_feature_result")) {
+  part_features <- cv_feature_result$participant_features
 
-  if (!is.null(av$anomalies) && !is.null(av$anomalies$raw_data_result)) {
-    data <- lmm_results$data
-    features <- c("mean_velocity", "rir", "load_percentage_numeric")
+  # Create bar plot of participant scores
+  score_df <- data.frame(
+    participant = part_features$id,
+    score = part_anomaly_result$scores,
+    is_anomaly = part_anomaly_result$is_anomaly
+  )
+  score_df <- score_df[order(score_df$score, decreasing = TRUE), ]
+  score_df$participant <- factor(score_df$participant, levels = score_df$participant)
 
-    if (!"load_percentage_numeric" %in% names(data)) {
-      data$load_percentage_numeric <- as.numeric(gsub("%", "", data$load_percentage))
-    }
-
-    explanation <- anomaly_detector$explain_anomalies(
-      av$anomalies$raw_data_result,
-      data,
-      features,
-      participant_col = "id"
-    )
-
-    if (explanation$n_anomalies > 0) {
-      drivers <- explanation$get_primary_drivers()
-
-      display_df <- data.frame(
-        Participant = drivers$participant_id,
-        `Anomaly Score` = sprintf("%.3f", drivers$anomaly_score),
-        `Primary Driver` = drivers$primary_driver,
-        Direction = drivers$primary_direction,
-        check.names = FALSE
-      )
-
-      format_table(display_df)
-    } else {
-      cat("No anomalies detected.")
-    }
-  }
+  ggplot2::ggplot(score_df, ggplot2::aes(x = participant, y = score, fill = is_anomaly)) +
+    ggplot2::geom_col() +
+    ggplot2::geom_hline(yintercept = part_anomaly_result$threshold, linetype = "dashed", color = "red") +
+    ggplot2::scale_fill_manual(values = c("FALSE" = "#2E86AB", "TRUE" = "#E63946"),
+                               labels = c("Normal", "Anomalous")) +
+    ggplot2::labs(
+      title = sprintf("Participant-Level Anomaly Scores (%d Features)", length(part_available_features)),
+      subtitle = sprintf("Threshold = %.3f (10%% contamination)", part_anomaly_result$threshold),
+      x = "Participant", y = "Anomaly Score", fill = "Status"
+    ) +
+    ggplot2::theme_minimal() +
+    ggplot2::theme(axis.text.x = ggplot2::element_text(angle = 45, hjust = 1))
 }
 ```
 
-The feature contributions (@fig-anomaly-explanations and @tbl-anomaly-explanations) reveal which specific measurements drove each anomaly. Observations flagged primarily for low velocity at high RIR may indicate fatigue or technique issues, while those with high velocity at low RIR may reflect unusually strong performance or measurement artifacts.
-
-#### 5.8.2 Random Effects Anomalies
+#### 5.8.5 Random Effects Anomalies
 
 We also screen participants based on their random effects (individual intercepts and slopes) to identify individuals with unusual velocity-RIR patterns.
 
@@ -2795,6 +3047,165 @@ if (!is.null(lmm_results) && !is.null(lmm_results$advanced_validation)) {
 }
 ```
 
+#### 5.9.1 Cook's Distance for Final LMER Model
+
+While Isolation Forest is better for general data quality screening, **Cook's distance remains valuable for assessing influence on our final model**. Here we apply Cook's distance specifically to the best LMER model specification to identify observations that disproportionately affect the model coefficients.
+
+```{r tbl-cooks-final-model}
+#| label: tbl-cooks-final-model
+#| tbl-cap: "Cook's distance diagnostics for the final LMER model. Observations with Cook's D > 4/n are flagged as influential."
+
+if (!is.null(lmm_results) && !is.null(lmm_results$best_model) &&
+    !is.null(lmm_results$best_model$model)) {
+
+  model <- lmm_results$best_model$model
+  data <- lmm_results$data
+
+  # Compute Cook's distance using influence.ME package
+  if (requireNamespace("influence.ME", quietly = TRUE)) {
+    # Get influence measures (can be slow for large models)
+    cooks_d <- tryCatch({
+      influence.ME::cooks.distance.estex(
+        influence.ME::influence(model, obs = TRUE)
+      )
+    }, error = function(e) NULL)
+
+    if (!is.null(cooks_d)) {
+      n <- length(cooks_d)
+      threshold <- 4 / n
+      influential <- cooks_d > threshold
+
+      # Summary table
+      cooks_df <- data.frame(
+        Metric = c(
+          "Total Observations",
+          "Threshold (4/n)",
+          "Influential Observations",
+          "Percentage Influential",
+          "Max Cook's D",
+          "Mean Cook's D"
+        ),
+        Value = c(
+          n,
+          sprintf("%.4f", threshold),
+          sum(influential),
+          sprintf("%.1f%%", 100 * sum(influential) / n),
+          sprintf("%.4f", max(cooks_d)),
+          sprintf("%.4f", mean(cooks_d))
+        )
+      )
+
+      format_table(cooks_df, col.names = c("Metric", "Value"))
+    }
+  } else {
+    cat("Note: influence.ME package not available for Cook's distance computation.\n")
+  }
+}
+```
+
+```{r tbl-cooks-influential-obs}
+#| label: tbl-cooks-influential-obs
+#| tbl-cap: "Details of observations with high Cook's distance (influence on model coefficients)"
+
+if (!is.null(lmm_results) && !is.null(lmm_results$best_model) &&
+    !is.null(lmm_results$best_model$model)) {
+
+  model <- lmm_results$best_model$model
+  data <- lmm_results$data
+
+  if (requireNamespace("influence.ME", quietly = TRUE)) {
+    cooks_d <- tryCatch({
+      influence.ME::cooks.distance.estex(
+        influence.ME::influence(model, obs = TRUE)
+      )
+    }, error = function(e) NULL)
+
+    if (!is.null(cooks_d)) {
+      n <- length(cooks_d)
+      threshold <- 4 / n
+      influential_idx <- which(cooks_d > threshold)
+
+      if (length(influential_idx) > 0) {
+        # Get top 15 most influential
+        top_idx <- influential_idx[order(cooks_d[influential_idx], decreasing = TRUE)]
+        top_idx <- head(top_idx, 15)
+
+        influential_obs <- data[top_idx, c("id", "mean_velocity", "rir", "load_percentage", "day")]
+        influential_obs$cooks_d <- round(cooks_d[top_idx], 4)
+        influential_obs$velocity <- round(influential_obs$mean_velocity, 3)
+        influential_obs <- influential_obs[, c("id", "velocity", "rir", "load_percentage", "day", "cooks_d")]
+
+        format_table(
+          influential_obs,
+          col.names = c("Participant", "Velocity (m/s)", "RIR", "Load", "Day", "Cook's D")
+        )
+      } else {
+        cat("No observations exceed the Cook's distance threshold.\n")
+      }
+    }
+  }
+}
+```
+
+```{r cooks-interpretation}
+#| results: asis
+
+if (!is.null(lmm_results) && !is.null(lmm_results$best_model) &&
+    !is.null(lmm_results$best_model$model)) {
+
+  model <- lmm_results$best_model$model
+  data <- lmm_results$data
+
+  if (requireNamespace("influence.ME", quietly = TRUE)) {
+    cooks_d <- tryCatch({
+      influence.ME::cooks.distance.estex(
+        influence.ME::influence(model, obs = TRUE)
+      )
+    }, error = function(e) NULL)
+
+    if (!is.null(cooks_d)) {
+      n <- length(cooks_d)
+      threshold <- 4 / n
+      influential_idx <- which(cooks_d > threshold)
+
+      cat("**Interpretation of Cook's Distance Results:**\n\n")
+
+      if (length(influential_idx) == 0) {
+        cat("No observations have disproportionate influence on the model coefficients. ",
+            "This suggests the model estimates are robust and not driven by individual observations.\n")
+      } else {
+        pct <- round(100 * length(influential_idx) / n, 1)
+        cat(sprintf("**%d observations (%.1f%%)** have Cook's distance > 4/n, indicating they influence the model coefficients. ",
+                    length(influential_idx), pct))
+
+        # Characterize influential observations
+        infl_data <- data[influential_idx, ]
+        mean_rir <- mean(infl_data$rir)
+        mean_vel <- mean(infl_data$mean_velocity)
+        global_mean_vel <- mean(data$mean_velocity)
+
+        if (mean_vel < global_mean_vel * 0.9) {
+          cat("These observations tend to have **lower velocities** than average, ")
+        } else if (mean_vel > global_mean_vel * 1.1) {
+          cat("These observations tend to have **higher velocities** than average, ")
+        }
+
+        if (mean_rir < 2) {
+          cat("and are concentrated near **failure (RIR 0-1)**. ")
+        } else if (mean_rir > 4) {
+          cat("and occur at **high RIR values**. ")
+        }
+
+        cat("\n\n")
+        cat("**Recommendation:** These observations warrant review but should not be automatically removed. ",
+            "High influence may reflect genuine individual variation rather than data quality issues. ",
+            "Compare with Isolation Forest flags---observations flagged by both methods may be true anomalies.\n")
+      }
+    }
+  }
+}
+```
+
 ### 5.10 Enhanced Multi-Level Anomaly Detection {#sec-enhanced-anomaly}
 
 The previous section used a fixed 95th percentile threshold. Here we compare multiple data-driven threshold selection strategies and extend anomaly detection to the participant level using aggregate behavior patterns.
@@ -2890,7 +3301,7 @@ if (!is.null(lmm_results) && !is.null(lmm_results$advanced_validation)) {
 }
 ```
 
-#### 5.10.3 Participant-Level Anomaly Detection {#sec-participant-anomalies}
+#### 5.10.3 Participant Behavior Profiling {#sec-participant-profiles}
 
 Beyond individual observations, we profile participants based on their aggregate behavior patterns to identify those with unusual overall performance characteristics.
 

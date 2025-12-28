@@ -34,12 +34,14 @@ box::use(
   isotree[isolation.forest, predict.isolation_forest],
   ggplot2[
     ggplot, aes, geom_histogram, geom_vline, geom_point, geom_segment,
-    geom_hline, geom_bar, geom_text, geom_tile, labs, theme_minimal, theme,
-    element_text, element_blank, scale_fill_manual, scale_color_manual,
-    scale_fill_gradient2, after_stat, coord_flip, facet_wrap, position_dodge
+    geom_hline, geom_bar, geom_text, geom_tile, geom_col, geom_abline,
+    labs, theme_minimal, theme, element_text, element_blank,
+    scale_fill_manual, scale_color_manual, scale_fill_gradient2,
+    after_stat, coord_flip, facet_wrap, position_dodge
   ],
   dplyr[mutate, arrange, group_by, summarize, ungroup, n, .data, filter, bind_rows],
-  stats[predict, setNames, quantile, sd],
+  stats[predict, setNames, quantile, sd, median, aggregate],
+  utils[head],
   tidyr[pivot_longer],
   ./threshold_selector[ThresholdSelector, ThresholdStrategy],
   ./feature_engineer[FeatureEngineer],
@@ -211,6 +213,127 @@ FeatureContributionResult <- R6Class(
         features_used = self$feature_names,
         primary_driver_counts = as.list(driver_counts),
         most_common_driver = names(driver_counts)[which.max(driver_counts)]
+      )
+    }
+  )
+)
+
+#' SHAP-like Contribution Result Value Object
+#'
+#' Stores permutation-based feature contributions for anomalous observations.
+#' Uses Isolation Forest perturbation to explain why each observation was flagged.
+#'
+#' @export
+ShapContributionResult <- R6Class(
+  classname = "ShapContributionResult",
+  cloneable = FALSE,
+
+  public = list(
+    #' @field contributions List of named vectors (one per anomaly)
+    contributions = NULL,
+    #' @field feature_names Character vector of feature names used
+    feature_names = NULL,
+    #' @field anomaly_indices Integer vector of anomaly row indices
+    anomaly_indices = NULL,
+    #' @field anomaly_scores Numeric vector of anomaly scores
+    anomaly_scores = NULL,
+    #' @field participant_ids Character vector of participant IDs (if available)
+    participant_ids = NULL,
+    #' @field threshold Threshold used for flagging
+    threshold = NULL,
+    #' @field n_anomalies Number of anomalies explained
+    n_anomalies = NULL,
+
+    #' @description Create ShapContributionResult
+    #' @param contributions List of named numeric vectors
+    #' @param feature_names Character vector of feature names
+    #' @param anomaly_indices Integer vector of row indices
+    #' @param anomaly_scores Numeric vector of scores
+    #' @param participant_ids Character vector of participant IDs
+    #' @param threshold Numeric threshold value
+    initialize = function(contributions, feature_names, anomaly_indices,
+                          anomaly_scores, participant_ids, threshold) {
+      self$contributions <- contributions
+      self$feature_names <- feature_names
+      self$anomaly_indices <- anomaly_indices
+      self$anomaly_scores <- anomaly_scores
+      self$participant_ids <- participant_ids
+      self$threshold <- threshold
+      self$n_anomalies <- length(contributions)
+    },
+
+    #' @description Get top K contributing features for a specific anomaly
+    #' @param idx Position in the anomaly list (1-based)
+    #' @param k Number of top features to return
+    #' @return Data frame with feature, contribution columns
+    get_top_contributors = function(idx, k = 5) {
+      if (idx < 1 || idx > self$n_anomalies) {
+        stop("Index out of range")
+      }
+
+      contrib <- self$contributions[[idx]]
+      sorted_idx <- order(abs(contrib), decreasing = TRUE)
+      top_idx <- head(sorted_idx, k)
+
+      data.frame(
+        feature = names(contrib)[top_idx],
+        contribution = contrib[top_idx],
+        stringsAsFactors = FALSE
+      )
+    },
+
+    #' @description Generate explanation text for all anomalies
+    #' @param k Number of features to include per explanation
+    #' @return Character vector of explanations
+    generate_explanations = function(k = 3) {
+      explanations <- vapply(seq_len(self$n_anomalies), function(i) {
+        top <- self$get_top_contributors(i, k)
+        parts <- vapply(seq_len(nrow(top)), function(j) {
+          direction <- if (top$contribution[j] > 0) "increases" else "decreases"
+          sprintf("%s %s score by %.3f", top$feature[j], direction, abs(top$contribution[j]))
+        }, character(1))
+
+        pid <- if (!is.null(self$participant_ids)) self$participant_ids[i] else sprintf("Obs %d", self$anomaly_indices[i])
+        sprintf("%s flagged: %s", pid, paste(parts, collapse = "; "))
+      }, character(1))
+
+      explanations
+    },
+
+    #' @description Get aggregate feature importance across all anomalies
+    #' @return Data frame with feature and mean_abs_contribution
+    get_aggregate_importance = function() {
+      if (self$n_anomalies == 0) {
+        return(data.frame(feature = character(), mean_abs_contribution = numeric()))
+      }
+
+      # Combine all contributions
+      all_contrib <- do.call(rbind, lapply(seq_len(self$n_anomalies), function(i) {
+        data.frame(
+          feature = names(self$contributions[[i]]),
+          contribution = abs(self$contributions[[i]]),
+          stringsAsFactors = FALSE
+        )
+      }))
+
+      # Aggregate by feature
+      agg <- aggregate(contribution ~ feature, data = all_contrib, FUN = mean)
+      names(agg)[2] <- "mean_abs_contribution"
+      agg <- agg[order(agg$mean_abs_contribution, decreasing = TRUE), ]
+      rownames(agg) <- NULL
+      agg
+    },
+
+    #' @description Summary of SHAP contributions
+    #' @return Named list with summary statistics
+    summarize = function() {
+      agg <- self$get_aggregate_importance()
+      list(
+        n_anomalies = self$n_anomalies,
+        features_used = self$feature_names,
+        threshold = self$threshold,
+        top_features = if (nrow(agg) > 0) head(agg$feature, 5) else character(),
+        anomaly_indices = self$anomaly_indices
       )
     }
   )
@@ -610,6 +733,201 @@ AnomalyDetector <- R6Class(
       FeatureContributionResult$new(contributions, features)
     },
 
+    #' @description Explain anomalies using SHAP-like permutation contributions
+    #'
+    #' Computes feature contributions for each anomalous observation using
+    #' permutation-based importance. For each feature, replaces its value with
+    #' the population median and measures the change in anomaly score.
+    #'
+    #' @param anomaly_result AnomalyResult object from detect_raw_data_anomalies
+    #' @param data Original data frame used for detection
+    #' @param features Character vector of features used in detection
+    #' @param participant_col Optional column name for participant ID
+    #' @param max_anomalies Maximum anomalies to explain (default: 50)
+    #' @return ShapContributionResult object
+    explain_anomalies_shap = function(anomaly_result, data, features,
+                                       participant_col = "id", max_anomalies = 50) {
+      stopifnot(
+        "anomaly_result must be AnomalyResult" = inherits(anomaly_result, "AnomalyResult"),
+        "data must be a data frame" = is.data.frame(data),
+        "features must be character" = is.character(features),
+        "all features must exist in data" = all(features %in% names(data))
+      )
+
+      # Get indices of flagged anomalies
+      anomaly_indices <- anomaly_result$anomaly_indices
+
+      if (length(anomaly_indices) == 0) {
+        return(ShapContributionResult$new(
+          contributions = list(),
+          feature_names = features,
+          anomaly_indices = integer(),
+          anomaly_scores = numeric(),
+          participant_ids = character(),
+          threshold = anomaly_result$threshold
+        ))
+      }
+
+      # Limit to max_anomalies (sorted by score)
+      if (length(anomaly_indices) > max_anomalies) {
+        scores_at_indices <- anomaly_result$scores[anomaly_indices]
+        top_idx <- order(scores_at_indices, decreasing = TRUE)[seq_len(max_anomalies)]
+        anomaly_indices <- anomaly_indices[top_idx]
+      }
+
+      # Extract feature matrix
+      feature_matrix <- as.matrix(data[, features, drop = FALSE])
+
+      # Handle missing values with median imputation
+      for (j in seq_len(ncol(feature_matrix))) {
+        na_idx <- is.na(feature_matrix[, j])
+        if (any(na_idx)) {
+          feature_matrix[na_idx, j] <- median(feature_matrix[!na_idx, j], na.rm = TRUE)
+        }
+      }
+
+      # Fit Isolation Forest model
+      iso_model <- private$.fit_model(feature_matrix)
+
+      # Get baseline scores for all data
+      baseline_scores <- predict(iso_model, feature_matrix)
+
+      # Compute median for each feature (baseline for perturbation)
+      medians <- apply(feature_matrix, 2, median, na.rm = TRUE)
+
+      # Compute contributions for each anomaly
+      contributions <- lapply(anomaly_indices, function(idx) {
+        private$.compute_observation_contribution(
+          idx, feature_matrix, features, iso_model, baseline_scores[idx], medians
+        )
+      })
+
+      # Extract participant IDs
+      participant_ids <- if (participant_col %in% names(data)) {
+        as.character(data[anomaly_indices, participant_col])
+      } else {
+        sprintf("Obs %d", anomaly_indices)
+      }
+
+      ShapContributionResult$new(
+        contributions = contributions,
+        feature_names = features,
+        anomaly_indices = anomaly_indices,
+        anomaly_scores = anomaly_result$scores[anomaly_indices],
+        participant_ids = participant_ids,
+        threshold = anomaly_result$threshold
+      )
+    },
+
+    #' @description Plot SHAP-like contributions for anomalous observations
+    #'
+    #' Creates a faceted bar chart showing feature contributions for each anomaly.
+    #'
+    #' @param shap_result ShapContributionResult object
+    #' @param max_display Maximum number of anomalies to display (default: 8)
+    #' @param top_k Number of features per anomaly (default: 5)
+    #' @param title Plot title
+    #' @return ggplot object
+    plot_observation_contributions = function(shap_result, max_display = 8,
+                                               top_k = 5, title = "Observation Feature Contributions") {
+      stopifnot(
+        "shap_result must be ShapContributionResult" =
+          inherits(shap_result, "ShapContributionResult")
+      )
+
+      if (shap_result$n_anomalies == 0) {
+        message("No anomalies to plot")
+        return(NULL)
+      }
+
+      # Limit to max_display
+      n_to_show <- min(shap_result$n_anomalies, max_display)
+
+      # Build plot data
+      plot_data <- do.call(rbind, lapply(seq_len(n_to_show), function(i) {
+        top <- shap_result$get_top_contributors(i, top_k)
+        top$participant_id <- shap_result$participant_ids[i]
+        top$anomaly_score <- shap_result$anomaly_scores[i]
+        top$obs_idx <- shap_result$anomaly_indices[i]
+        top
+      }))
+
+      # Create label with participant ID and score
+      plot_data$label <- sprintf("%s (score: %.2f)",
+                                  plot_data$participant_id, plot_data$anomaly_score)
+
+      # Order features within each facet by absolute contribution
+      # Use unique() to avoid duplicate factor levels
+      plot_data <- plot_data |>
+        group_by(.data$label) |>
+        mutate(feature = factor(.data$feature,
+                                levels = unique(.data$feature[order(abs(.data$contribution))]))) |>
+        ungroup()
+
+      ggplot(plot_data, aes(x = .data$feature, y = .data$contribution,
+                            fill = .data$contribution > 0)) +
+        geom_col(width = 0.7) +
+        geom_hline(yintercept = 0, color = "gray50", linewidth = 0.3) +
+        coord_flip() +
+        facet_wrap(~ .data$label, scales = "free_y", ncol = 2) +
+        scale_fill_manual(
+          values = c("TRUE" = "#E63946", "FALSE" = "#2E86AB"),
+          labels = c("TRUE" = "Increases score", "FALSE" = "Decreases score"),
+          name = "Direction"
+        ) +
+        labs(
+          title = title,
+          subtitle = sprintf("Top %d features per observation | Threshold: %.3f",
+                            top_k, shap_result$threshold),
+          x = NULL,
+          y = "Contribution to Anomaly Score"
+        ) +
+        theme_minimal(base_size = 10) +
+        theme(
+          plot.title = element_text(face = "bold"),
+          strip.text = element_text(size = 8),
+          legend.position = "bottom"
+        )
+    },
+
+    #' @description Plot aggregate feature importance for observations
+    #'
+    #' Shows mean absolute contribution across all anomalous observations.
+    #'
+    #' @param shap_result ShapContributionResult object
+    #' @param top_n Number of top features to show (default: 10)
+    #' @param title Plot title
+    #' @return ggplot object
+    plot_observation_aggregate_importance = function(shap_result, top_n = 10,
+                                                      title = "Observation-Level Feature Importance") {
+      stopifnot(
+        "shap_result must be ShapContributionResult" =
+          inherits(shap_result, "ShapContributionResult")
+      )
+
+      if (shap_result$n_anomalies == 0) {
+        message("No anomalies to plot")
+        return(NULL)
+      }
+
+      agg <- shap_result$get_aggregate_importance()
+      agg <- head(agg, top_n)
+      agg$feature <- factor(agg$feature, levels = rev(agg$feature))
+
+      ggplot(agg, aes(x = .data$feature, y = .data$mean_abs_contribution)) +
+        geom_col(fill = "#2E86AB", width = 0.7) +
+        coord_flip() +
+        labs(
+          title = title,
+          subtitle = sprintf("Mean |contribution| across %d anomalous observations",
+                            shap_result$n_anomalies),
+          x = NULL,
+          y = "Mean Absolute Contribution"
+        ) +
+        theme_minimal(base_size = 11) +
+        theme(plot.title = element_text(face = "bold"))
+    },
+
     #' @description Plot anomaly explanations as heatmap
     #'
     #' Shows z-scores for each feature and flagged observation.
@@ -854,6 +1172,150 @@ AnomalyDetector <- R6Class(
     compare_threshold_strategies = function(scores) {
       selector <- ThresholdSelector$new()
       selector$compare_strategies(scores)
+    },
+
+    #' @description Detect anomalies using Leave-One-Out Cross-Validation
+    #'
+    #' For each observation, fit the Isolation Forest on all other observations
+    #' and score the held-out observation. This avoids overfitting where an
+    #' observation influences its own anomaly score.
+    #'
+    #' @param data Data frame with numeric features
+    #' @param features Character vector of column names to use
+    #' @param contamination Expected proportion of anomalies (default: 0.05)
+    #' @return AnomalyResult object with CV-based scores
+    detect_anomalies_cv = function(data, features, contamination = 0.05) {
+      stopifnot(
+        "data must be a data frame" = is.data.frame(data),
+        "features must be character vector" = is.character(features),
+        "all features must exist in data" = all(features %in% names(data))
+      )
+
+      # Extract feature matrix
+      feature_matrix <- as.matrix(data[, features, drop = FALSE])
+      n <- nrow(feature_matrix)
+
+      # Handle missing values
+      for (j in seq_len(ncol(feature_matrix))) {
+        na_idx <- is.na(feature_matrix[, j])
+        if (any(na_idx)) {
+          feature_matrix[na_idx, j] <- median(feature_matrix[!na_idx, j], na.rm = TRUE)
+        }
+      }
+
+      # Leave-One-Out CV scoring
+      cv_scores <- numeric(n)
+      for (i in seq_len(n)) {
+        train_data <- feature_matrix[-i, , drop = FALSE]
+        test_obs <- feature_matrix[i, , drop = FALSE]
+
+        # Fit on training, score test
+        model <- private$.fit_model(train_data)
+        cv_scores[i] <- predict(model, test_obs)
+      }
+
+      # Calculate threshold
+      threshold <- private$.calculate_threshold(cv_scores, contamination)
+
+      AnomalyResult$new(cv_scores, threshold, contamination)
+    },
+
+    #' @description Generate enhanced summary table for SHAP contributions
+    #'
+    #' Creates a digestible summary showing top K features per anomaly
+    #' with their contributions and directions.
+    #'
+    #' @param shap_result ShapContributionResult object
+    #' @param top_k Number of features to show per anomaly (default: 3)
+    #' @return Data frame with enhanced summaries
+    summarize_shap_contributions = function(shap_result, top_k = 3) {
+      stopifnot(
+        "shap_result must be ShapContributionResult" =
+          inherits(shap_result, "ShapContributionResult")
+      )
+
+      if (shap_result$n_anomalies == 0) {
+        return(data.frame())
+      }
+
+      # Build summary for each anomaly
+      summaries <- lapply(seq_len(shap_result$n_anomalies), function(i) {
+        top <- shap_result$get_top_contributors(i, top_k)
+
+        # Format each feature contribution
+        contrib_strings <- vapply(seq_len(nrow(top)), function(j) {
+          direction <- if (top$contribution[j] > 0) "↑" else "↓"
+          sprintf("%s %s%.3f", top$feature[j], direction, abs(top$contribution[j]))
+        }, character(1))
+
+        data.frame(
+          participant = shap_result$participant_ids[i],
+          observation = shap_result$anomaly_indices[i],
+          score = round(shap_result$anomaly_scores[i], 3),
+          rank = i,
+          feature_1 = if (nrow(top) >= 1) contrib_strings[1] else NA_character_,
+          feature_2 = if (nrow(top) >= 2) contrib_strings[2] else NA_character_,
+          feature_3 = if (nrow(top) >= 3) contrib_strings[3] else NA_character_,
+          stringsAsFactors = FALSE
+        )
+      })
+
+      do.call(rbind, summaries)
+    },
+
+    #' @description Plot comparison of anomaly score distributions with/without CV
+    #'
+    #' Helps visualize whether CV-based scores differ substantially from
+    #' standard scores (indicating potential overfitting).
+    #'
+    #' @param standard_result AnomalyResult from standard detection
+    #' @param cv_result AnomalyResult from CV detection
+    #' @param title Plot title
+    #' @return ggplot object
+    plot_cv_comparison = function(standard_result, cv_result,
+                                   title = "Standard vs. Cross-Validated Anomaly Scores") {
+      stopifnot(
+        "standard_result must be AnomalyResult" = inherits(standard_result, "AnomalyResult"),
+        "cv_result must be AnomalyResult" = inherits(cv_result, "AnomalyResult")
+      )
+
+      df <- data.frame(
+        standard = standard_result$scores,
+        cv = cv_result$scores,
+        standard_anomaly = standard_result$is_anomaly,
+        cv_anomaly = cv_result$is_anomaly
+      )
+
+      # Classify agreement
+      df$agreement <- ifelse(df$standard_anomaly & df$cv_anomaly, "Both flag",
+                      ifelse(df$standard_anomaly & !df$cv_anomaly, "Only standard",
+                      ifelse(!df$standard_anomaly & df$cv_anomaly, "Only CV", "Neither")))
+      df$agreement <- factor(df$agreement, levels = c("Neither", "Only standard", "Only CV", "Both flag"))
+
+      ggplot(df, aes(x = .data$standard, y = .data$cv, color = .data$agreement)) +
+        geom_point(alpha = 0.7, size = 2) +
+        geom_abline(slope = 1, intercept = 0, linetype = "dashed", color = "gray50") +
+        geom_hline(yintercept = cv_result$threshold, linetype = "dotted", color = "#E63946") +
+        geom_vline(xintercept = standard_result$threshold, linetype = "dotted", color = "#2E86AB") +
+        scale_color_manual(values = c(
+          "Neither" = "gray70",
+          "Only standard" = "#2E86AB",
+          "Only CV" = "#F77F00",
+          "Both flag" = "#E63946"
+        )) +
+        labs(
+          title = title,
+          subtitle = sprintf("Standard flags %d, CV flags %d | Blue line = std threshold, Red = CV threshold",
+                            sum(standard_result$is_anomaly), sum(cv_result$is_anomaly)),
+          x = "Standard Anomaly Score",
+          y = "CV Anomaly Score",
+          color = "Classification"
+        ) +
+        theme_minimal(base_size = 11) +
+        theme(
+          plot.title = element_text(face = "bold"),
+          legend.position = "bottom"
+        )
     }
   ),
 
@@ -918,6 +1380,54 @@ AnomalyDetector <- R6Class(
       }
 
       "Methods show partial agreement"
+    },
+
+    #' @description Fit Isolation Forest and return the model
+    #' @param feature_matrix Numeric matrix
+    #' @return Fitted isolation.forest model
+    .fit_model = function(feature_matrix) {
+      # Handle single-column case
+      if (ncol(feature_matrix) == 1) {
+        feature_matrix <- cbind(feature_matrix, feature_matrix)
+      }
+
+      isolation.forest(
+        feature_matrix,
+        ntrees = private$.n_trees,
+        seed = private$.random_state,
+        nthreads = 1
+      )
+    },
+
+    #' @description Compute SHAP-like contribution for single observation
+    #' @param idx Row index of observation
+    #' @param feature_matrix Full feature matrix
+    #' @param feature_names Character vector of feature names
+    #' @param iso_model Fitted Isolation Forest model
+    #' @param baseline_score Baseline anomaly score for this observation
+    #' @param medians Population medians for each feature
+    #' @return Named numeric vector of contributions
+    .compute_observation_contribution = function(idx, feature_matrix, feature_names,
+                                                   iso_model, baseline_score, medians) {
+      n_features <- length(feature_names)
+      contributions <- numeric(n_features)
+      names(contributions) <- feature_names
+
+      for (j in seq_len(n_features)) {
+        # Create perturbed observation (replace feature j with median)
+        perturbed <- feature_matrix[idx, , drop = FALSE]
+        perturbed[1, j] <- medians[j]
+
+        # Get perturbed score
+        perturbed_score <- predict(iso_model, perturbed)
+
+        # Contribution = how much this feature adds to the anomaly score
+        # Positive = feature increases anomaly score
+        # Negative = feature decreases anomaly score
+        contributions[j] <- baseline_score - perturbed_score
+      }
+
+      contributions
     }
   )
 )
