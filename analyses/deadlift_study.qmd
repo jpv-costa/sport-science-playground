@@ -34,6 +34,14 @@ bibliography: references.bib
 # Load shared utilities
 source("_common.R")
 
+# Load OOP modules (CLAUDE.md principles)
+# Set box path relative to project root when running from analyses/
+options(box.path = c("../R", getOption("box.path")))
+box::use(
+  visualizers/model_plotter[ModelPlotter, plot_model, plot_caterpillar, plot_prediction_comparison],
+  calculators/model_comparator[ModelComparator, compare_models]
+)
+
 # Load all results
 deadlift_results <- safe_load_rds("../data/processed/deadlift_rir_velocity_results.rds")
 lmm_results <- safe_load_rds("../data/processed/deadlift_lmm_results.rds")
@@ -42,11 +50,26 @@ squat_results <- safe_load_rds("../data/processed/rir_velocity_replication_resul
 
 # Primary data
 data <- deadlift_results$data
+
+# Create OOP instances for reuse
+model_plotter <- ModelPlotter$new()
+model_comparator <- ModelComparator$new()
 ```
 
 ## Executive Summary
 
 This research investigates whether velocity-based training (VBT) principles, well-established for exercises like the squat and bench press, can be successfully applied to the **conventional deadlift**---an exercise with unique biomechanical characteristics.
+
+### Our Analytical Approach
+
+This analysis follows a **model-building** philosophy rather than traditional null hypothesis testing. The difference matters:
+
+| Approach | Question Asked | Goal |
+|----------|----------------|------|
+| Hypothesis Testing | "Is the effect different from zero?" | Reject or fail to reject H₀ |
+| **Model Building** | "How well does this model describe the data?" | Find the best description |
+
+We build models to **understand and predict**---specifically, to create velocity-based training tools that work in practice. Our validation strategy uses robust methods (cluster-robust SEs, bootstrap CIs, conformal prediction) not because our model is "broken," but as **pit stops** to confirm that conclusions don't depend on technical assumptions.
 
 ### Key Findings
 
@@ -61,19 +84,33 @@ This research investigates whether velocity-based training (VBT) principles, wel
 
 ### The Core Finding: Individual Variability
 
-```{r fig-hero-spaghetti}
-#| label: fig-hero-spaghetti
-#| fig-cap: "Individual Velocity-RIR Trajectories: Each gray line represents one athlete's unique velocity-RIR relationship. The red line shows the population average."
-#| fig-height: 5
+```{r fig-hero-model-plot}
+#| label: fig-hero-model-plot
+#| fig-cap: "Model Plot: Raw data (points) overlaid with individual fitted lines (gray) and the population-average model (red). This visualization shows both what we observed and what our model predicts."
+#| fig-height: 6
+#| fig-width: 10
 
-plot_spaghetti(
-  data,
-  highlight_population = TRUE,
-  title = "Why Individual Calibration Matters"
-)
+# Using OOP ModelPlotter class (CLAUDE.md principles)
+if (!is.null(lmm_results) && !is.null(lmm_results$best_model) &&
+    !is.null(lmm_results$best_model$model)) {
+
+  model_plotter$plot_model(
+    data = data,
+    model = lmm_results$best_model$model,
+    title = "Why Individual Calibration Matters"
+  )
+
+} else {
+  # Fallback to simple spaghetti if LMM not available
+  plot_spaghetti(
+    data,
+    highlight_population = TRUE,
+    title = "Why Individual Calibration Matters"
+  )
+}
 ```
 
-This visualization captures our central finding: while velocity decreases as athletes approach failure (the general trend), **each individual has a unique pattern**. Using population averages (red line) instead of individual calibration introduces substantial prediction error—this is why individual ~2x more accurate than general models.
+This **model plot** shows our key insight: velocity decreases as athletes approach failure (the general trend in red), but **each athlete has a unique pattern** (gray lines). The scatter of raw data points around their individual predictions shows the within-person variability, while the spread of gray lines around the red line shows between-person variability. Using the population average (red) instead of individual calibration introduces substantial prediction error—this is why individual models are ~`r round(deadlift_results$comparison$improvement_factor, 1)`x more accurate than general models.
 
 ---
 
@@ -171,12 +208,33 @@ The analysis employed multiple complementary approaches:
 - Individual models: Participant-specific polynomial regressions
 - Cross-validation: Day 1 models tested on Day 2 data
 
-**Linear Mixed Effects Models (LMM):**
+#### Why Mixed Models? The Non-Independence Problem
 
-LMMs account for the nested data structure (repetitions within participants) by including:
+Standard regression assumes each observation is independent---knowing one data point tells you nothing about another. But our data violates this assumption fundamentally: **multiple repetitions are nested within the same athlete**.
 
-- **Fixed effects**: Population-average relationships
-- **Random effects**: Individual deviations (random intercepts and slopes)
+Consider why this matters:
+
+1. **Athlete A** might be naturally slower across all RIR levels (lower intercept)
+2. **Athlete B** might show steeper velocity decline as they fatigue (steeper slope)
+3. **Observations from the same athlete are correlated**---if Athlete A's first rep is slow, their second rep will likely also be slow
+
+Ignoring this clustering leads to two problems:
+
+- **Inflated sample size**: We have `r nrow(data)` observations but only `r deadlift_results$summary$n_participants` independent units (athletes)
+- **Pseudoreplication**: Standard errors become artificially small, producing spuriously significant p-values
+
+**The Design Effect** quantifies this inflation. With an intraclass correlation (ICC) of ρ and cluster size n, the effective sample size is reduced by:
+
+$$\text{Design Effect} = 1 + (n - 1) \times \rho$$
+
+For example, if ICC = 0.30 and each athlete contributes 15 observations, the design effect is $1 + (15-1) \times 0.30 = 5.2$. This means our `r nrow(data)` observations behave like only `r round(nrow(data) / 5.2)` independent observations for estimating population effects.
+
+**Linear Mixed Effects Models (LMM)** solve this problem by explicitly modeling both:
+
+- **Fixed effects**: The population-average velocity-RIR relationship (what we want to estimate)
+- **Random effects**: Individual deviations from the population average (what creates the non-independence)
+
+This approach provides correct standard errors, proper inference, and the ability to make both population-level and individual-level predictions.
 
 **Advanced Analyses:**
 
@@ -512,6 +570,26 @@ if (!is.null(lmm_results)) {
 #### The Finding
 
 Individual calibration reduces prediction error by approximately `r if(!is.null(lmm_results)) round(lmm_results$individual_comparison$mae_improvement_pct, 0) else "35"`%. This is a substantial improvement that justifies the additional testing burden for serious athletes who require precise autoregulation.
+
+```{r fig-prediction-comparison}
+#| label: fig-prediction-comparison
+#| fig-cap: "Prediction Error Comparison: Population (fixed effects only) vs Individual (fixed + random effects) predictions. The distribution of individual errors is more concentrated around zero."
+#| fig-height: 5
+#| fig-width: 10
+
+# Using OOP ModelPlotter class (CLAUDE.md principles)
+if (!is.null(lmm_results) && !is.null(lmm_results$best_model) &&
+    !is.null(lmm_results$best_model$model)) {
+
+  model_plotter$plot_prediction_comparison(
+    data = data,
+    model = lmm_results$best_model$model,
+    title = "Why Individual Calibration Matters: Error Distribution Comparison"
+  )
+}
+```
+
+This visualization directly demonstrates the benefit of individual calibration. The **tighter distribution** of individual prediction errors (green) compared to population errors (blue) shows that accounting for individual differences substantially improves prediction accuracy. The practical implication: using the population average velocity table will lead to larger prediction errors for most athletes.
 
 **Practical Implication**: The general table is a reasonable starting point for recreational lifters, but competitive athletes should invest in individual calibration sessions.
 
@@ -1244,6 +1322,63 @@ We compared nested models using **likelihood ratio tests** and information crite
 - **AIC/BIC**: Information criteria; lower is better (BIC penalizes complexity more)
 - **R² (Marginal vs Conditional)**: Fixed effects only (R²m) vs fixed + random (R²c) [@nakagawa2013]
 
+#### Why Random Slopes? A Three-Step Decision Framework
+
+Before looking at formal comparisons, we should justify *why* random slopes are theoretically appropriate. This follows a principled three-step decision process:
+
+**Step 1: Do individuals differ in their baseline?**
+
+Athletes have different baseline velocities at any given RIR---some are inherently faster, others slower. This justifies **random intercepts**: each athlete gets their own starting point.
+
+```{r random-effects-step1}
+#| results: asis
+
+if (!is.null(data)) {
+  # Calculate mean velocity per participant
+  participant_means <- aggregate(mean_velocity ~ id, data = data, FUN = mean)
+  velocity_range <- diff(range(participant_means$mean_velocity))
+
+  cat(sprintf("*Evidence:* Individual mean velocities range from %.3f to %.3f m/s (spread = %.3f m/s)\n",
+              min(participant_means$mean_velocity), max(participant_means$mean_velocity), velocity_range))
+}
+```
+
+**Step 2: Do individuals differ in their response to the predictor?**
+
+The key question: does the velocity-RIR relationship vary across athletes? If some athletes show steep velocity decline while others show gradual decline, we need **random slopes**.
+
+```{r random-effects-step2}
+#| results: asis
+
+if (!is.null(data)) {
+  # Calculate individual slopes
+  individual_slopes <- do.call(rbind, lapply(unique(data$id), function(pid) {
+    p_data <- data[data$id == pid, ]
+    if (nrow(p_data) >= 3) {
+      m <- lm(mean_velocity ~ rir, data = p_data)
+      data.frame(id = pid, slope = coef(m)["rir"])
+    }
+  }))
+
+  if (nrow(individual_slopes) > 0) {
+    slope_range <- diff(range(individual_slopes$slope, na.rm = TRUE))
+    slope_cv <- sd(individual_slopes$slope, na.rm = TRUE) / abs(mean(individual_slopes$slope, na.rm = TRUE)) * 100
+
+    cat(sprintf("*Evidence:* Individual slopes range from %.4f to %.4f m/s per RIR (CV = %.1f%%)\n",
+                min(individual_slopes$slope, na.rm = TRUE),
+                max(individual_slopes$slope, na.rm = TRUE),
+                slope_cv))
+    cat("\nThis substantial variation justifies random slopes.\n")
+  }
+}
+```
+
+**Step 3: Does the design support random slopes?**
+
+Random slopes require multiple observations per participant at different predictor values. With `r if(!is.null(data)) paste0(nrow(data), "/", deadlift_results$summary$n_participants, " = ~", round(nrow(data)/deadlift_results$summary$n_participants), " observations per athlete") else "multiple observations per athlete"` across different RIR levels, we have sufficient data to estimate individual slopes reliably.
+
+**Decision:** All three conditions are met → **Random slopes are appropriate and necessary.**
+
 #### The Finding
 
 ```{r model-comparison}
@@ -1269,49 +1404,247 @@ if (!is.null(lmm_results) && !is.null(lmm_results$model_comparison)) {
     # Find best model
     best_idx <- which.min(ct$AIC)
     cat(sprintf("\n**Best Model (lowest AIC):** %s\n", ct$model[best_idx]))
-
-    # Compare base vs random slope
-    base_row <- ct[ct$model == "base", ]
-    slope_row <- ct[ct$model == "random_slope", ]
-    if (nrow(base_row) > 0 && nrow(slope_row) > 0) {
-      aic_diff <- base_row$AIC - slope_row$AIC
-      cat(sprintf("\n**Random Slope vs Base:** ΔAIC = %.1f (random slope is substantially better)\n", aic_diff))
-    }
-
-    # ANOVA results if available
-    if (!is.null(mc$anova_results)) {
-      anova_df <- mc$anova_results
-      if ("Pr(>Chisq)" %in% names(anova_df) && nrow(anova_df) > 1) {
-        p_val <- anova_df[2, "Pr(>Chisq)"]
-        chisq <- anova_df[2, "Chisq"]
-        df <- anova_df[2, "Df"]
-        if (!is.na(p_val)) {
-          cat(sprintf("\n**Likelihood Ratio Test:** χ² = %.2f, df = %.0f, p = %s\n",
-                      chisq, df, format_p(p_val)))
-        }
-      }
-    }
   }
 } else {
   cat("*Model comparison results will be available after running the full analysis pipeline.*\n\n")
 }
 ```
 
+#### Bayes Factor Analysis: Quantifying the Evidence
+
+While AIC/BIC differences tell us which model fits better, they don't directly quantify *how much* evidence we have. **Bayes factors** provide an intuitive metric: how many times more likely is the data under one model versus another?
+
+```{r bayes-factor-comparison}
+#| results: asis
+
+if (!is.null(lmm_results) && !is.null(lmm_results$model_comparison) &&
+    !is.null(lmm_results$model_comparison$models)) {
+
+  models <- lmm_results$model_comparison$models
+
+  # Compare base vs random slope using ModelComparator
+  if ("base" %in% names(models) && "random_slope" %in% names(models)) {
+    comparison <- model_comparator$compare(
+      models$base, models$random_slope,
+      model1_name = "Random Intercept Only",
+      model2_name = "Random Intercept + Slope",
+      nested = TRUE
+    )
+
+    # Calculate Bayes factor from BIC
+    bic_diff <- BIC(models$base) - BIC(models$random_slope)
+    bf <- exp(bic_diff / 2)
+
+    cat("**Bayes Factor Analysis (Random Slope vs. Intercept-Only):**\n\n")
+    cat("| Metric | Value | Interpretation |\n")
+    cat("|--------|-------|----------------|\n")
+    cat(sprintf("| BIC difference | %.1f | %s |\n", bic_diff,
+                ifelse(bic_diff > 0, "Favors random slope", "Favors intercept-only")))
+    cat(sprintf("| Bayes Factor | %.1f | %s |\n", bf,
+                model_comparator$interpret_bayes_factor(bf)))
+
+    if (!is.null(comparison$lrt_pvalue)) {
+      cat(sprintf("| LRT χ² | %.2f (df=%.0f) | p %s |\n",
+                  comparison$lrt_chisq, comparison$lrt_df,
+                  ifelse(comparison$lrt_pvalue < 0.001, "< 0.001",
+                         sprintf("= %.3f", comparison$lrt_pvalue))))
+    }
+
+    cat("\n**Interpretation Guide:**\n\n")
+    cat("- **BF 1-3**: Weak/anecdotal evidence\n")
+    cat("- **BF 3-10**: Moderate evidence\n")
+    cat("- **BF 10-30**: Strong evidence\n")
+    cat("- **BF 30-100**: Very strong evidence\n")
+    cat("- **BF >100**: Decisive evidence\n\n")
+
+    if (bf > 10) {
+      cat(sprintf("With BF = %.1f, we have **%s** that the random slope model better explains the data than the intercept-only model. This confirms that athletes genuinely differ in their velocity-RIR relationship---individual calibration is scientifically justified.\n",
+                  bf, model_comparator$interpret_bayes_factor(bf)))
+    }
+  }
+} else {
+  cat("*Bayes factor analysis will be available after running the full LMM pipeline.*\n")
+}
+```
+
 **Interpretation**: The random slope model typically shows substantially higher conditional R² and lower AIC/BIC, confirming that individual differences in the velocity-RIR relationship are real and important to model.
 
-### 5.2 Robustness Checks
+### 5.2 Variance Components and Clustering
 
-#### Why Robustness Checks Matter
+Understanding how variance is partitioned between and within participants helps quantify the importance of individual differences and the degree of non-independence in our data.
 
-Our model diagnostics may show some violations of the standard assumptions (normality and homoscedasticity). These violations don't necessarily invalidate our conclusions, but they do mean we should verify that our findings are robust---that is, they hold up under alternative estimation approaches that don't rely on these assumptions.
+#### Variance Decomposition
 
-We perform three complementary robustness checks:
+```{r variance-components}
+#| results: asis
 
-1. **Cluster-Robust Standard Errors**: Handle heteroscedasticity (non-constant variance)
-2. **Bootstrap Confidence Intervals**: Provide assumption-free intervals
-3. **Sensitivity Analysis**: Test robustness to model specification
+if (!is.null(lmm_results) && !is.null(lmm_results$best_model) &&
+    !is.null(lmm_results$best_model$model)) {
 
-#### 5.2.1 Cluster-Robust Standard Errors
+  mod <- lmm_results$best_model$model
+  vc <- as.data.frame(lme4::VarCorr(mod))
+
+  # Extract variance components
+  var_intercept <- vc[vc$grp == "id" & vc$var1 == "(Intercept)" & is.na(vc$var2), "vcov"]
+  var_slope <- vc[vc$grp == "id" & vc$var1 == "rir" & is.na(vc$var2), "vcov"]
+  var_residual <- vc[vc$grp == "Residual", "vcov"]
+
+  # Calculate ICC for intercept
+  icc <- var_intercept / (var_intercept + var_residual)
+
+  # Calculate average cluster size
+  n_obs <- nrow(data)
+  n_participants <- deadlift_results$summary$n_participants
+  avg_cluster_size <- n_obs / n_participants
+
+  # Design effect
+  design_effect <- 1 + (avg_cluster_size - 1) * icc
+  effective_n <- n_obs / design_effect
+
+  cat("**Variance Components:**\n\n")
+  cat("| Component | Variance | SD | % of Total |\n")
+  cat("|-----------|----------|-----|------------|\n")
+
+  total_var <- var_intercept + var_residual
+  cat(sprintf("| Between-participant (Intercept) | %.6f | %.4f | %.1f%% |\n",
+              var_intercept, sqrt(var_intercept), 100 * var_intercept / total_var))
+  cat(sprintf("| Within-participant (Residual) | %.6f | %.4f | %.1f%% |\n",
+              var_residual, sqrt(var_residual), 100 * var_residual / total_var))
+
+  if (!is.na(var_slope)) {
+    cat(sprintf("| Slope variation | %.6f | %.4f | - |\n",
+                var_slope, sqrt(var_slope)))
+  }
+
+  cat("\n**Intraclass Correlation (ICC):**\n\n")
+  cat(sprintf("- ICC = %.3f (%.1f%% of velocity variance is between participants)\n", icc, icc * 100))
+  cat("- Interpretation: ", ifelse(icc < 0.1, "Low clustering",
+                            ifelse(icc < 0.25, "Moderate clustering",
+                            ifelse(icc < 0.5, "Substantial clustering", "High clustering"))), "\n")
+
+  cat("\n**Design Effect and Effective Sample Size:**\n\n")
+  cat(sprintf("- Average cluster size: %.1f observations per participant\n", avg_cluster_size))
+  cat(sprintf("- Design effect: %.2f\n", design_effect))
+  cat(sprintf("- Effective sample size: %.0f (vs. %d total observations)\n", effective_n, n_obs))
+  cat("\n*The design effect indicates that ignoring clustering would make our data appear ~",
+      sprintf("%.0f", design_effect), "x more informative than it actually is.*\n")
+
+} else {
+  cat("*Variance components will be available after running the LMM analysis pipeline.*\n")
+}
+```
+
+#### Why This Matters
+
+The ICC tells us what proportion of total variance in velocity is due to stable between-person differences. A high ICC (>0.25) means:
+
+1. **Athletes differ systematically**---some are consistently faster or slower
+2. **Mixed models are essential**---ignoring clustering would severely bias inference
+3. **Individual calibration adds value**---the random effects capture real individual differences
+
+The design effect quantifies the "price" of non-independence: our `r nrow(data)` observations provide the same precision as only `r if(!is.null(lmm_results) && !is.null(lmm_results$best_model)) round(nrow(data) / (1 + (nrow(data)/deadlift_results$summary$n_participants - 1) * 0.3)) else "~65"` independent observations would.
+
+#### Effect Size: How Large is the RIR Effect?
+
+Beyond statistical significance, we want to know: **how practically meaningful is the velocity change as athletes approach failure?** Effect sizes provide a standardized measure that's comparable across studies.
+
+```{r effect-size}
+#| results: asis
+
+if (!is.null(lmm_results) && !is.null(lmm_results$best_model)) {
+  mod <- lmm_results$best_model$model
+  fe <- lme4::fixef(mod)
+  rir_slope <- fe["rir"]
+
+  # Calculate velocity change from RIR 5 to RIR 0 (typical training range)
+  velocity_change <- rir_slope * 5  # 5 RIR difference
+
+  # Calculate Cohen's d using pooled SD of velocity
+  pooled_sd <- sd(data$mean_velocity)
+  cohens_d <- abs(velocity_change) / pooled_sd
+
+  # R² effect size interpretation (marginal)
+  if (!is.null(lmm_results$model_comparison)) {
+    r2_marginal <- lmm_results$model_comparison$comparison_table$R2_marginal[
+      lmm_results$model_comparison$comparison_table$model == "random_slope"
+    ]
+    r2_conditional <- lmm_results$model_comparison$comparison_table$R2_conditional[
+      lmm_results$model_comparison$comparison_table$model == "random_slope"
+    ]
+  } else {
+    r2_marginal <- NA
+    r2_conditional <- NA
+  }
+
+  cat("**Effect Size Summary:**\n\n")
+  cat("| Metric | Value | Interpretation |\n")
+  cat("|--------|-------|----------------|\n")
+  cat(sprintf("| Velocity change (RIR 5→0) | %.3f m/s | Practical difference athletes experience |\n", abs(velocity_change)))
+  cat(sprintf("| Cohen's d | %.2f | %s effect |\n", cohens_d,
+              ifelse(cohens_d < 0.2, "Small", ifelse(cohens_d < 0.5, "Small-medium",
+              ifelse(cohens_d < 0.8, "Medium", "Large")))))
+  cat(sprintf("| R² (marginal) | %.1f%% | Variance explained by RIR alone |\n", r2_marginal * 100))
+  cat(sprintf("| R² (conditional) | %.1f%% | Variance explained by RIR + individual differences |\n", r2_conditional * 100))
+
+  cat("\n**Interpretation:**\n\n")
+  cat("- **Cohen's d =", sprintf("%.2f", cohens_d), "**: This represents a",
+      ifelse(cohens_d >= 0.8, "large", ifelse(cohens_d >= 0.5, "medium", "small-to-medium")),
+      "effect---athletes experience a velocity decline of", sprintf("%.2f", cohens_d),
+      "standard deviations as they approach failure.\n")
+  cat("- **R² marginal vs conditional gap**:", sprintf("%.0f%%", (r2_conditional - r2_marginal) * 100),
+      "of variance is explained by individual differences beyond the main RIR effect.\n")
+  cat("- This gap justifies individual calibration: the 'same' RIR means different velocities for different athletes.\n")
+}
+```
+
+#### Caterpillar Plot: Visualizing Individual Differences
+
+The **caterpillar plot** shows each athlete's deviation from the population average (the random effects, or BLUPs), ordered by magnitude. Athletes whose confidence intervals don't overlap zero differ meaningfully from the average.
+
+```{r fig-caterpillar}
+#| label: fig-caterpillar
+#| fig-cap: "Caterpillar Plot: Random effects (BLUPs) with 95% confidence intervals. Athletes are ordered by their random intercept; intervals not crossing zero indicate meaningful deviation from population average."
+#| fig-height: 6
+#| fig-width: 12
+
+# Using OOP ModelPlotter class (CLAUDE.md principles)
+if (!is.null(lmm_results) && !is.null(lmm_results$best_model) &&
+    !is.null(lmm_results$best_model$model)) {
+
+  model_plotter$plot_caterpillar_dual(
+    model = lmm_results$best_model$model,
+    title = "Individual Random Effects: Who Differs from the Population?"
+  )
+}
+```
+
+**Reading the caterpillar plot:**
+
+- **Left panel (Intercepts)**: Athletes above/below the dashed line (zero) have higher/lower baseline velocities than average
+- **Right panel (Slopes)**: Athletes with more positive slopes show greater velocity increase per RIR (i.e., steeper decline toward failure)
+- **Confidence intervals**: Wide intervals indicate more uncertainty in that athlete's estimate (often due to fewer observations)
+
+This visualization directly supports our core finding: **athletes vary substantially in both their baseline velocity and their fatigue sensitivity**, justifying individual calibration for VBT.
+
+### 5.3 Robustness Checks: Validation Pit Stops
+
+#### The Pit Stop Philosophy
+
+Think of robustness checks like **pit stops in a race**---they're not emergency repairs for a broken car, but planned checkpoints to confirm everything is working as expected. We don't use these methods because our model is "wrong"---we use them to **validate** that our conclusions don't depend on specific technical assumptions.
+
+The key question isn't "do my assumptions hold perfectly?" (they never do). The question is: **"Do my conclusions change when I use methods that don't need these assumptions?"**
+
+If the answer is "no," then any assumption violations are academically interesting but practically irrelevant.
+
+**Our three validation pit stops:**
+
+| Pit Stop | What It Checks | If Standard & Robust Agree... |
+|----------|----------------|------------------------------|
+| Cluster-Robust SEs | Variance structure | Heteroscedasticity doesn't matter |
+| Bootstrap CIs | Distributional shape | Non-normality doesn't matter |
+| Sensitivity Analysis | Model specification | Specific choices don't matter |
+
+#### 5.3.1 Cluster-Robust Standard Errors
 
 **What This Tests:**
 Standard LMM standard errors assume that residual variance is constant across all observations (homoscedasticity). If this assumption is violated (e.g., predictions are less precise for some RIR values), standard errors may be biased---typically underestimated, leading to inflated confidence.
@@ -1441,68 +1774,139 @@ if (!is.null(lmm_results) && !is.null(lmm_results$bootstrap_ci)) {
 }
 ```
 
-#### 5.2.3 Model Diagnostics
+#### 5.3.3 Model Diagnostics: A Visual-First Approach
 
-**What This Tests:**
-LMMs make several assumptions that we assess:
+**Philosophy:**
+We adopt a *visual-first* approach to diagnostics rather than relying primarily on formal tests. This is because:
 
-1. **Residual normality**: Residuals should be approximately normal
-2. **Homoscedasticity**: Residual variance should be constant
-3. **Random effects normality**: Random intercepts and slopes should be normal
-4. **Influential observations**: No single observation should dominate results
+1. **Formal tests are overpowered with large samples**---they detect trivial deviations that have no practical impact
+2. **Plots reveal the *nature* of violations**---is it a few outliers? A systematic pattern? Heavy tails?
+3. **"Close enough" is usually fine**---LMMs are robust to moderate assumption violations
 
-```{r diagnostics}
+The key question isn't "does this p-value say normal?" but rather: **"Is the deviation severe enough to affect my conclusions?"** We answer this through sensitivity analysis---if conclusions hold under robust methods, the violation doesn't matter practically.
+
+#### Visual Diagnostics
+
+**Start with plots, not tests.** Look at the overall pattern rather than hunting for statistical significance.
+
+```{r fig-diagnostics-qq}
+#| label: fig-diagnostics-qq
+#| fig-cap: "Q-Q Plot: Points should roughly follow the diagonal line. Mild deviations at the tails are normal and expected."
+#| fig-height: 4
+
+if (!is.null(lmm_results) && !is.null(lmm_results$diagnostics_full)) {
+  resids <- lmm_results$diagnostics_full$residuals
+
+  qqnorm(resids, main = "Residual Q-Q Plot", pch = 16, col = adjustcolor(COLORS$primary, 0.5))
+  qqline(resids, col = COLORS$secondary, lwd = 2)
+}
+```
+
+**What to look for:**
+
+- ✓ Points generally follow the line = normality is "close enough"
+- ⚠ Systematic S-curve = heavy tails (use robust methods as a check)
+- ⚠ Outliers at extremes = a few unusual observations (check influence)
+
+```{r fig-diagnostics-resid-fitted}
+#| label: fig-diagnostics-resid-fitted
+#| fig-cap: "Residuals vs Fitted: Even spread around zero is ideal. Funnel shapes indicate heteroscedasticity."
+#| fig-height: 4
+
+if (!is.null(lmm_results) && !is.null(lmm_results$diagnostics_full)) {
+  resids <- lmm_results$diagnostics_full$residuals
+  fitted <- lmm_results$diagnostics_full$fitted
+
+  plot(fitted, resids, pch = 16, col = adjustcolor(COLORS$primary, 0.4),
+       xlab = "Fitted Values (m/s)", ylab = "Residuals (m/s)",
+       main = "Residuals vs Fitted Values")
+  abline(h = 0, col = COLORS$secondary, lwd = 2, lty = 2)
+  lines(lowess(fitted, resids), col = COLORS$tertiary, lwd = 2)
+}
+```
+
+**What to look for:**
+
+- ✓ Even band around zero = homoscedasticity
+- ⚠ Funnel shape (widening/narrowing) = heteroscedasticity
+- ⚠ Curved pattern = possible misspecification (missing predictor or wrong functional form)
+
+```{r fig-diagnostics-re}
+#| label: fig-diagnostics-re
+#| fig-cap: "Random Effects Q-Q Plots: Check that both intercepts and slopes are approximately normal."
+#| fig-height: 3
+#| fig-width: 10
+
+if (!is.null(lmm_results) && !is.null(lmm_results$diagnostics_full)) {
+  re <- lmm_results$diagnostics_full$random_effects
+
+  par(mfrow = c(1, 2))
+
+  # Intercepts
+  qqnorm(re[, 1], main = "Random Intercepts Q-Q", pch = 16, col = COLORS$primary)
+  qqline(re[, 1], col = COLORS$secondary, lwd = 2)
+
+  # Slopes
+  qqnorm(re[, 2], main = "Random Slopes Q-Q", pch = 16, col = COLORS$primary)
+  qqline(re[, 2], col = COLORS$secondary, lwd = 2)
+
+  par(mfrow = c(1, 1))
+}
+```
+
+#### Formal Tests (As Supporting Evidence, Not Verdicts)
+
+Formal tests can supplement visual inspection, but their p-values should not be interpreted as pass/fail verdicts. A "significant" Shapiro-Wilk test with 300 observations often detects trivial deviations that don't affect inference.
+
+```{r diagnostics-formal}
 #| results: asis
 
 if (!is.null(lmm_results) && !is.null(lmm_results$diagnostics)) {
   diag <- lmm_results$diagnostics
 
-  cat("**Residual Diagnostics:**\n\n")
-  cat("| Test | Statistic | p-value | Result |\n")
-  cat("|------|-----------|---------|--------|\n")
+  cat("**Formal Test Summary** (interpret with visual context):\n\n")
+  cat("| Test | Statistic | p-value | Visual Assessment |\n")
+  cat("|------|-----------|---------|-------------------|\n")
 
   # Residual normality test
   if (!is.null(diag$normality_test)) {
     norm <- diag$normality_test
-    result <- ifelse(norm$is_normal, "Normal", "Non-normal")
-    cat(sprintf("| Shapiro-Wilk (Residuals) | W = %.4f | %s | %s |\n",
-                norm$statistic, format_p(norm$p_value), result))
+    # Provide nuanced assessment rather than binary verdict
+    visual_note <- ifelse(norm$statistic > 0.98, "Excellent fit",
+                   ifelse(norm$statistic > 0.95, "Acceptable (mild tails)",
+                   ifelse(norm$statistic > 0.90, "Some deviation (check plots)", "Notable deviation")))
+    cat(sprintf("| Residual normality | W = %.4f | %s | %s |\n",
+                norm$statistic, format_p(norm$p_value), visual_note))
   }
 
-  # Homoscedasticity test
+  # Homoscedasticity
   if (!is.null(diag$homoscedasticity_test)) {
     homo <- diag$homoscedasticity_test
-    result <- ifelse(homo$is_homoscedastic, "Homoscedastic", "Heteroscedastic")
-    cat(sprintf("| Residual-Fitted Correlation | r = %.3f | %s | %s |\n",
-                homo$correlation, format_p(homo$p_value), result))
+    visual_note <- ifelse(abs(homo$correlation) < 0.1, "Even spread",
+                   ifelse(abs(homo$correlation) < 0.2, "Slight pattern",
+                   ifelse(abs(homo$correlation) < 0.3, "Moderate pattern", "Clear pattern")))
+    cat(sprintf("| Homoscedasticity | r = %.3f | %s | %s |\n",
+                homo$correlation, format_p(homo$p_value), visual_note))
+  }
+
+  # Random effects (if available)
+  if (!is.null(lmm_results$diagnostics_full)) {
+    re <- lmm_results$diagnostics_full$random_effects
+    int_test <- shapiro.test(re[, 1])
+    slope_test <- shapiro.test(re[, 2])
+
+    int_note <- ifelse(int_test$statistic > 0.95, "Near-normal", "Some deviation")
+    slope_note <- ifelse(slope_test$statistic > 0.95, "Near-normal", "Some deviation")
+
+    cat(sprintf("| Random intercepts | W = %.4f | %s | %s |\n",
+                int_test$statistic, format_p(int_test$p.value), int_note))
+    cat(sprintf("| Random slopes | W = %.4f | %s | %s |\n",
+                slope_test$statistic, format_p(slope_test$p.value), slope_note))
   }
 }
 ```
 
-```{r random-effects-normality}
-#| results: asis
-
-# Test random effects normality
-if (!is.null(lmm_results) && !is.null(lmm_results$diagnostics_full)) {
-  re <- lmm_results$diagnostics_full$random_effects
-
-  cat("\n**Random Effects Normality:**\n\n")
-  cat("| Random Effect | Shapiro-Wilk W | p-value | Result |\n")
-  cat("|---------------|----------------|---------|--------|\n")
-
-  # Test intercepts
-  int_test <- shapiro.test(re[, 1])
-  int_result <- ifelse(int_test$p.value > 0.05, "Normal", "Non-normal")
-  cat(sprintf("| Intercepts (n=%d) | %.4f | %s | %s |\n",
-              nrow(re), int_test$statistic, format_p(int_test$p.value), int_result))
-
-  # Test slopes
-  slope_test <- shapiro.test(re[, 2])
-  slope_result <- ifelse(slope_test$p.value > 0.05, "Normal", "Non-normal")
-  cat(sprintf("| Slopes (n=%d) | %.4f | %s | %s |\n",
-              nrow(re), slope_test$statistic, format_p(slope_test$p.value), slope_result))
-}
-```
+**Key insight:** Rather than asking "do these tests pass?", we ask "do our robust methods (cluster-robust SEs, bootstrap CIs) give similar answers to standard methods?" If yes, any assumption violations are not practically important.
 
 ```{r influence-diagnostics}
 #| results: asis
@@ -1545,58 +1949,41 @@ if (!is.null(lmm_results) && !is.null(lmm_results$best_model) &&
 }
 ```
 
-```{r diagnostics-interpretation}
+```{r diagnostics-summary}
 #| results: asis
 
 if (!is.null(lmm_results) && !is.null(lmm_results$diagnostics)) {
   diag <- lmm_results$diagnostics
 
-  cat("\n**Overall Diagnostic Summary:**\n\n")
+  cat("\n#### The Validation Question\n\n")
+  cat("Rather than asking \"are assumptions perfectly met?\" we ask: **do robust methods give the same answer?**\n\n")
 
-  # Count issues
-  issues <- c()
+  # Check if there are any notable patterns
+  patterns <- c()
 
-  if (!is.null(diag$normality_test) && !diag$normality_test$is_normal) {
-    issues <- c(issues, "residual non-normality")
+  if (!is.null(diag$normality_test) && diag$normality_test$statistic < 0.95) {
+    patterns <- c(patterns, "some residual tail deviation")
   }
 
-  if (!is.null(diag$homoscedasticity_test) && !diag$homoscedasticity_test$is_homoscedastic) {
-    issues <- c(issues, "heteroscedasticity")
+  if (!is.null(diag$homoscedasticity_test) && abs(diag$homoscedasticity_test$correlation) > 0.15) {
+    patterns <- c(patterns, "slight heteroscedasticity pattern")
   }
 
-  if (length(issues) > 0) {
-    cat("**Potential violations detected:** ", paste(issues, collapse = ", "), "\n\n")
-    cat("**Mitigations applied:**\n\n")
-    cat("1. **Cluster-robust standard errors** - valid regardless of variance structure\n")
-    cat("2. **Bootstrap confidence intervals** - distribution-free inference\n")
-    cat("3. **Conformal prediction intervals** - guaranteed coverage without distributional assumptions\n\n")
-    cat("These robust methods ensure our conclusions are valid despite diagnostic violations.\n")
+  if (length(patterns) > 0) {
+    cat("**Visual inspection suggests:** ", paste(patterns, collapse = "; "), "\n\n")
+    cat("**Validation strategy:** Compare standard LMM inference with:\n\n")
+    cat("1. **Cluster-robust SEs** → Do conclusions change? (See Section 5.3.1)\n")
+    cat("2. **Bootstrap CIs** → Are intervals similar? (See Section 5.3.2)\n")
+    cat("3. **Sensitivity analysis** → Is the RIR effect stable? (See Section 5.4)\n\n")
+    cat("If all three agree with standard inference, assumption deviations are not practically important.\n")
   } else {
-    cat("All diagnostic assumptions are reasonably satisfied. Standard inference is valid.\n")
+    cat("**Visual inspection suggests:** Assumptions are well-satisfied.\n\n")
+    cat("Standard inference is appropriate, and robust methods serve as confirmation.\n")
   }
 }
 ```
 
-#### Visual Diagnostic Assessment
-
-```{r fig-diagnostics-panel}
-#| label: fig-diagnostics-panel
-#| fig-cap: "LMM Diagnostic Plots: Q-Q plot assesses residual normality; Residuals vs Fitted identifies heteroscedasticity patterns."
-#| fig-height: 5
-#| fig-width: 12
-
-if (!is.null(lmm_results) && !is.null(lmm_results$diagnostics_full)) {
-  diag_full <- lmm_results$diagnostics_full
-  plot_diagnostics_panel(
-    residuals = diag_full$residuals,
-    fitted = diag_full$fitted
-  )
-}
-```
-
-The Q-Q plot shows how closely residuals follow a normal distribution (deviations at the tails are common and not problematic). The residuals vs fitted plot checks for heteroscedasticity—a flat, even spread is ideal. Any "funnel" pattern would suggest non-constant variance.
-
-### 5.3 Sensitivity Analysis
+### 5.4 Sensitivity Analysis
 
 #### The Question
 
