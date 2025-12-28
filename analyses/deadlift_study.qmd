@@ -2730,18 +2730,28 @@ if (!is.null(lmm_results) && !is.null(lmm_results$advanced_validation)) {
 }
 ```
 
-### 5.9 Comparison: Isolation Forest vs Cook's Distance {#sec-if-vs-cooks}
+### 5.9 Why Isolation Forest Over Cook's Distance {#sec-if-vs-cooks}
 
-Cook's distance and Isolation Forest detect different types of unusual observations:
+We choose Isolation Forest as our primary anomaly detection method for several reasons:
 
-| Method | What It Detects | Strengths |
-|--------|-----------------|-----------|
-| **Cook's Distance** | Influential observations (affect regression coefficients) | Standard, interpretable |
-| **Isolation Forest** | Multivariate anomalies (unusual in feature space) | No distributional assumptions |
+**Advantages of Isolation Forest:**
+
+1. **No distributional assumptions**: Unlike Cook's distance (which assumes normality and linear relationships), Isolation Forest works with any data distribution
+2. **Multivariate detection**: Identifies unusual *combinations* of features, not just univariate outliers
+3. **Feature explainability**: With SHAP-like permutation analysis, we can explain *why* each observation is flagged
+4. **Data-driven thresholds**: Elbow detection finds natural breaks in anomaly scores rather than arbitrary cutoffs
+5. **Scales to high dimensions**: Works well with our 50+ engineered features
+
+**Limitations of Cook's Distance:**
+
+- Measures *influence on regression coefficients*, not inherent data quality
+- Tends to over-flag observations with high leverage (extreme X values)
+- The 4/n threshold is arbitrary and often flags too many observations
+- Cannot explain why an observation is flagged
 
 ```{r tbl-if-vs-cooks}
 #| label: tbl-if-vs-cooks
-#| tbl-cap: "Agreement between Isolation Forest and Cook's Distance for flagging anomalies"
+#| tbl-cap: "Comparison between Isolation Forest and Cook's Distance flagging (for reference)"
 
 if (!is.null(lmm_results) && !is.null(lmm_results$advanced_validation)) {
   av <- lmm_results$advanced_validation
@@ -2750,25 +2760,19 @@ if (!is.null(lmm_results) && !is.null(lmm_results$advanced_validation)) {
     comp <- av$if_vs_cooks_comparison
 
     comparison_df <- data.frame(
-      Category = c(
-        "Both Methods Agree (Flagged)",
-        "Only Isolation Forest Flags",
-        "Only Cook's Distance Flags",
-        "Neither Method Flags",
-        "Overall Agreement Rate",
-        "Jaccard Index"
+      Metric = c(
+        "Observations flagged by Isolation Forest",
+        "Observations flagged by Cook's Distance",
+        "Agreement rate"
       ),
       Value = c(
-        comp$both_flagged,
-        comp$only_isolation_forest,
-        comp$only_cooks_distance,
-        comp$neither_flagged,
-        sprintf("%.1f%%", comp$agreement_rate * 100),
-        sprintf("%.3f", comp$jaccard_index)
+        comp$both_flagged + comp$only_isolation_forest,
+        comp$both_flagged + comp$only_cooks_distance,
+        sprintf("%.1f%%", comp$agreement_rate * 100)
       )
     )
 
-    format_table(comparison_df, col.names = c("Category", "Value"))
+    format_table(comparison_df, col.names = c("Metric", "Value"))
   }
 }
 ```
@@ -2782,22 +2786,392 @@ if (!is.null(lmm_results) && !is.null(lmm_results$advanced_validation)) {
   if (!is.null(av$if_vs_cooks_comparison)) {
     comp <- av$if_vs_cooks_comparison
 
-    cat("**Interpretation:** ", comp$interpretation, "\n\n")
-
-    if (comp$agreement_rate > 0.8) {
-      cat("High agreement between methods suggests consistent identification of unusual observations.\n")
-    } else if (comp$agreement_rate > 0.5) {
-      cat("Moderate agreement indicates the methods detect different aspects of data quality.\n")
-    } else {
-      cat("Low agreement confirms these methods are complementary rather than redundant. ",
-          "Cook's distance focuses on regression influence, while Isolation Forest ",
-          "detects multivariate outliers in the feature space.\n")
+    if (comp$only_cooks_distance > comp$only_isolation_forest * 3) {
+      cat("**Note:** Cook's distance flags significantly more observations than Isolation Forest. ",
+          "This is expected because Cook's distance is sensitive to leverage (extreme RIR or load values) ",
+          "rather than truly anomalous patterns. We focus on Isolation Forest results for data quality assessment.\n")
     }
   }
 }
 ```
 
-### 5.10 Model Calibration {#sec-calibration}
+### 5.10 Enhanced Multi-Level Anomaly Detection {#sec-enhanced-anomaly}
+
+The previous section used a fixed 95th percentile threshold. Here we compare multiple data-driven threshold selection strategies and extend anomaly detection to the participant level using aggregate behavior patterns.
+
+#### 5.10.1 Threshold Strategy Comparison
+
+Different threshold selection strategies may identify different thresholds depending on the score distribution characteristics.
+
+```{r tbl-threshold-comparison}
+#| label: tbl-threshold-comparison
+#| tbl-cap: "Comparison of threshold selection strategies for Isolation Forest scores"
+
+if (!is.null(lmm_results) && !is.null(lmm_results$advanced_validation)) {
+  av <- lmm_results$advanced_validation
+
+  if (!is.null(av$anomalies) && !is.null(av$anomalies$threshold_comparison)) {
+    tc <- av$anomalies$threshold_comparison
+
+    tc_display <- data.frame(
+      Strategy = tc$strategy,
+      Threshold = sprintf("%.4f", tc$threshold),
+      `N Flagged` = tc$n_flagged,
+      `Pct Flagged` = sprintf("%.1f%%", (tc$n_flagged / max(tc$n_total, 1)) * 100),
+      check.names = FALSE
+    )
+
+    format_table(tc_display)
+  }
+}
+```
+
+```{r threshold-interpretation}
+#| results: asis
+
+if (!is.null(lmm_results) && !is.null(lmm_results$advanced_validation)) {
+  av <- lmm_results$advanced_validation
+
+  if (!is.null(av$anomalies) && !is.null(av$anomalies$threshold_comparison)) {
+    tc <- av$anomalies$threshold_comparison
+
+    # Find the elbow and fixed strategies
+    elbow_row <- tc[tc$strategy == "elbow_detection", ]
+    fixed_row <- tc[tc$strategy == "fixed_percentile", ]
+
+    if (nrow(elbow_row) > 0 && nrow(fixed_row) > 0) {
+      cat(sprintf(
+        "**Interpretation:** The elbow detection method identifies a threshold of %.4f (flagging %d observations), compared to the fixed 95th percentile threshold of %.4f (flagging %d observations). ",
+        elbow_row$threshold, elbow_row$n_flagged,
+        fixed_row$threshold, fixed_row$n_flagged
+      ))
+
+      if (elbow_row$threshold > fixed_row$threshold) {
+        cat("The higher elbow threshold suggests there is a clear separation between the normal score cluster and anomalous observations, supporting a more conservative flagging approach.\n")
+      } else {
+        cat("The thresholds are similar, indicating the 95th percentile is appropriate for this dataset.\n")
+      }
+    }
+  }
+}
+```
+
+#### 5.10.2 Elbow Detection Results
+
+Using the elbow detection method, which identifies the natural cluster boundary in the score distribution:
+
+```{r tbl-elbow-anomalies}
+#| label: tbl-elbow-anomalies
+#| tbl-cap: "Anomaly detection using elbow-based threshold selection"
+
+if (!is.null(lmm_results) && !is.null(lmm_results$advanced_validation)) {
+  av <- lmm_results$advanced_validation
+
+  if (!is.null(av$anomalies) && !is.null(av$anomalies$raw_data_v2)) {
+    v2 <- av$anomalies$raw_data_v2
+
+    elbow_df <- data.frame(
+      Metric = c(
+        "Total Observations",
+        "Anomalies Detected",
+        "Anomaly Rate",
+        "Elbow Threshold"
+      ),
+      Value = c(
+        v2$n_total,
+        v2$n_anomalies,
+        sprintf("%.1f%%", v2$anomaly_rate * 100),
+        sprintf("%.4f", v2$threshold)
+      )
+    )
+
+    format_table(elbow_df, col.names = c("Metric", "Value"))
+  }
+}
+```
+
+#### 5.10.3 Participant-Level Anomaly Detection {#sec-participant-anomalies}
+
+Beyond individual observations, we profile participants based on their aggregate behavior patterns to identify those with unusual overall performance characteristics.
+
+```{r tbl-participant-profile}
+#| label: tbl-participant-profile
+#| tbl-cap: "Participant-level anomaly detection based on aggregate behavior patterns"
+
+if (!is.null(lmm_results) && !is.null(lmm_results$advanced_validation)) {
+  av <- lmm_results$advanced_validation
+
+  if (!is.null(av$anomalies) && !is.null(av$anomalies$participant_profile)) {
+    pp <- av$anomalies$participant_profile
+
+    profile_df <- data.frame(
+      Metric = c(
+        "Total Participants",
+        "Anomalous Participants",
+        "Anomaly Rate",
+        "Threshold",
+        "Detection Method"
+      ),
+      Value = c(
+        pp$n_participants,
+        pp$n_anomalous,
+        sprintf("%.1f%%", (pp$n_anomalous / pp$n_participants) * 100),
+        sprintf("%.4f", pp$threshold),
+        pp$method
+      )
+    )
+
+    format_table(profile_df, col.names = c("Metric", "Value"))
+  }
+}
+```
+
+```{r fig-participant-profiles}
+#| label: fig-participant-profiles
+#| fig-cap: "Participant anomaly scores with threshold visualization. Each point represents a participant, ordered by their aggregate anomaly score. Red points indicate participants flagged as having unusual behavior patterns."
+#| fig-width: 10
+#| fig-height: 6
+
+if (!is.null(lmm_results) && !is.null(lmm_results$advanced_validation_full)) {
+  avf <- lmm_results$advanced_validation_full
+
+  if (!is.null(avf$participant_profile)) {
+    # Import ParticipantProfiler for plotting (use .. since QMD is in analyses/)
+    box::use(../R/calculators/participant_profiler[ParticipantProfiler])
+    profiler <- ParticipantProfiler$new()
+    profiler$plot_profiles(
+      avf$participant_profile,
+      title = "Participant Anomaly Profiles"
+    )
+  }
+}
+```
+
+```{r participant-anomaly-explanations}
+#| results: asis
+
+if (!is.null(lmm_results) && !is.null(lmm_results$advanced_validation_full)) {
+  avf <- lmm_results$advanced_validation_full
+
+  if (!is.null(avf$participant_profile)) {
+    pp <- avf$participant_profile
+    anomalous_ids <- pp$get_anomalous_ids()
+
+    if (length(anomalous_ids) > 0) {
+      cat("**Anomalous Participants and SHAP-like Feature Contributions:**\n\n")
+      cat("Each anomalous participant is explained by the features that most strongly contributed to their anomaly score. Positive contributions indicate features that *increased* the anomaly score (made the participant appear more unusual).\n\n")
+
+      for (pid in anomalous_ids) {
+        explanation <- pp$get_explanation(pid)
+        cat(sprintf("- %s\n", explanation))
+      }
+
+      cat("\n**Interpretation:** These participants show unusual combinations of aggregate features (velocity consistency, load sensitivity, RIR patterns) compared to the population. The feature contributions above explain *why* each participant was flagged---the specific features that deviated most from population norms.\n")
+    } else {
+      cat("No participants were flagged as anomalous based on their aggregate behavior patterns. All participants show typical velocity-load-RIR relationships.\n")
+    }
+  }
+}
+```
+
+```{r fig-participant-contributions}
+#| label: fig-participant-contributions
+#| fig-cap: "SHAP-like feature contributions for anomalous participants. Each bar shows how much a feature contributed to the participant's anomaly score. Blue bars (negative) indicate features that decreased the anomaly score, while red bars (positive) indicate features that increased it."
+#| fig-width: 12
+#| fig-height: 8
+
+if (!is.null(lmm_results) && !is.null(lmm_results$advanced_validation_full)) {
+  avf <- lmm_results$advanced_validation_full
+
+  if (!is.null(avf$participant_profile)) {
+    pp <- avf$participant_profile
+
+    if (sum(pp$is_anomaly) > 0 && !is.null(pp$feature_contributions)) {
+      box::use(../R/calculators/participant_profiler[ParticipantProfiler])
+      profiler <- ParticipantProfiler$new()
+
+      tryCatch({
+        profiler$plot_all_anomaly_explanations(pp, top_k = 5)
+      }, error = function(e) {
+        cat("Feature contribution plot not available.\n")
+      })
+    }
+  }
+}
+```
+
+```{r fig-aggregate-importance}
+#| label: fig-aggregate-importance
+#| fig-cap: "Aggregate feature importance across all anomalous participants. This shows which features most commonly contribute to anomaly detection, helping identify the key behavioral patterns that distinguish anomalous participants."
+#| fig-width: 10
+#| fig-height: 6
+
+if (!is.null(lmm_results) && !is.null(lmm_results$advanced_validation_full)) {
+  avf <- lmm_results$advanced_validation_full
+
+  if (!is.null(avf$participant_profile)) {
+    pp <- avf$participant_profile
+
+    if (sum(pp$is_anomaly) > 0 && !is.null(pp$feature_contributions)) {
+      box::use(../R/calculators/participant_profiler[ParticipantProfiler])
+      profiler <- ParticipantProfiler$new()
+
+      tryCatch({
+        profiler$plot_aggregate_importance(pp, top_k = 10)
+      }, error = function(e) {
+        cat("Aggregate importance plot not available.\n")
+      })
+    }
+  }
+}
+```
+
+#### 5.10.4 Feature Engineering Summary
+
+The enhanced anomaly detection uses a comprehensive feature engineering system with 12 feature groups across multiple aggregation levels:
+
+**Feature Group Categories:**
+
+1. **Observation-Level (per rep)**: Z-scores vs global and participant means, position in set
+2. **Set-Level (per set)**: Mean velocity, velocity decay, coefficient of variation
+3. **Participant-Level (aggregated)**: Overall velocity patterns, RIR sensitivity, load response
+4. **Participant × Set**: Performance deviation from participant's own norm
+5. **Participant × Load**: How each participant responds at different load levels
+6. **Participant × RIR**: Velocity-RIR relationship for each participant
+7. **Cross-Set Ratios**: Comparing performance across consecutive sets
+8. **Global Context Ratios**: Comparing each observation to population norms
+9. **Velocity Curve Features**: Decay patterns within sets
+10. **Session-Level Features**: Cumulative volume, fatigue tracking
+11. **Advanced Derived Features**: Residuals from RIR predictions, standardized deviations
+12. **Interaction Features**: RIR × Load interactions, position × RIR
+
+```{r tbl-features-summary}
+#| label: tbl-features-summary
+#| tbl-cap: "Summary of engineered features for anomaly detection"
+
+if (!is.null(lmm_results) && !is.null(lmm_results$advanced_validation)) {
+  av <- lmm_results$advanced_validation
+
+  if (!is.null(av$anomalies) && !is.null(av$anomalies$features_result)) {
+    fr <- av$anomalies$features_result
+
+    features_df <- data.frame(
+      Level = c("Observation", "Set", "Participant", "Cross-Level"),
+      `N Features` = c(
+        length(fr$feature_names$observation),
+        length(fr$feature_names$set),
+        length(fr$feature_names$participant),
+        length(fr$feature_names$participant_set) + length(fr$feature_names$participant_load) + length(fr$feature_names$participant_rir)
+      ),
+      Description = c(
+        "Per-rep: z-scores, position, decay contribution",
+        "Per-set: mean, CV, decay slope, range",
+        "Per-participant: velocity profile, RIR sensitivity",
+        "Participant × (Set, Load, RIR): cross-level interactions"
+      ),
+      check.names = FALSE
+    )
+
+    format_table(features_df)
+  }
+}
+```
+
+```{r features-detail}
+#| results: asis
+
+if (!is.null(lmm_results) && !is.null(lmm_results$advanced_validation)) {
+  av <- lmm_results$advanced_validation
+
+  if (!is.null(av$anomalies) && !is.null(av$anomalies$features_result)) {
+    fr <- av$anomalies$features_result
+
+    cat("**Key Observation-Level Features (for individual rep anomaly detection):**\n\n")
+    key_obs <- c("velocity_z_global", "velocity_z_within_participant", "velocity_z_within_set",
+                 "set_position_normalized", "velocity_residual_from_rir", "standardized_residual_rir")
+    for (f in key_obs) {
+      if (f %in% fr$feature_names$observation) {
+        cat(sprintf("- `%s`\n", f))
+      }
+    }
+
+    cat("\n**Key Participant-Level Features (for participant profiling):**\n\n")
+    key_part <- c("p_mean_velocity", "p_velocity_cv", "p_rir_slope", "p_rir_r2",
+                  "p_load_sensitivity", "p_mean_reps_per_set")
+    for (f in key_part) {
+      if (f %in% fr$feature_names$participant) {
+        cat(sprintf("- `%s`\n", f))
+      }
+    }
+
+    cat("\n**Feature Interpretation:**\n\n")
+    cat("- **velocity_z_global**: How unusual is this velocity compared to all observations?\n")
+    cat("- **velocity_z_within_participant**: How unusual is this velocity for this specific participant?\n")
+    cat("- **velocity_residual_from_rir**: Deviation from expected velocity given the RIR\n")
+    cat("- **p_velocity_cv**: Coefficient of variation (consistency) across all observations\n")
+    cat("- **p_rir_slope**: How strongly velocity increases with RIR (steeper = more fatigable)\n")
+    cat("- **p_load_sensitivity**: How much velocity drops when load increases\n")
+  }
+}
+```
+
+#### 5.10.5 Detection Method Comparison
+
+We compare Isolation Forest with Mahalanobis distance for participant-level anomaly detection:
+
+```{r tbl-method-comparison}
+#| label: tbl-method-comparison
+#| tbl-cap: "Comparison of participant anomaly detection methods"
+
+if (!is.null(lmm_results) && !is.null(lmm_results$advanced_validation)) {
+  av <- lmm_results$advanced_validation
+
+  if (!is.null(av$anomalies) && !is.null(av$anomalies$participant_method_comparison)) {
+    mc <- av$anomalies$participant_method_comparison
+
+    mc_display <- data.frame(
+      Method = mc$method,
+      `N Flagged` = mc$n_flagged,
+      Threshold = sprintf("%.4f", mc$threshold),
+      `Mean Score` = sprintf("%.4f", mc$score_mean),
+      `Score SD` = sprintf("%.4f", mc$score_sd),
+      check.names = FALSE
+    )
+
+    format_table(mc_display)
+  }
+}
+```
+
+```{r method-interpretation}
+#| results: asis
+
+if (!is.null(lmm_results) && !is.null(lmm_results$advanced_validation)) {
+  av <- lmm_results$advanced_validation
+
+  if (!is.null(av$anomalies) && !is.null(av$anomalies$participant_method_comparison)) {
+    mc <- av$anomalies$participant_method_comparison
+
+    if_row <- mc[mc$method == "isolation_forest", ]
+    mah_row <- mc[mc$method == "mahalanobis", ]
+
+    if (nrow(if_row) > 0 && nrow(mah_row) > 0) {
+      cat(sprintf(
+        "**Interpretation:** Isolation Forest flagged %d participants while Mahalanobis distance flagged %d. ",
+        if_row$n_flagged, mah_row$n_flagged
+      ))
+
+      if (if_row$n_flagged == mah_row$n_flagged) {
+        cat("Agreement between methods increases confidence in the identified anomalies.\n")
+      } else {
+        cat("Differences between methods reflect their complementary detection approaches---Isolation Forest captures non-linear patterns while Mahalanobis assumes multivariate normality.\n")
+      }
+    }
+  }
+}
+```
+
+### 5.11 Model Calibration {#sec-calibration}
 
 Model calibration assesses whether predictions match reality. A well-calibrated model should have predictions that, on average, equal observed values.
 

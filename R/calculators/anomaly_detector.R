@@ -40,7 +40,10 @@ box::use(
   ],
   dplyr[mutate, arrange, group_by, summarize, ungroup, n, .data, filter, bind_rows],
   stats[predict, setNames, quantile, sd],
-  tidyr[pivot_longer]
+  tidyr[pivot_longer],
+  ./threshold_selector[ThresholdSelector, ThresholdStrategy],
+  ./feature_engineer[FeatureEngineer],
+  ./participant_profiler[ParticipantProfiler]
 )
 
 #' Anomaly Result Value Object
@@ -754,6 +757,103 @@ AnomalyDetector <- R6Class(
           plot.title = element_text(face = "bold"),
           legend.position = "bottom"
         )
+    },
+
+    # =========================================================================
+    # Enhanced Methods with Configurable Threshold
+    # =========================================================================
+
+    #' @description Detect raw data anomalies with configurable threshold strategy
+    #'
+    #' Enhanced version that supports data-driven threshold selection
+    #' in addition to fixed contamination rates.
+    #'
+    #' @param data Data frame with numeric features
+    #' @param features Character vector of column names to use
+    #' @param threshold_strategy ThresholdStrategy value (default: ELBOW_DETECTION)
+    #' @param threshold_params List of strategy-specific parameters
+    #' @return AnomalyResult object
+    detect_raw_data_anomalies_v2 = function(data, features,
+                                             threshold_strategy = ThresholdStrategy$ELBOW_DETECTION,
+                                             threshold_params = list()) {
+      stopifnot(
+        "data must be a data frame" = is.data.frame(data),
+        "features must be character vector" = is.character(features),
+        "all features must exist in data" = all(features %in% names(data))
+      )
+
+      # Extract feature matrix
+      feature_matrix <- as.matrix(data[, features, drop = FALSE])
+
+      # Check for missing values
+      if (any(is.na(feature_matrix))) {
+        warning("Missing values detected. Rows with NA will have NA scores.")
+      }
+
+      # Fit Isolation Forest and get scores
+      scores <- private$.fit_and_score(feature_matrix)
+
+      # Use ThresholdSelector for data-driven threshold
+      selector <- ThresholdSelector$new()
+      threshold_result <- selector$select_threshold(
+        scores, threshold_strategy, threshold_params
+      )
+
+      AnomalyResult$new(scores, threshold_result$threshold, contamination_rate = NULL)
+    },
+
+    #' @description Detect participant-level anomalies using aggregate behavior
+    #'
+    #' Uses FeatureEngineer to create participant-level features and
+    #' ParticipantProfiler to detect anomalous participants.
+    #'
+    #' @param data Data frame with required columns for feature engineering
+    #' @param method Detection method: "isolation_forest" or "mahalanobis"
+    #' @param threshold_strategy ThresholdStrategy value
+    #' @param threshold_params List of threshold parameters
+    #' @return ParticipantProfileResult object from participant_profiler
+    detect_participant_anomalies = function(data,
+                                             method = "isolation_forest",
+                                             threshold_strategy = ThresholdStrategy$ELBOW_DETECTION,
+                                             threshold_params = list()) {
+      # Engineer features
+      fe <- FeatureEngineer$new()
+      features_result <- fe$engineer_features(data)
+
+      # Profile participants
+      profiler <- ParticipantProfiler$new(random_state = private$.random_state)
+      profiler$profile_participants(
+        features_result$participant_features,
+        method = method,
+        threshold_strategy = threshold_strategy,
+        threshold_params = threshold_params
+      )
+    },
+
+    #' @description Get FeatureEngineer instance for manual feature engineering
+    #' @return FeatureEngineer R6 class (not instance)
+    get_feature_engineer = function() {
+      FeatureEngineer
+    },
+
+    #' @description Get ParticipantProfiler instance for manual profiling
+    #' @return New ParticipantProfiler instance with same random state
+    get_participant_profiler = function() {
+      ParticipantProfiler$new(random_state = private$.random_state)
+    },
+
+    #' @description Get ThresholdSelector for manual threshold selection
+    #' @return New ThresholdSelector instance
+    get_threshold_selector = function() {
+      ThresholdSelector$new()
+    },
+
+    #' @description Compare threshold strategies for a given set of scores
+    #' @param scores Numeric vector of anomaly scores
+    #' @return Data frame comparing all strategies
+    compare_threshold_strategies = function(scores) {
+      selector <- ThresholdSelector$new()
+      selector$compare_strategies(scores)
     }
   ),
 

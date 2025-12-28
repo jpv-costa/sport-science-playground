@@ -55,6 +55,9 @@ box::use(
     AnomalyResult,
     ParticipantAnomalyResult
   ],
+  R/calculators/threshold_selector[ThresholdSelector, ThresholdStrategy],
+  R/calculators/feature_engineer[FeatureEngineer],
+  R/calculators/participant_profiler[ParticipantProfiler],
   R/calculators/influence_diagnostics[
     InfluenceDiagnostics,
     InfluenceDiagnosticsResult
@@ -813,6 +816,71 @@ cat(sprintf("  Only Cook's D: %d observations\n", if_comparison$only_cooks_dista
 cat(sprintf("  Agreement rate: %.1f%%\n", if_comparison$agreement_rate * 100))
 cat(sprintf("  Interpretation: %s\n\n", if_comparison$interpretation))
 
+# 10.5.1: Enhanced Anomaly Detection with Data-Driven Threshold
+cat("10.5.1 Enhanced Anomaly Detection (Data-Driven Threshold)\n")
+cat("-" |> rep(70) |> paste(collapse = ""), "\n\n")
+
+# Compare threshold strategies
+cat("Comparing threshold strategies on raw anomaly scores:\n")
+threshold_comparison <- anomaly_detector$compare_threshold_strategies(raw_anomalies$scores)
+print(threshold_comparison)
+cat("\n")
+
+# Use elbow detection for more accurate threshold
+cat("Using Elbow Detection for data-driven threshold:\n")
+raw_anomalies_v2 <- anomaly_detector$detect_raw_data_anomalies_v2(
+  data = data,
+  features = c("mean_velocity", "rir", "load_percentage"),
+  threshold_strategy = ThresholdStrategy$ELBOW_DETECTION
+)
+
+cat(sprintf("  Elbow threshold: %.4f (vs fixed %.4f)\n",
+            raw_anomalies_v2$threshold, raw_anomalies$threshold))
+cat(sprintf("  Anomalies with elbow: %d (vs fixed %d)\n",
+            raw_anomalies_v2$n_anomalies, raw_anomalies$n_anomalies))
+cat("\n")
+
+# 10.5.2: Participant-Level Anomaly Detection
+cat("10.5.2 Participant-Level Anomaly Detection (Aggregate Behavior)\n")
+cat("-" |> rep(70) |> paste(collapse = ""), "\n\n")
+
+# Engineer features and detect participant-level anomalies
+cat("Engineering participant-level features...\n")
+fe <- FeatureEngineer$new()
+features_result <- fe$engineer_features(data)
+cat(sprintf("  Observation features: %d\n", length(fe$get_observation_feature_names())))
+cat(sprintf("  Participant features: %d\n", length(fe$get_participant_feature_names())))
+cat("\n")
+
+# Profile participants
+cat("Detecting anomalous participants via aggregate behavior:\n")
+profiler <- ParticipantProfiler$new(random_state = 42)
+participant_profile <- profiler$profile_participants(
+  features_result$participant_features,
+  method = "isolation_forest",
+  threshold_strategy = ThresholdStrategy$ELBOW_DETECTION
+)
+
+cat(sprintf("  Threshold: %.4f\n", participant_profile$threshold))
+cat(sprintf("  Anomalous participants: %d of %d\n",
+            sum(participant_profile$is_anomaly),
+            length(participant_profile$is_anomaly)))
+if (length(participant_profile$get_anomalous_ids()) > 0) {
+  cat(sprintf("  Anomalous IDs: %s\n",
+              paste(participant_profile$get_anomalous_ids(), collapse = ", ")))
+  cat("\n  Explanations:\n")
+  for (pid in participant_profile$get_anomalous_ids()) {
+    cat(sprintf("    - %s\n", participant_profile$get_explanation(pid)))
+  }
+}
+cat("\n")
+
+# Compare methods
+cat("Comparing detection methods:\n")
+method_comparison <- profiler$compare_methods(features_result$participant_features)
+print(method_comparison)
+cat("\n")
+
 # 10.6: Model Calibration
 cat("10.6 Model Calibration Assessment\n")
 cat("-" |> rep(70) |> paste(collapse = ""), "\n\n")
@@ -936,7 +1004,18 @@ output <- list(
       # Full result objects for visualizations
       raw_data_result = raw_anomalies,
       random_effects_result = re_anomalies,
-      cv_residuals_result = cv_anomalies
+      cv_residuals_result = cv_anomalies,
+      # Enhanced detection (v2) with elbow threshold
+      raw_data_v2 = raw_anomalies_v2$summarize(),
+      raw_data_v2_result = raw_anomalies_v2,
+      threshold_comparison = threshold_comparison,
+      # Participant-level anomaly detection
+      participant_profile = participant_profile$summarize(),
+      participant_profile_result = participant_profile,
+      participant_method_comparison = method_comparison,
+      # Feature engineering
+      features_summary = features_result$summarize(),
+      features_result = features_result
     ),
 
     # Influence diagnostics
@@ -967,7 +1046,13 @@ output <- list(
     cv_anomalies = cv_anomalies,
     influence_result = influence_result,
     calibration = calibration,
-    interval_comparison_full = interval_comparison
+    interval_comparison_full = interval_comparison,
+    # Enhanced detection
+    raw_anomalies_v2 = raw_anomalies_v2,
+    participant_profile = participant_profile,
+    features_result = features_result,
+    threshold_comparison = threshold_comparison,
+    method_comparison = method_comparison
   )
 )
 

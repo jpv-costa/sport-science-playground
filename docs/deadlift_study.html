@@ -272,8 +272,9 @@ window.Quarto = {
   <li><a href="#sec-coef-stability" id="toc-sec-coef-stability" class="nav-link" data-scroll-target="#sec-coef-stability">5.6 Coefficient Stability Analysis</a></li>
   <li><a href="#sec-model-selection-stability" id="toc-sec-model-selection-stability" class="nav-link" data-scroll-target="#sec-model-selection-stability">5.7 Model Selection Stability</a></li>
   <li><a href="#sec-anomaly-detection" id="toc-sec-anomaly-detection" class="nav-link" data-scroll-target="#sec-anomaly-detection">5.8 Anomaly Detection with Isolation Forest</a></li>
-  <li><a href="#sec-if-vs-cooks" id="toc-sec-if-vs-cooks" class="nav-link" data-scroll-target="#sec-if-vs-cooks">5.9 Comparison: Isolation Forest vs Cook’s Distance</a></li>
-  <li><a href="#sec-calibration" id="toc-sec-calibration" class="nav-link" data-scroll-target="#sec-calibration">5.10 Model Calibration</a></li>
+  <li><a href="#sec-if-vs-cooks" id="toc-sec-if-vs-cooks" class="nav-link" data-scroll-target="#sec-if-vs-cooks">5.9 Why Isolation Forest Over Cook’s Distance</a></li>
+  <li><a href="#sec-enhanced-anomaly" id="toc-sec-enhanced-anomaly" class="nav-link" data-scroll-target="#sec-enhanced-anomaly">5.10 Enhanced Multi-Level Anomaly Detection</a></li>
+  <li><a href="#sec-calibration" id="toc-sec-calibration" class="nav-link" data-scroll-target="#sec-calibration">5.11 Model Calibration</a></li>
   <li><a href="#advanced-validation-summary" id="toc-advanced-validation-summary" class="nav-link" data-scroll-target="#advanced-validation-summary">5.11 Advanced Validation Summary</a></li>
   </ul></li>
   <li><a href="#discussion" id="toc-discussion" class="nav-link" data-scroll-target="#discussion">6. Discussion</a>
@@ -4805,34 +4806,23 @@ Table&nbsp;21: Random effects anomaly detection by participant
 </section>
 </section>
 <section id="sec-if-vs-cooks" class="level3">
-<h3 class="anchored" data-anchor-id="sec-if-vs-cooks">5.9 Comparison: Isolation Forest vs Cook’s Distance</h3>
-<p>Cook’s distance and Isolation Forest detect different types of unusual observations:</p>
-<table class="table">
-<colgroup>
-<col style="width: 22%">
-<col style="width: 47%">
-<col style="width: 30%">
-</colgroup>
-<thead>
-<tr class="header">
-<th>Method</th>
-<th>What It Detects</th>
-<th>Strengths</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td><strong>Cook’s Distance</strong></td>
-<td>Influential observations (affect regression coefficients)</td>
-<td>Standard, interpretable</td>
-</tr>
-<tr class="even">
-<td><strong>Isolation Forest</strong></td>
-<td>Multivariate anomalies (unusual in feature space)</td>
-<td>No distributional assumptions</td>
-</tr>
-</tbody>
-</table>
+<h3 class="anchored" data-anchor-id="sec-if-vs-cooks">5.9 Why Isolation Forest Over Cook’s Distance</h3>
+<p>We choose Isolation Forest as our primary anomaly detection method for several reasons:</p>
+<p><strong>Advantages of Isolation Forest:</strong></p>
+<ol type="1">
+<li><strong>No distributional assumptions</strong>: Unlike Cook’s distance (which assumes normality and linear relationships), Isolation Forest works with any data distribution</li>
+<li><strong>Multivariate detection</strong>: Identifies unusual <em>combinations</em> of features, not just univariate outliers</li>
+<li><strong>Feature explainability</strong>: With SHAP-like permutation analysis, we can explain <em>why</em> each observation is flagged</li>
+<li><strong>Data-driven thresholds</strong>: Elbow detection finds natural breaks in anomaly scores rather than arbitrary cutoffs</li>
+<li><strong>Scales to high dimensions</strong>: Works well with our 50+ engineered features</li>
+</ol>
+<p><strong>Limitations of Cook’s Distance:</strong></p>
+<ul>
+<li>Measures <em>influence on regression coefficients</em>, not inherent data quality</li>
+<li>Tends to over-flag observations with high leverage (extreme X values)</li>
+<li>The 4/n threshold is arbitrary and often flags too many observations</li>
+<li>Cannot explain why an observation is flagged</li>
+</ul>
 <div class="cell">
 <details class="code-fold">
 <summary>Show code</summary>
@@ -4843,66 +4833,48 @@ Table&nbsp;21: Random effects anomaly detection by participant
 <span id="cb74-5"><a href="#cb74-5" aria-hidden="true" tabindex="-1"></a>    comp <span class="ot">&lt;-</span> av<span class="sc">$</span>if_vs_cooks_comparison</span>
 <span id="cb74-6"><a href="#cb74-6" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb74-7"><a href="#cb74-7" aria-hidden="true" tabindex="-1"></a>    comparison_df <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(</span>
-<span id="cb74-8"><a href="#cb74-8" aria-hidden="true" tabindex="-1"></a>      <span class="at">Category =</span> <span class="fu">c</span>(</span>
-<span id="cb74-9"><a href="#cb74-9" aria-hidden="true" tabindex="-1"></a>        <span class="st">"Both Methods Agree (Flagged)"</span>,</span>
-<span id="cb74-10"><a href="#cb74-10" aria-hidden="true" tabindex="-1"></a>        <span class="st">"Only Isolation Forest Flags"</span>,</span>
-<span id="cb74-11"><a href="#cb74-11" aria-hidden="true" tabindex="-1"></a>        <span class="st">"Only Cook's Distance Flags"</span>,</span>
-<span id="cb74-12"><a href="#cb74-12" aria-hidden="true" tabindex="-1"></a>        <span class="st">"Neither Method Flags"</span>,</span>
-<span id="cb74-13"><a href="#cb74-13" aria-hidden="true" tabindex="-1"></a>        <span class="st">"Overall Agreement Rate"</span>,</span>
-<span id="cb74-14"><a href="#cb74-14" aria-hidden="true" tabindex="-1"></a>        <span class="st">"Jaccard Index"</span></span>
-<span id="cb74-15"><a href="#cb74-15" aria-hidden="true" tabindex="-1"></a>      ),</span>
-<span id="cb74-16"><a href="#cb74-16" aria-hidden="true" tabindex="-1"></a>      <span class="at">Value =</span> <span class="fu">c</span>(</span>
-<span id="cb74-17"><a href="#cb74-17" aria-hidden="true" tabindex="-1"></a>        comp<span class="sc">$</span>both_flagged,</span>
-<span id="cb74-18"><a href="#cb74-18" aria-hidden="true" tabindex="-1"></a>        comp<span class="sc">$</span>only_isolation_forest,</span>
-<span id="cb74-19"><a href="#cb74-19" aria-hidden="true" tabindex="-1"></a>        comp<span class="sc">$</span>only_cooks_distance,</span>
-<span id="cb74-20"><a href="#cb74-20" aria-hidden="true" tabindex="-1"></a>        comp<span class="sc">$</span>neither_flagged,</span>
-<span id="cb74-21"><a href="#cb74-21" aria-hidden="true" tabindex="-1"></a>        <span class="fu">sprintf</span>(<span class="st">"%.1f%%"</span>, comp<span class="sc">$</span>agreement_rate <span class="sc">*</span> <span class="dv">100</span>),</span>
-<span id="cb74-22"><a href="#cb74-22" aria-hidden="true" tabindex="-1"></a>        <span class="fu">sprintf</span>(<span class="st">"%.3f"</span>, comp<span class="sc">$</span>jaccard_index)</span>
-<span id="cb74-23"><a href="#cb74-23" aria-hidden="true" tabindex="-1"></a>      )</span>
-<span id="cb74-24"><a href="#cb74-24" aria-hidden="true" tabindex="-1"></a>    )</span>
-<span id="cb74-25"><a href="#cb74-25" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb74-26"><a href="#cb74-26" aria-hidden="true" tabindex="-1"></a>    <span class="fu">format_table</span>(comparison_df, <span class="at">col.names =</span> <span class="fu">c</span>(<span class="st">"Category"</span>, <span class="st">"Value"</span>))</span>
-<span id="cb74-27"><a href="#cb74-27" aria-hidden="true" tabindex="-1"></a>  }</span>
-<span id="cb74-28"><a href="#cb74-28" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb74-8"><a href="#cb74-8" aria-hidden="true" tabindex="-1"></a>      <span class="at">Metric =</span> <span class="fu">c</span>(</span>
+<span id="cb74-9"><a href="#cb74-9" aria-hidden="true" tabindex="-1"></a>        <span class="st">"Observations flagged by Isolation Forest"</span>,</span>
+<span id="cb74-10"><a href="#cb74-10" aria-hidden="true" tabindex="-1"></a>        <span class="st">"Observations flagged by Cook's Distance"</span>,</span>
+<span id="cb74-11"><a href="#cb74-11" aria-hidden="true" tabindex="-1"></a>        <span class="st">"Agreement rate"</span></span>
+<span id="cb74-12"><a href="#cb74-12" aria-hidden="true" tabindex="-1"></a>      ),</span>
+<span id="cb74-13"><a href="#cb74-13" aria-hidden="true" tabindex="-1"></a>      <span class="at">Value =</span> <span class="fu">c</span>(</span>
+<span id="cb74-14"><a href="#cb74-14" aria-hidden="true" tabindex="-1"></a>        comp<span class="sc">$</span>both_flagged <span class="sc">+</span> comp<span class="sc">$</span>only_isolation_forest,</span>
+<span id="cb74-15"><a href="#cb74-15" aria-hidden="true" tabindex="-1"></a>        comp<span class="sc">$</span>both_flagged <span class="sc">+</span> comp<span class="sc">$</span>only_cooks_distance,</span>
+<span id="cb74-16"><a href="#cb74-16" aria-hidden="true" tabindex="-1"></a>        <span class="fu">sprintf</span>(<span class="st">"%.1f%%"</span>, comp<span class="sc">$</span>agreement_rate <span class="sc">*</span> <span class="dv">100</span>)</span>
+<span id="cb74-17"><a href="#cb74-17" aria-hidden="true" tabindex="-1"></a>      )</span>
+<span id="cb74-18"><a href="#cb74-18" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb74-19"><a href="#cb74-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb74-20"><a href="#cb74-20" aria-hidden="true" tabindex="-1"></a>    <span class="fu">format_table</span>(comparison_df, <span class="at">col.names =</span> <span class="fu">c</span>(<span class="st">"Metric"</span>, <span class="st">"Value"</span>))</span>
+<span id="cb74-21"><a href="#cb74-21" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb74-22"><a href="#cb74-22" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div id="tbl-if-vs-cooks" class="cell quarto-float anchored">
 <figure class="quarto-float quarto-float-tbl figure">
 <figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-if-vs-cooks-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Table&nbsp;22: Agreement between Isolation Forest and Cook’s Distance for flagging anomalies
+Table&nbsp;22: Comparison between Isolation Forest and Cook’s Distance flagging (for reference)
 </figcaption>
 <div aria-describedby="tbl-if-vs-cooks-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <div class="cell-output-display">
 <table class="do-not-create-environment cell table table-sm table-striped small">
 <thead>
 <tr class="header">
-<th style="text-align: left;">Category</th>
+<th style="text-align: left;">Metric</th>
 <th style="text-align: left;">Value</th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
-<td style="text-align: left;">Both Methods Agree (Flagged)</td>
-<td style="text-align: left;">21</td>
+<td style="text-align: left;">Observations flagged by Isolation Forest</td>
+<td style="text-align: left;">22</td>
 </tr>
 <tr class="even">
-<td style="text-align: left;">Only Isolation Forest Flags</td>
-<td style="text-align: left;">1</td>
+<td style="text-align: left;">Observations flagged by Cook’s Distance</td>
+<td style="text-align: left;">228</td>
 </tr>
 <tr class="odd">
-<td style="text-align: left;">Only Cook’s Distance Flags</td>
-<td style="text-align: left;">207</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">Neither Method Flags</td>
-<td style="text-align: left;">177</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">Overall Agreement Rate</td>
+<td style="text-align: left;">Agreement rate</td>
 <td style="text-align: left;">48.8%</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">Jaccard Index</td>
-<td style="text-align: left;">0.092</td>
 </tr>
 </tbody>
 </table>
@@ -4919,60 +4891,673 @@ Table&nbsp;22: Agreement between Isolation Forest and Cook’s Distance for flag
 <span id="cb75-4"><a href="#cb75-4" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (<span class="sc">!</span><span class="fu">is.null</span>(av<span class="sc">$</span>if_vs_cooks_comparison)) {</span>
 <span id="cb75-5"><a href="#cb75-5" aria-hidden="true" tabindex="-1"></a>    comp <span class="ot">&lt;-</span> av<span class="sc">$</span>if_vs_cooks_comparison</span>
 <span id="cb75-6"><a href="#cb75-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb75-7"><a href="#cb75-7" aria-hidden="true" tabindex="-1"></a>    <span class="fu">cat</span>(<span class="st">"**Interpretation:** "</span>, comp<span class="sc">$</span>interpretation, <span class="st">"</span><span class="sc">\n\n</span><span class="st">"</span>)</span>
-<span id="cb75-8"><a href="#cb75-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb75-9"><a href="#cb75-9" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> (comp<span class="sc">$</span>agreement_rate <span class="sc">&gt;</span> <span class="fl">0.8</span>) {</span>
-<span id="cb75-10"><a href="#cb75-10" aria-hidden="true" tabindex="-1"></a>      <span class="fu">cat</span>(<span class="st">"High agreement between methods suggests consistent identification of unusual observations.</span><span class="sc">\n</span><span class="st">"</span>)</span>
-<span id="cb75-11"><a href="#cb75-11" aria-hidden="true" tabindex="-1"></a>    } <span class="cf">else</span> <span class="cf">if</span> (comp<span class="sc">$</span>agreement_rate <span class="sc">&gt;</span> <span class="fl">0.5</span>) {</span>
-<span id="cb75-12"><a href="#cb75-12" aria-hidden="true" tabindex="-1"></a>      <span class="fu">cat</span>(<span class="st">"Moderate agreement indicates the methods detect different aspects of data quality.</span><span class="sc">\n</span><span class="st">"</span>)</span>
-<span id="cb75-13"><a href="#cb75-13" aria-hidden="true" tabindex="-1"></a>    } <span class="cf">else</span> {</span>
-<span id="cb75-14"><a href="#cb75-14" aria-hidden="true" tabindex="-1"></a>      <span class="fu">cat</span>(<span class="st">"Low agreement confirms these methods are complementary rather than redundant. "</span>,</span>
-<span id="cb75-15"><a href="#cb75-15" aria-hidden="true" tabindex="-1"></a>          <span class="st">"Cook's distance focuses on regression influence, while Isolation Forest "</span>,</span>
-<span id="cb75-16"><a href="#cb75-16" aria-hidden="true" tabindex="-1"></a>          <span class="st">"detects multivariate outliers in the feature space.</span><span class="sc">\n</span><span class="st">"</span>)</span>
-<span id="cb75-17"><a href="#cb75-17" aria-hidden="true" tabindex="-1"></a>    }</span>
-<span id="cb75-18"><a href="#cb75-18" aria-hidden="true" tabindex="-1"></a>  }</span>
-<span id="cb75-19"><a href="#cb75-19" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb75-7"><a href="#cb75-7" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> (comp<span class="sc">$</span>only_cooks_distance <span class="sc">&gt;</span> comp<span class="sc">$</span>only_isolation_forest <span class="sc">*</span> <span class="dv">3</span>) {</span>
+<span id="cb75-8"><a href="#cb75-8" aria-hidden="true" tabindex="-1"></a>      <span class="fu">cat</span>(<span class="st">"**Note:** Cook's distance flags significantly more observations than Isolation Forest. "</span>,</span>
+<span id="cb75-9"><a href="#cb75-9" aria-hidden="true" tabindex="-1"></a>          <span class="st">"This is expected because Cook's distance is sensitive to leverage (extreme RIR or load values) "</span>,</span>
+<span id="cb75-10"><a href="#cb75-10" aria-hidden="true" tabindex="-1"></a>          <span class="st">"rather than truly anomalous patterns. We focus on Isolation Forest results for data quality assessment.</span><span class="sc">\n</span><span class="st">"</span>)</span>
+<span id="cb75-11"><a href="#cb75-11" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb75-12"><a href="#cb75-12" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb75-13"><a href="#cb75-13" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
-<p><strong>Interpretation:</strong> Cook’s distance flags more observations (may be more sensitive to leverage)</p>
-<p>Low agreement confirms these methods are complementary rather than redundant. Cook’s distance focuses on regression influence, while Isolation Forest detects multivariate outliers in the feature space.</p>
+<p><strong>Note:</strong> Cook’s distance flags significantly more observations than Isolation Forest. This is expected because Cook’s distance is sensitive to leverage (extreme RIR or load values) rather than truly anomalous patterns. We focus on Isolation Forest results for data quality assessment.</p>
 </section>
-<section id="sec-calibration" class="level3">
-<h3 class="anchored" data-anchor-id="sec-calibration">5.10 Model Calibration</h3>
-<p>Model calibration assesses whether predictions match reality. A well-calibrated model should have predictions that, on average, equal observed values.</p>
+<section id="sec-enhanced-anomaly" class="level3">
+<h3 class="anchored" data-anchor-id="sec-enhanced-anomaly">5.10 Enhanced Multi-Level Anomaly Detection</h3>
+<p>The previous section used a fixed 95th percentile threshold. Here we compare multiple data-driven threshold selection strategies and extend anomaly detection to the participant level using aggregate behavior patterns.</p>
+<section id="threshold-strategy-comparison" class="level4">
+<h4 class="anchored" data-anchor-id="threshold-strategy-comparison">5.10.1 Threshold Strategy Comparison</h4>
+<p>Different threshold selection strategies may identify different thresholds depending on the score distribution characteristics.</p>
 <div class="cell">
 <details class="code-fold">
 <summary>Show code</summary>
 <div class="sourceCode cell-code" id="cb76"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb76-1"><a href="#cb76-1" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (<span class="sc">!</span><span class="fu">is.null</span>(lmm_results) <span class="sc">&amp;&amp;</span> <span class="sc">!</span><span class="fu">is.null</span>(lmm_results<span class="sc">$</span>advanced_validation)) {</span>
 <span id="cb76-2"><a href="#cb76-2" aria-hidden="true" tabindex="-1"></a>  av <span class="ot">&lt;-</span> lmm_results<span class="sc">$</span>advanced_validation</span>
 <span id="cb76-3"><a href="#cb76-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb76-4"><a href="#cb76-4" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (<span class="sc">!</span><span class="fu">is.null</span>(av<span class="sc">$</span>calibration)) {</span>
-<span id="cb76-5"><a href="#cb76-5" aria-hidden="true" tabindex="-1"></a>    cal <span class="ot">&lt;-</span> av<span class="sc">$</span>calibration</span>
+<span id="cb76-4"><a href="#cb76-4" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (<span class="sc">!</span><span class="fu">is.null</span>(av<span class="sc">$</span>anomalies) <span class="sc">&amp;&amp;</span> <span class="sc">!</span><span class="fu">is.null</span>(av<span class="sc">$</span>anomalies<span class="sc">$</span>threshold_comparison)) {</span>
+<span id="cb76-5"><a href="#cb76-5" aria-hidden="true" tabindex="-1"></a>    tc <span class="ot">&lt;-</span> av<span class="sc">$</span>anomalies<span class="sc">$</span>threshold_comparison</span>
 <span id="cb76-6"><a href="#cb76-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb76-7"><a href="#cb76-7" aria-hidden="true" tabindex="-1"></a>    cal_df <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(</span>
-<span id="cb76-8"><a href="#cb76-8" aria-hidden="true" tabindex="-1"></a>      <span class="at">Metric =</span> <span class="fu">c</span>(</span>
-<span id="cb76-9"><a href="#cb76-9" aria-hidden="true" tabindex="-1"></a>        <span class="st">"Calibration Slope"</span>,</span>
-<span id="cb76-10"><a href="#cb76-10" aria-hidden="true" tabindex="-1"></a>        <span class="st">"Calibration Intercept"</span>,</span>
-<span id="cb76-11"><a href="#cb76-11" aria-hidden="true" tabindex="-1"></a>        <span class="st">"R-squared"</span>,</span>
-<span id="cb76-12"><a href="#cb76-12" aria-hidden="true" tabindex="-1"></a>        <span class="st">"Mean Bias"</span>,</span>
-<span id="cb76-13"><a href="#cb76-13" aria-hidden="true" tabindex="-1"></a>        <span class="st">"Assessment"</span></span>
-<span id="cb76-14"><a href="#cb76-14" aria-hidden="true" tabindex="-1"></a>      ),</span>
-<span id="cb76-15"><a href="#cb76-15" aria-hidden="true" tabindex="-1"></a>      <span class="at">Value =</span> <span class="fu">c</span>(</span>
-<span id="cb76-16"><a href="#cb76-16" aria-hidden="true" tabindex="-1"></a>        <span class="fu">sprintf</span>(<span class="st">"%.3f"</span>, cal<span class="sc">$</span>slope),</span>
-<span id="cb76-17"><a href="#cb76-17" aria-hidden="true" tabindex="-1"></a>        <span class="fu">sprintf</span>(<span class="st">"%.4f"</span>, cal<span class="sc">$</span>intercept),</span>
-<span id="cb76-18"><a href="#cb76-18" aria-hidden="true" tabindex="-1"></a>        <span class="fu">sprintf</span>(<span class="st">"%.3f"</span>, cal<span class="sc">$</span>r_squared),</span>
-<span id="cb76-19"><a href="#cb76-19" aria-hidden="true" tabindex="-1"></a>        <span class="fu">sprintf</span>(<span class="st">"%.4e m/s"</span>, cal<span class="sc">$</span>mean_bias),</span>
-<span id="cb76-20"><a href="#cb76-20" aria-hidden="true" tabindex="-1"></a>        cal<span class="sc">$</span>interpretation</span>
-<span id="cb76-21"><a href="#cb76-21" aria-hidden="true" tabindex="-1"></a>      )</span>
-<span id="cb76-22"><a href="#cb76-22" aria-hidden="true" tabindex="-1"></a>    )</span>
-<span id="cb76-23"><a href="#cb76-23" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb76-24"><a href="#cb76-24" aria-hidden="true" tabindex="-1"></a>    <span class="fu">format_table</span>(cal_df, <span class="at">col.names =</span> <span class="fu">c</span>(<span class="st">"Metric"</span>, <span class="st">"Value"</span>))</span>
-<span id="cb76-25"><a href="#cb76-25" aria-hidden="true" tabindex="-1"></a>  }</span>
-<span id="cb76-26"><a href="#cb76-26" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb76-7"><a href="#cb76-7" aria-hidden="true" tabindex="-1"></a>    tc_display <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(</span>
+<span id="cb76-8"><a href="#cb76-8" aria-hidden="true" tabindex="-1"></a>      <span class="at">Strategy =</span> tc<span class="sc">$</span>strategy,</span>
+<span id="cb76-9"><a href="#cb76-9" aria-hidden="true" tabindex="-1"></a>      <span class="at">Threshold =</span> <span class="fu">sprintf</span>(<span class="st">"%.4f"</span>, tc<span class="sc">$</span>threshold),</span>
+<span id="cb76-10"><a href="#cb76-10" aria-hidden="true" tabindex="-1"></a>      <span class="st">`</span><span class="at">N Flagged</span><span class="st">`</span> <span class="ot">=</span> tc<span class="sc">$</span>n_flagged,</span>
+<span id="cb76-11"><a href="#cb76-11" aria-hidden="true" tabindex="-1"></a>      <span class="st">`</span><span class="at">Pct Flagged</span><span class="st">`</span> <span class="ot">=</span> <span class="fu">sprintf</span>(<span class="st">"%.1f%%"</span>, (tc<span class="sc">$</span>n_flagged <span class="sc">/</span> <span class="fu">max</span>(tc<span class="sc">$</span>n_total, <span class="dv">1</span>)) <span class="sc">*</span> <span class="dv">100</span>),</span>
+<span id="cb76-12"><a href="#cb76-12" aria-hidden="true" tabindex="-1"></a>      <span class="at">check.names =</span> <span class="cn">FALSE</span></span>
+<span id="cb76-13"><a href="#cb76-13" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb76-14"><a href="#cb76-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb76-15"><a href="#cb76-15" aria-hidden="true" tabindex="-1"></a>    <span class="fu">format_table</span>(tc_display)</span>
+<span id="cb76-16"><a href="#cb76-16" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb76-17"><a href="#cb76-17" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div id="tbl-threshold-comparison" class="cell quarto-float anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-threshold-comparison-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;23: Comparison of threshold selection strategies for Isolation Forest scores
+</figcaption>
+<div aria-describedby="tbl-threshold-comparison-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="cell-output-display">
+<table class="do-not-create-environment cell table table-sm table-striped small">
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">fixed_percentile</td>
+<td style="text-align: left;">0.6026</td>
+<td style="text-align: right;">22</td>
+<td style="text-align: left;">2200.0%</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">elbow_detection</td>
+<td style="text-align: left;">0.5143</td>
+<td style="text-align: right;">83</td>
+<td style="text-align: left;">8300.0%</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">gap_statistics</td>
+<td style="text-align: left;">0.6568</td>
+<td style="text-align: right;">8</td>
+<td style="text-align: left;">800.0%</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">knee_point</td>
+<td style="text-align: left;">0.7197</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: left;">100.0%</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">mad_based</td>
+<td style="text-align: left;">0.5972</td>
+<td style="text-align: right;">23</td>
+<td style="text-align: left;">2300.0%</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</figure>
+</div>
+</div>
+<details class="code-fold">
+<summary>Show code</summary>
+<div class="sourceCode cell-code" id="cb77"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb77-1"><a href="#cb77-1" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (<span class="sc">!</span><span class="fu">is.null</span>(lmm_results) <span class="sc">&amp;&amp;</span> <span class="sc">!</span><span class="fu">is.null</span>(lmm_results<span class="sc">$</span>advanced_validation)) {</span>
+<span id="cb77-2"><a href="#cb77-2" aria-hidden="true" tabindex="-1"></a>  av <span class="ot">&lt;-</span> lmm_results<span class="sc">$</span>advanced_validation</span>
+<span id="cb77-3"><a href="#cb77-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb77-4"><a href="#cb77-4" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (<span class="sc">!</span><span class="fu">is.null</span>(av<span class="sc">$</span>anomalies) <span class="sc">&amp;&amp;</span> <span class="sc">!</span><span class="fu">is.null</span>(av<span class="sc">$</span>anomalies<span class="sc">$</span>threshold_comparison)) {</span>
+<span id="cb77-5"><a href="#cb77-5" aria-hidden="true" tabindex="-1"></a>    tc <span class="ot">&lt;-</span> av<span class="sc">$</span>anomalies<span class="sc">$</span>threshold_comparison</span>
+<span id="cb77-6"><a href="#cb77-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb77-7"><a href="#cb77-7" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Find the elbow and fixed strategies</span></span>
+<span id="cb77-8"><a href="#cb77-8" aria-hidden="true" tabindex="-1"></a>    elbow_row <span class="ot">&lt;-</span> tc[tc<span class="sc">$</span>strategy <span class="sc">==</span> <span class="st">"elbow_detection"</span>, ]</span>
+<span id="cb77-9"><a href="#cb77-9" aria-hidden="true" tabindex="-1"></a>    fixed_row <span class="ot">&lt;-</span> tc[tc<span class="sc">$</span>strategy <span class="sc">==</span> <span class="st">"fixed_percentile"</span>, ]</span>
+<span id="cb77-10"><a href="#cb77-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb77-11"><a href="#cb77-11" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> (<span class="fu">nrow</span>(elbow_row) <span class="sc">&gt;</span> <span class="dv">0</span> <span class="sc">&amp;&amp;</span> <span class="fu">nrow</span>(fixed_row) <span class="sc">&gt;</span> <span class="dv">0</span>) {</span>
+<span id="cb77-12"><a href="#cb77-12" aria-hidden="true" tabindex="-1"></a>      <span class="fu">cat</span>(<span class="fu">sprintf</span>(</span>
+<span id="cb77-13"><a href="#cb77-13" aria-hidden="true" tabindex="-1"></a>        <span class="st">"**Interpretation:** The elbow detection method identifies a threshold of %.4f (flagging %d observations), compared to the fixed 95th percentile threshold of %.4f (flagging %d observations). "</span>,</span>
+<span id="cb77-14"><a href="#cb77-14" aria-hidden="true" tabindex="-1"></a>        elbow_row<span class="sc">$</span>threshold, elbow_row<span class="sc">$</span>n_flagged,</span>
+<span id="cb77-15"><a href="#cb77-15" aria-hidden="true" tabindex="-1"></a>        fixed_row<span class="sc">$</span>threshold, fixed_row<span class="sc">$</span>n_flagged</span>
+<span id="cb77-16"><a href="#cb77-16" aria-hidden="true" tabindex="-1"></a>      ))</span>
+<span id="cb77-17"><a href="#cb77-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb77-18"><a href="#cb77-18" aria-hidden="true" tabindex="-1"></a>      <span class="cf">if</span> (elbow_row<span class="sc">$</span>threshold <span class="sc">&gt;</span> fixed_row<span class="sc">$</span>threshold) {</span>
+<span id="cb77-19"><a href="#cb77-19" aria-hidden="true" tabindex="-1"></a>        <span class="fu">cat</span>(<span class="st">"The higher elbow threshold suggests there is a clear separation between the normal score cluster and anomalous observations, supporting a more conservative flagging approach.</span><span class="sc">\n</span><span class="st">"</span>)</span>
+<span id="cb77-20"><a href="#cb77-20" aria-hidden="true" tabindex="-1"></a>      } <span class="cf">else</span> {</span>
+<span id="cb77-21"><a href="#cb77-21" aria-hidden="true" tabindex="-1"></a>        <span class="fu">cat</span>(<span class="st">"The thresholds are similar, indicating the 95th percentile is appropriate for this dataset.</span><span class="sc">\n</span><span class="st">"</span>)</span>
+<span id="cb77-22"><a href="#cb77-22" aria-hidden="true" tabindex="-1"></a>      }</span>
+<span id="cb77-23"><a href="#cb77-23" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb77-24"><a href="#cb77-24" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb77-25"><a href="#cb77-25" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<p><strong>Interpretation:</strong> The elbow detection method identifies a threshold of 0.5143 (flagging 83 observations), compared to the fixed 95th percentile threshold of 0.6026 (flagging 22 observations). The thresholds are similar, indicating the 95th percentile is appropriate for this dataset.</p>
+</section>
+<section id="elbow-detection-results" class="level4">
+<h4 class="anchored" data-anchor-id="elbow-detection-results">5.10.2 Elbow Detection Results</h4>
+<p>Using the elbow detection method, which identifies the natural cluster boundary in the score distribution:</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Show code</summary>
+<div class="sourceCode cell-code" id="cb78"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb78-1"><a href="#cb78-1" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (<span class="sc">!</span><span class="fu">is.null</span>(lmm_results) <span class="sc">&amp;&amp;</span> <span class="sc">!</span><span class="fu">is.null</span>(lmm_results<span class="sc">$</span>advanced_validation)) {</span>
+<span id="cb78-2"><a href="#cb78-2" aria-hidden="true" tabindex="-1"></a>  av <span class="ot">&lt;-</span> lmm_results<span class="sc">$</span>advanced_validation</span>
+<span id="cb78-3"><a href="#cb78-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb78-4"><a href="#cb78-4" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (<span class="sc">!</span><span class="fu">is.null</span>(av<span class="sc">$</span>anomalies) <span class="sc">&amp;&amp;</span> <span class="sc">!</span><span class="fu">is.null</span>(av<span class="sc">$</span>anomalies<span class="sc">$</span>raw_data_v2)) {</span>
+<span id="cb78-5"><a href="#cb78-5" aria-hidden="true" tabindex="-1"></a>    v2 <span class="ot">&lt;-</span> av<span class="sc">$</span>anomalies<span class="sc">$</span>raw_data_v2</span>
+<span id="cb78-6"><a href="#cb78-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb78-7"><a href="#cb78-7" aria-hidden="true" tabindex="-1"></a>    elbow_df <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(</span>
+<span id="cb78-8"><a href="#cb78-8" aria-hidden="true" tabindex="-1"></a>      <span class="at">Metric =</span> <span class="fu">c</span>(</span>
+<span id="cb78-9"><a href="#cb78-9" aria-hidden="true" tabindex="-1"></a>        <span class="st">"Total Observations"</span>,</span>
+<span id="cb78-10"><a href="#cb78-10" aria-hidden="true" tabindex="-1"></a>        <span class="st">"Anomalies Detected"</span>,</span>
+<span id="cb78-11"><a href="#cb78-11" aria-hidden="true" tabindex="-1"></a>        <span class="st">"Anomaly Rate"</span>,</span>
+<span id="cb78-12"><a href="#cb78-12" aria-hidden="true" tabindex="-1"></a>        <span class="st">"Elbow Threshold"</span></span>
+<span id="cb78-13"><a href="#cb78-13" aria-hidden="true" tabindex="-1"></a>      ),</span>
+<span id="cb78-14"><a href="#cb78-14" aria-hidden="true" tabindex="-1"></a>      <span class="at">Value =</span> <span class="fu">c</span>(</span>
+<span id="cb78-15"><a href="#cb78-15" aria-hidden="true" tabindex="-1"></a>        v2<span class="sc">$</span>n_total,</span>
+<span id="cb78-16"><a href="#cb78-16" aria-hidden="true" tabindex="-1"></a>        v2<span class="sc">$</span>n_anomalies,</span>
+<span id="cb78-17"><a href="#cb78-17" aria-hidden="true" tabindex="-1"></a>        <span class="fu">sprintf</span>(<span class="st">"%.1f%%"</span>, v2<span class="sc">$</span>anomaly_rate <span class="sc">*</span> <span class="dv">100</span>),</span>
+<span id="cb78-18"><a href="#cb78-18" aria-hidden="true" tabindex="-1"></a>        <span class="fu">sprintf</span>(<span class="st">"%.4f"</span>, v2<span class="sc">$</span>threshold)</span>
+<span id="cb78-19"><a href="#cb78-19" aria-hidden="true" tabindex="-1"></a>      )</span>
+<span id="cb78-20"><a href="#cb78-20" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb78-21"><a href="#cb78-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb78-22"><a href="#cb78-22" aria-hidden="true" tabindex="-1"></a>    <span class="fu">format_table</span>(elbow_df, <span class="at">col.names =</span> <span class="fu">c</span>(<span class="st">"Metric"</span>, <span class="st">"Value"</span>))</span>
+<span id="cb78-23"><a href="#cb78-23" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb78-24"><a href="#cb78-24" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div id="tbl-elbow-anomalies" class="cell quarto-float anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-elbow-anomalies-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;24: Anomaly detection using elbow-based threshold selection
+</figcaption>
+<div aria-describedby="tbl-elbow-anomalies-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="cell-output-display">
+<table class="do-not-create-environment cell table table-sm table-striped small">
+<thead>
+<tr class="header">
+<th style="text-align: left;">Metric</th>
+<th style="text-align: left;">Value</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">Total Observations</td>
+<td style="text-align: left;">406</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Anomalies Detected</td>
+<td style="text-align: left;">83</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Anomaly Rate</td>
+<td style="text-align: left;">20.4%</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Elbow Threshold</td>
+<td style="text-align: left;">0.5143</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</figure>
+</div>
+</div>
+</section>
+<section id="sec-participant-anomalies" class="level4">
+<h4 class="anchored" data-anchor-id="sec-participant-anomalies">5.10.3 Participant-Level Anomaly Detection</h4>
+<p>Beyond individual observations, we profile participants based on their aggregate behavior patterns to identify those with unusual overall performance characteristics.</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Show code</summary>
+<div class="sourceCode cell-code" id="cb79"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb79-1"><a href="#cb79-1" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (<span class="sc">!</span><span class="fu">is.null</span>(lmm_results) <span class="sc">&amp;&amp;</span> <span class="sc">!</span><span class="fu">is.null</span>(lmm_results<span class="sc">$</span>advanced_validation)) {</span>
+<span id="cb79-2"><a href="#cb79-2" aria-hidden="true" tabindex="-1"></a>  av <span class="ot">&lt;-</span> lmm_results<span class="sc">$</span>advanced_validation</span>
+<span id="cb79-3"><a href="#cb79-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb79-4"><a href="#cb79-4" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (<span class="sc">!</span><span class="fu">is.null</span>(av<span class="sc">$</span>anomalies) <span class="sc">&amp;&amp;</span> <span class="sc">!</span><span class="fu">is.null</span>(av<span class="sc">$</span>anomalies<span class="sc">$</span>participant_profile)) {</span>
+<span id="cb79-5"><a href="#cb79-5" aria-hidden="true" tabindex="-1"></a>    pp <span class="ot">&lt;-</span> av<span class="sc">$</span>anomalies<span class="sc">$</span>participant_profile</span>
+<span id="cb79-6"><a href="#cb79-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb79-7"><a href="#cb79-7" aria-hidden="true" tabindex="-1"></a>    profile_df <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(</span>
+<span id="cb79-8"><a href="#cb79-8" aria-hidden="true" tabindex="-1"></a>      <span class="at">Metric =</span> <span class="fu">c</span>(</span>
+<span id="cb79-9"><a href="#cb79-9" aria-hidden="true" tabindex="-1"></a>        <span class="st">"Total Participants"</span>,</span>
+<span id="cb79-10"><a href="#cb79-10" aria-hidden="true" tabindex="-1"></a>        <span class="st">"Anomalous Participants"</span>,</span>
+<span id="cb79-11"><a href="#cb79-11" aria-hidden="true" tabindex="-1"></a>        <span class="st">"Anomaly Rate"</span>,</span>
+<span id="cb79-12"><a href="#cb79-12" aria-hidden="true" tabindex="-1"></a>        <span class="st">"Threshold"</span>,</span>
+<span id="cb79-13"><a href="#cb79-13" aria-hidden="true" tabindex="-1"></a>        <span class="st">"Detection Method"</span></span>
+<span id="cb79-14"><a href="#cb79-14" aria-hidden="true" tabindex="-1"></a>      ),</span>
+<span id="cb79-15"><a href="#cb79-15" aria-hidden="true" tabindex="-1"></a>      <span class="at">Value =</span> <span class="fu">c</span>(</span>
+<span id="cb79-16"><a href="#cb79-16" aria-hidden="true" tabindex="-1"></a>        pp<span class="sc">$</span>n_participants,</span>
+<span id="cb79-17"><a href="#cb79-17" aria-hidden="true" tabindex="-1"></a>        pp<span class="sc">$</span>n_anomalous,</span>
+<span id="cb79-18"><a href="#cb79-18" aria-hidden="true" tabindex="-1"></a>        <span class="fu">sprintf</span>(<span class="st">"%.1f%%"</span>, (pp<span class="sc">$</span>n_anomalous <span class="sc">/</span> pp<span class="sc">$</span>n_participants) <span class="sc">*</span> <span class="dv">100</span>),</span>
+<span id="cb79-19"><a href="#cb79-19" aria-hidden="true" tabindex="-1"></a>        <span class="fu">sprintf</span>(<span class="st">"%.4f"</span>, pp<span class="sc">$</span>threshold),</span>
+<span id="cb79-20"><a href="#cb79-20" aria-hidden="true" tabindex="-1"></a>        pp<span class="sc">$</span>method</span>
+<span id="cb79-21"><a href="#cb79-21" aria-hidden="true" tabindex="-1"></a>      )</span>
+<span id="cb79-22"><a href="#cb79-22" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb79-23"><a href="#cb79-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb79-24"><a href="#cb79-24" aria-hidden="true" tabindex="-1"></a>    <span class="fu">format_table</span>(profile_df, <span class="at">col.names =</span> <span class="fu">c</span>(<span class="st">"Metric"</span>, <span class="st">"Value"</span>))</span>
+<span id="cb79-25"><a href="#cb79-25" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb79-26"><a href="#cb79-26" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div id="tbl-participant-profile" class="cell quarto-float anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-participant-profile-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;25: Participant-level anomaly detection based on aggregate behavior patterns
+</figcaption>
+<div aria-describedby="tbl-participant-profile-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="cell-output-display">
+<table class="do-not-create-environment cell table table-sm table-striped small">
+<thead>
+<tr class="header">
+<th style="text-align: left;">Metric</th>
+<th style="text-align: left;">Value</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">Total Participants</td>
+<td style="text-align: left;">19</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Anomalous Participants</td>
+<td style="text-align: left;">4</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Anomaly Rate</td>
+<td style="text-align: left;">21.1%</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Threshold</td>
+<td style="text-align: left;">0.5113</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Detection Method</td>
+<td style="text-align: left;">isolation_forest</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</figure>
+</div>
+</div>
+<div class="cell">
+<details class="code-fold">
+<summary>Show code</summary>
+<div class="sourceCode cell-code" id="cb80"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb80-1"><a href="#cb80-1" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (<span class="sc">!</span><span class="fu">is.null</span>(lmm_results) <span class="sc">&amp;&amp;</span> <span class="sc">!</span><span class="fu">is.null</span>(lmm_results<span class="sc">$</span>advanced_validation_full)) {</span>
+<span id="cb80-2"><a href="#cb80-2" aria-hidden="true" tabindex="-1"></a>  avf <span class="ot">&lt;-</span> lmm_results<span class="sc">$</span>advanced_validation_full</span>
+<span id="cb80-3"><a href="#cb80-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb80-4"><a href="#cb80-4" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (<span class="sc">!</span><span class="fu">is.null</span>(avf<span class="sc">$</span>participant_profile)) {</span>
+<span id="cb80-5"><a href="#cb80-5" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Import ParticipantProfiler for plotting (use .. since QMD is in analyses/)</span></span>
+<span id="cb80-6"><a href="#cb80-6" aria-hidden="true" tabindex="-1"></a>    box<span class="sc">::</span><span class="fu">use</span>(..<span class="sc">/</span>R<span class="sc">/</span>calculators<span class="sc">/</span>participant_profiler[ParticipantProfiler])</span>
+<span id="cb80-7"><a href="#cb80-7" aria-hidden="true" tabindex="-1"></a>    profiler <span class="ot">&lt;-</span> ParticipantProfiler<span class="sc">$</span><span class="fu">new</span>()</span>
+<span id="cb80-8"><a href="#cb80-8" aria-hidden="true" tabindex="-1"></a>    profiler<span class="sc">$</span><span class="fu">plot_profiles</span>(</span>
+<span id="cb80-9"><a href="#cb80-9" aria-hidden="true" tabindex="-1"></a>      avf<span class="sc">$</span>participant_profile,</span>
+<span id="cb80-10"><a href="#cb80-10" aria-hidden="true" tabindex="-1"></a>      <span class="at">title =</span> <span class="st">"Participant Anomaly Profiles"</span></span>
+<span id="cb80-11"><a href="#cb80-11" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb80-12"><a href="#cb80-12" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb80-13"><a href="#cb80-13" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<div id="fig-participant-profiles" class="quarto-figure quarto-figure-center quarto-float anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-participant-profiles-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="deadlift_study_files/figure-html/fig-participant-profiles-1.png" class="img-fluid figure-img" style="width:100.0%">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-participant-profiles-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;24: Participant anomaly scores with threshold visualization. Each point represents a participant, ordered by their aggregate anomaly score. Red points indicate participants flagged as having unusual behavior patterns.
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<details class="code-fold">
+<summary>Show code</summary>
+<div class="sourceCode cell-code" id="cb81"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb81-1"><a href="#cb81-1" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (<span class="sc">!</span><span class="fu">is.null</span>(lmm_results) <span class="sc">&amp;&amp;</span> <span class="sc">!</span><span class="fu">is.null</span>(lmm_results<span class="sc">$</span>advanced_validation_full)) {</span>
+<span id="cb81-2"><a href="#cb81-2" aria-hidden="true" tabindex="-1"></a>  avf <span class="ot">&lt;-</span> lmm_results<span class="sc">$</span>advanced_validation_full</span>
+<span id="cb81-3"><a href="#cb81-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb81-4"><a href="#cb81-4" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (<span class="sc">!</span><span class="fu">is.null</span>(avf<span class="sc">$</span>participant_profile)) {</span>
+<span id="cb81-5"><a href="#cb81-5" aria-hidden="true" tabindex="-1"></a>    pp <span class="ot">&lt;-</span> avf<span class="sc">$</span>participant_profile</span>
+<span id="cb81-6"><a href="#cb81-6" aria-hidden="true" tabindex="-1"></a>    anomalous_ids <span class="ot">&lt;-</span> pp<span class="sc">$</span><span class="fu">get_anomalous_ids</span>()</span>
+<span id="cb81-7"><a href="#cb81-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb81-8"><a href="#cb81-8" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> (<span class="fu">length</span>(anomalous_ids) <span class="sc">&gt;</span> <span class="dv">0</span>) {</span>
+<span id="cb81-9"><a href="#cb81-9" aria-hidden="true" tabindex="-1"></a>      <span class="fu">cat</span>(<span class="st">"**Anomalous Participants and SHAP-like Feature Contributions:**</span><span class="sc">\n\n</span><span class="st">"</span>)</span>
+<span id="cb81-10"><a href="#cb81-10" aria-hidden="true" tabindex="-1"></a>      <span class="fu">cat</span>(<span class="st">"Each anomalous participant is explained by the features that most strongly contributed to their anomaly score. Positive contributions indicate features that *increased* the anomaly score (made the participant appear more unusual).</span><span class="sc">\n\n</span><span class="st">"</span>)</span>
+<span id="cb81-11"><a href="#cb81-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb81-12"><a href="#cb81-12" aria-hidden="true" tabindex="-1"></a>      <span class="cf">for</span> (pid <span class="cf">in</span> anomalous_ids) {</span>
+<span id="cb81-13"><a href="#cb81-13" aria-hidden="true" tabindex="-1"></a>        explanation <span class="ot">&lt;-</span> pp<span class="sc">$</span><span class="fu">get_explanation</span>(pid)</span>
+<span id="cb81-14"><a href="#cb81-14" aria-hidden="true" tabindex="-1"></a>        <span class="fu">cat</span>(<span class="fu">sprintf</span>(<span class="st">"- %s</span><span class="sc">\n</span><span class="st">"</span>, explanation))</span>
+<span id="cb81-15"><a href="#cb81-15" aria-hidden="true" tabindex="-1"></a>      }</span>
+<span id="cb81-16"><a href="#cb81-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb81-17"><a href="#cb81-17" aria-hidden="true" tabindex="-1"></a>      <span class="fu">cat</span>(<span class="st">"</span><span class="sc">\n</span><span class="st">**Interpretation:** These participants show unusual combinations of aggregate features (velocity consistency, load sensitivity, RIR patterns) compared to the population. The feature contributions above explain *why* each participant was flagged---the specific features that deviated most from population norms.</span><span class="sc">\n</span><span class="st">"</span>)</span>
+<span id="cb81-18"><a href="#cb81-18" aria-hidden="true" tabindex="-1"></a>    } <span class="cf">else</span> {</span>
+<span id="cb81-19"><a href="#cb81-19" aria-hidden="true" tabindex="-1"></a>      <span class="fu">cat</span>(<span class="st">"No participants were flagged as anomalous based on their aggregate behavior patterns. All participants show typical velocity-load-RIR relationships.</span><span class="sc">\n</span><span class="st">"</span>)</span>
+<span id="cb81-20"><a href="#cb81-20" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb81-21"><a href="#cb81-21" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb81-22"><a href="#cb81-22" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<p><strong>Anomalous Participants and SHAP-like Feature Contributions:</strong></p>
+<p>Each anomalous participant is explained by the features that most strongly contributed to their anomaly score. Positive contributions indicate features that <em>increased</em> the anomaly score (made the participant appear more unusual).</p>
+<ul>
+<li>P05 flagged: p_load_sensitivity increases score by 0.057; p_velocity_cv increases score by 0.032; p_rir_slope increases score by 0.027</li>
+<li>P09 flagged: p_mean_velocity increases score by 0.049; p_velocity_range increases score by 0.033; p_velocity_cv increases score by 0.012</li>
+<li>P12 flagged: p_rir_r2 increases score by 0.046; p_velocity_cv increases score by 0.040; p_load_sensitivity increases score by 0.037</li>
+<li>P19 flagged: p_rir_slope increases score by 0.039; p_reps_cv increases score by 0.024; p_velocity_cv increases score by 0.016</li>
+</ul>
+<p><strong>Interpretation:</strong> These participants show unusual combinations of aggregate features (velocity consistency, load sensitivity, RIR patterns) compared to the population. The feature contributions above explain <em>why</em> each participant was flagged—the specific features that deviated most from population norms.</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Show code</summary>
+<div class="sourceCode cell-code" id="cb82"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb82-1"><a href="#cb82-1" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (<span class="sc">!</span><span class="fu">is.null</span>(lmm_results) <span class="sc">&amp;&amp;</span> <span class="sc">!</span><span class="fu">is.null</span>(lmm_results<span class="sc">$</span>advanced_validation_full)) {</span>
+<span id="cb82-2"><a href="#cb82-2" aria-hidden="true" tabindex="-1"></a>  avf <span class="ot">&lt;-</span> lmm_results<span class="sc">$</span>advanced_validation_full</span>
+<span id="cb82-3"><a href="#cb82-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb82-4"><a href="#cb82-4" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (<span class="sc">!</span><span class="fu">is.null</span>(avf<span class="sc">$</span>participant_profile)) {</span>
+<span id="cb82-5"><a href="#cb82-5" aria-hidden="true" tabindex="-1"></a>    pp <span class="ot">&lt;-</span> avf<span class="sc">$</span>participant_profile</span>
+<span id="cb82-6"><a href="#cb82-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb82-7"><a href="#cb82-7" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> (<span class="fu">sum</span>(pp<span class="sc">$</span>is_anomaly) <span class="sc">&gt;</span> <span class="dv">0</span> <span class="sc">&amp;&amp;</span> <span class="sc">!</span><span class="fu">is.null</span>(pp<span class="sc">$</span>feature_contributions)) {</span>
+<span id="cb82-8"><a href="#cb82-8" aria-hidden="true" tabindex="-1"></a>      box<span class="sc">::</span><span class="fu">use</span>(..<span class="sc">/</span>R<span class="sc">/</span>calculators<span class="sc">/</span>participant_profiler[ParticipantProfiler])</span>
+<span id="cb82-9"><a href="#cb82-9" aria-hidden="true" tabindex="-1"></a>      profiler <span class="ot">&lt;-</span> ParticipantProfiler<span class="sc">$</span><span class="fu">new</span>()</span>
+<span id="cb82-10"><a href="#cb82-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb82-11"><a href="#cb82-11" aria-hidden="true" tabindex="-1"></a>      <span class="fu">tryCatch</span>({</span>
+<span id="cb82-12"><a href="#cb82-12" aria-hidden="true" tabindex="-1"></a>        profiler<span class="sc">$</span><span class="fu">plot_all_anomaly_explanations</span>(pp, <span class="at">top_k =</span> <span class="dv">5</span>)</span>
+<span id="cb82-13"><a href="#cb82-13" aria-hidden="true" tabindex="-1"></a>      }, <span class="at">error =</span> <span class="cf">function</span>(e) {</span>
+<span id="cb82-14"><a href="#cb82-14" aria-hidden="true" tabindex="-1"></a>        <span class="fu">cat</span>(<span class="st">"Feature contribution plot not available.</span><span class="sc">\n</span><span class="st">"</span>)</span>
+<span id="cb82-15"><a href="#cb82-15" aria-hidden="true" tabindex="-1"></a>      })</span>
+<span id="cb82-16"><a href="#cb82-16" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb82-17"><a href="#cb82-17" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb82-18"><a href="#cb82-18" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<div id="fig-participant-contributions" class="quarto-figure quarto-figure-center quarto-float anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-participant-contributions-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="deadlift_study_files/figure-html/fig-participant-contributions-1.png" class="img-fluid figure-img" style="width:100.0%">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-participant-contributions-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;25: SHAP-like feature contributions for anomalous participants. Each bar shows how much a feature contributed to the participant’s anomaly score. Blue bars (negative) indicate features that decreased the anomaly score, while red bars (positive) indicate features that increased it.
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<div class="cell">
+<details class="code-fold">
+<summary>Show code</summary>
+<div class="sourceCode cell-code" id="cb83"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb83-1"><a href="#cb83-1" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (<span class="sc">!</span><span class="fu">is.null</span>(lmm_results) <span class="sc">&amp;&amp;</span> <span class="sc">!</span><span class="fu">is.null</span>(lmm_results<span class="sc">$</span>advanced_validation_full)) {</span>
+<span id="cb83-2"><a href="#cb83-2" aria-hidden="true" tabindex="-1"></a>  avf <span class="ot">&lt;-</span> lmm_results<span class="sc">$</span>advanced_validation_full</span>
+<span id="cb83-3"><a href="#cb83-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb83-4"><a href="#cb83-4" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (<span class="sc">!</span><span class="fu">is.null</span>(avf<span class="sc">$</span>participant_profile)) {</span>
+<span id="cb83-5"><a href="#cb83-5" aria-hidden="true" tabindex="-1"></a>    pp <span class="ot">&lt;-</span> avf<span class="sc">$</span>participant_profile</span>
+<span id="cb83-6"><a href="#cb83-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb83-7"><a href="#cb83-7" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> (<span class="fu">sum</span>(pp<span class="sc">$</span>is_anomaly) <span class="sc">&gt;</span> <span class="dv">0</span> <span class="sc">&amp;&amp;</span> <span class="sc">!</span><span class="fu">is.null</span>(pp<span class="sc">$</span>feature_contributions)) {</span>
+<span id="cb83-8"><a href="#cb83-8" aria-hidden="true" tabindex="-1"></a>      box<span class="sc">::</span><span class="fu">use</span>(..<span class="sc">/</span>R<span class="sc">/</span>calculators<span class="sc">/</span>participant_profiler[ParticipantProfiler])</span>
+<span id="cb83-9"><a href="#cb83-9" aria-hidden="true" tabindex="-1"></a>      profiler <span class="ot">&lt;-</span> ParticipantProfiler<span class="sc">$</span><span class="fu">new</span>()</span>
+<span id="cb83-10"><a href="#cb83-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb83-11"><a href="#cb83-11" aria-hidden="true" tabindex="-1"></a>      <span class="fu">tryCatch</span>({</span>
+<span id="cb83-12"><a href="#cb83-12" aria-hidden="true" tabindex="-1"></a>        profiler<span class="sc">$</span><span class="fu">plot_aggregate_importance</span>(pp, <span class="at">top_k =</span> <span class="dv">10</span>)</span>
+<span id="cb83-13"><a href="#cb83-13" aria-hidden="true" tabindex="-1"></a>      }, <span class="at">error =</span> <span class="cf">function</span>(e) {</span>
+<span id="cb83-14"><a href="#cb83-14" aria-hidden="true" tabindex="-1"></a>        <span class="fu">cat</span>(<span class="st">"Aggregate importance plot not available.</span><span class="sc">\n</span><span class="st">"</span>)</span>
+<span id="cb83-15"><a href="#cb83-15" aria-hidden="true" tabindex="-1"></a>      })</span>
+<span id="cb83-16"><a href="#cb83-16" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb83-17"><a href="#cb83-17" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb83-18"><a href="#cb83-18" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<div id="fig-aggregate-importance" class="quarto-figure quarto-figure-center quarto-float anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-aggregate-importance-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="deadlift_study_files/figure-html/fig-aggregate-importance-1.png" class="img-fluid figure-img" style="width:100.0%">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-aggregate-importance-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;26: Aggregate feature importance across all anomalous participants. This shows which features most commonly contribute to anomaly detection, helping identify the key behavioral patterns that distinguish anomalous participants.
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="feature-engineering-summary" class="level4">
+<h4 class="anchored" data-anchor-id="feature-engineering-summary">5.10.4 Feature Engineering Summary</h4>
+<p>The enhanced anomaly detection uses a comprehensive feature engineering system with 12 feature groups across multiple aggregation levels:</p>
+<p><strong>Feature Group Categories:</strong></p>
+<ol type="1">
+<li><strong>Observation-Level (per rep)</strong>: Z-scores vs global and participant means, position in set</li>
+<li><strong>Set-Level (per set)</strong>: Mean velocity, velocity decay, coefficient of variation</li>
+<li><strong>Participant-Level (aggregated)</strong>: Overall velocity patterns, RIR sensitivity, load response</li>
+<li><strong>Participant × Set</strong>: Performance deviation from participant’s own norm</li>
+<li><strong>Participant × Load</strong>: How each participant responds at different load levels</li>
+<li><strong>Participant × RIR</strong>: Velocity-RIR relationship for each participant</li>
+<li><strong>Cross-Set Ratios</strong>: Comparing performance across consecutive sets</li>
+<li><strong>Global Context Ratios</strong>: Comparing each observation to population norms</li>
+<li><strong>Velocity Curve Features</strong>: Decay patterns within sets</li>
+<li><strong>Session-Level Features</strong>: Cumulative volume, fatigue tracking</li>
+<li><strong>Advanced Derived Features</strong>: Residuals from RIR predictions, standardized deviations</li>
+<li><strong>Interaction Features</strong>: RIR × Load interactions, position × RIR</li>
+</ol>
+<div class="cell">
+<details class="code-fold">
+<summary>Show code</summary>
+<div class="sourceCode cell-code" id="cb84"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb84-1"><a href="#cb84-1" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (<span class="sc">!</span><span class="fu">is.null</span>(lmm_results) <span class="sc">&amp;&amp;</span> <span class="sc">!</span><span class="fu">is.null</span>(lmm_results<span class="sc">$</span>advanced_validation)) {</span>
+<span id="cb84-2"><a href="#cb84-2" aria-hidden="true" tabindex="-1"></a>  av <span class="ot">&lt;-</span> lmm_results<span class="sc">$</span>advanced_validation</span>
+<span id="cb84-3"><a href="#cb84-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb84-4"><a href="#cb84-4" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (<span class="sc">!</span><span class="fu">is.null</span>(av<span class="sc">$</span>anomalies) <span class="sc">&amp;&amp;</span> <span class="sc">!</span><span class="fu">is.null</span>(av<span class="sc">$</span>anomalies<span class="sc">$</span>features_result)) {</span>
+<span id="cb84-5"><a href="#cb84-5" aria-hidden="true" tabindex="-1"></a>    fr <span class="ot">&lt;-</span> av<span class="sc">$</span>anomalies<span class="sc">$</span>features_result</span>
+<span id="cb84-6"><a href="#cb84-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb84-7"><a href="#cb84-7" aria-hidden="true" tabindex="-1"></a>    features_df <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(</span>
+<span id="cb84-8"><a href="#cb84-8" aria-hidden="true" tabindex="-1"></a>      <span class="at">Level =</span> <span class="fu">c</span>(<span class="st">"Observation"</span>, <span class="st">"Set"</span>, <span class="st">"Participant"</span>, <span class="st">"Cross-Level"</span>),</span>
+<span id="cb84-9"><a href="#cb84-9" aria-hidden="true" tabindex="-1"></a>      <span class="st">`</span><span class="at">N Features</span><span class="st">`</span> <span class="ot">=</span> <span class="fu">c</span>(</span>
+<span id="cb84-10"><a href="#cb84-10" aria-hidden="true" tabindex="-1"></a>        <span class="fu">length</span>(fr<span class="sc">$</span>feature_names<span class="sc">$</span>observation),</span>
+<span id="cb84-11"><a href="#cb84-11" aria-hidden="true" tabindex="-1"></a>        <span class="fu">length</span>(fr<span class="sc">$</span>feature_names<span class="sc">$</span>set),</span>
+<span id="cb84-12"><a href="#cb84-12" aria-hidden="true" tabindex="-1"></a>        <span class="fu">length</span>(fr<span class="sc">$</span>feature_names<span class="sc">$</span>participant),</span>
+<span id="cb84-13"><a href="#cb84-13" aria-hidden="true" tabindex="-1"></a>        <span class="fu">length</span>(fr<span class="sc">$</span>feature_names<span class="sc">$</span>participant_set) <span class="sc">+</span> <span class="fu">length</span>(fr<span class="sc">$</span>feature_names<span class="sc">$</span>participant_load) <span class="sc">+</span> <span class="fu">length</span>(fr<span class="sc">$</span>feature_names<span class="sc">$</span>participant_rir)</span>
+<span id="cb84-14"><a href="#cb84-14" aria-hidden="true" tabindex="-1"></a>      ),</span>
+<span id="cb84-15"><a href="#cb84-15" aria-hidden="true" tabindex="-1"></a>      <span class="at">Description =</span> <span class="fu">c</span>(</span>
+<span id="cb84-16"><a href="#cb84-16" aria-hidden="true" tabindex="-1"></a>        <span class="st">"Per-rep: z-scores, position, decay contribution"</span>,</span>
+<span id="cb84-17"><a href="#cb84-17" aria-hidden="true" tabindex="-1"></a>        <span class="st">"Per-set: mean, CV, decay slope, range"</span>,</span>
+<span id="cb84-18"><a href="#cb84-18" aria-hidden="true" tabindex="-1"></a>        <span class="st">"Per-participant: velocity profile, RIR sensitivity"</span>,</span>
+<span id="cb84-19"><a href="#cb84-19" aria-hidden="true" tabindex="-1"></a>        <span class="st">"Participant × (Set, Load, RIR): cross-level interactions"</span></span>
+<span id="cb84-20"><a href="#cb84-20" aria-hidden="true" tabindex="-1"></a>      ),</span>
+<span id="cb84-21"><a href="#cb84-21" aria-hidden="true" tabindex="-1"></a>      <span class="at">check.names =</span> <span class="cn">FALSE</span></span>
+<span id="cb84-22"><a href="#cb84-22" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb84-23"><a href="#cb84-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb84-24"><a href="#cb84-24" aria-hidden="true" tabindex="-1"></a>    <span class="fu">format_table</span>(features_df)</span>
+<span id="cb84-25"><a href="#cb84-25" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb84-26"><a href="#cb84-26" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div id="tbl-features-summary" class="cell quarto-float anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-features-summary-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;26: Summary of engineered features for anomaly detection
+</figcaption>
+<div aria-describedby="tbl-features-summary-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="cell-output-display">
+<table class="do-not-create-environment cell table table-sm table-striped small">
+<colgroup>
+<col style="width: 16%">
+<col style="width: 4%">
+<col style="width: 79%">
+</colgroup>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">Observation</td>
+<td style="text-align: right;">25</td>
+<td style="text-align: left;">Per-rep: z-scores, position, decay contribution</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Set</td>
+<td style="text-align: right;">21</td>
+<td style="text-align: left;">Per-set: mean, CV, decay slope, range</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Participant</td>
+<td style="text-align: right;">41</td>
+<td style="text-align: left;">Per-participant: velocity profile, RIR sensitivity</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Cross-Level</td>
+<td style="text-align: right;">24</td>
+<td style="text-align: left;">Participant × (Set, Load, RIR): cross-level interactions</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</figure>
+</div>
+</div>
+<details class="code-fold">
+<summary>Show code</summary>
+<div class="sourceCode cell-code" id="cb85"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb85-1"><a href="#cb85-1" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (<span class="sc">!</span><span class="fu">is.null</span>(lmm_results) <span class="sc">&amp;&amp;</span> <span class="sc">!</span><span class="fu">is.null</span>(lmm_results<span class="sc">$</span>advanced_validation)) {</span>
+<span id="cb85-2"><a href="#cb85-2" aria-hidden="true" tabindex="-1"></a>  av <span class="ot">&lt;-</span> lmm_results<span class="sc">$</span>advanced_validation</span>
+<span id="cb85-3"><a href="#cb85-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb85-4"><a href="#cb85-4" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (<span class="sc">!</span><span class="fu">is.null</span>(av<span class="sc">$</span>anomalies) <span class="sc">&amp;&amp;</span> <span class="sc">!</span><span class="fu">is.null</span>(av<span class="sc">$</span>anomalies<span class="sc">$</span>features_result)) {</span>
+<span id="cb85-5"><a href="#cb85-5" aria-hidden="true" tabindex="-1"></a>    fr <span class="ot">&lt;-</span> av<span class="sc">$</span>anomalies<span class="sc">$</span>features_result</span>
+<span id="cb85-6"><a href="#cb85-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb85-7"><a href="#cb85-7" aria-hidden="true" tabindex="-1"></a>    <span class="fu">cat</span>(<span class="st">"**Key Observation-Level Features (for individual rep anomaly detection):**</span><span class="sc">\n\n</span><span class="st">"</span>)</span>
+<span id="cb85-8"><a href="#cb85-8" aria-hidden="true" tabindex="-1"></a>    key_obs <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"velocity_z_global"</span>, <span class="st">"velocity_z_within_participant"</span>, <span class="st">"velocity_z_within_set"</span>,</span>
+<span id="cb85-9"><a href="#cb85-9" aria-hidden="true" tabindex="-1"></a>                 <span class="st">"set_position_normalized"</span>, <span class="st">"velocity_residual_from_rir"</span>, <span class="st">"standardized_residual_rir"</span>)</span>
+<span id="cb85-10"><a href="#cb85-10" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> (f <span class="cf">in</span> key_obs) {</span>
+<span id="cb85-11"><a href="#cb85-11" aria-hidden="true" tabindex="-1"></a>      <span class="cf">if</span> (f <span class="sc">%in%</span> fr<span class="sc">$</span>feature_names<span class="sc">$</span>observation) {</span>
+<span id="cb85-12"><a href="#cb85-12" aria-hidden="true" tabindex="-1"></a>        <span class="fu">cat</span>(<span class="fu">sprintf</span>(<span class="st">"- `%s`</span><span class="sc">\n</span><span class="st">"</span>, f))</span>
+<span id="cb85-13"><a href="#cb85-13" aria-hidden="true" tabindex="-1"></a>      }</span>
+<span id="cb85-14"><a href="#cb85-14" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb85-15"><a href="#cb85-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb85-16"><a href="#cb85-16" aria-hidden="true" tabindex="-1"></a>    <span class="fu">cat</span>(<span class="st">"</span><span class="sc">\n</span><span class="st">**Key Participant-Level Features (for participant profiling):**</span><span class="sc">\n\n</span><span class="st">"</span>)</span>
+<span id="cb85-17"><a href="#cb85-17" aria-hidden="true" tabindex="-1"></a>    key_part <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"p_mean_velocity"</span>, <span class="st">"p_velocity_cv"</span>, <span class="st">"p_rir_slope"</span>, <span class="st">"p_rir_r2"</span>,</span>
+<span id="cb85-18"><a href="#cb85-18" aria-hidden="true" tabindex="-1"></a>                  <span class="st">"p_load_sensitivity"</span>, <span class="st">"p_mean_reps_per_set"</span>)</span>
+<span id="cb85-19"><a href="#cb85-19" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> (f <span class="cf">in</span> key_part) {</span>
+<span id="cb85-20"><a href="#cb85-20" aria-hidden="true" tabindex="-1"></a>      <span class="cf">if</span> (f <span class="sc">%in%</span> fr<span class="sc">$</span>feature_names<span class="sc">$</span>participant) {</span>
+<span id="cb85-21"><a href="#cb85-21" aria-hidden="true" tabindex="-1"></a>        <span class="fu">cat</span>(<span class="fu">sprintf</span>(<span class="st">"- `%s`</span><span class="sc">\n</span><span class="st">"</span>, f))</span>
+<span id="cb85-22"><a href="#cb85-22" aria-hidden="true" tabindex="-1"></a>      }</span>
+<span id="cb85-23"><a href="#cb85-23" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb85-24"><a href="#cb85-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb85-25"><a href="#cb85-25" aria-hidden="true" tabindex="-1"></a>    <span class="fu">cat</span>(<span class="st">"</span><span class="sc">\n</span><span class="st">**Feature Interpretation:**</span><span class="sc">\n\n</span><span class="st">"</span>)</span>
+<span id="cb85-26"><a href="#cb85-26" aria-hidden="true" tabindex="-1"></a>    <span class="fu">cat</span>(<span class="st">"- **velocity_z_global**: How unusual is this velocity compared to all observations?</span><span class="sc">\n</span><span class="st">"</span>)</span>
+<span id="cb85-27"><a href="#cb85-27" aria-hidden="true" tabindex="-1"></a>    <span class="fu">cat</span>(<span class="st">"- **velocity_z_within_participant**: How unusual is this velocity for this specific participant?</span><span class="sc">\n</span><span class="st">"</span>)</span>
+<span id="cb85-28"><a href="#cb85-28" aria-hidden="true" tabindex="-1"></a>    <span class="fu">cat</span>(<span class="st">"- **velocity_residual_from_rir**: Deviation from expected velocity given the RIR</span><span class="sc">\n</span><span class="st">"</span>)</span>
+<span id="cb85-29"><a href="#cb85-29" aria-hidden="true" tabindex="-1"></a>    <span class="fu">cat</span>(<span class="st">"- **p_velocity_cv**: Coefficient of variation (consistency) across all observations</span><span class="sc">\n</span><span class="st">"</span>)</span>
+<span id="cb85-30"><a href="#cb85-30" aria-hidden="true" tabindex="-1"></a>    <span class="fu">cat</span>(<span class="st">"- **p_rir_slope**: How strongly velocity increases with RIR (steeper = more fatigable)</span><span class="sc">\n</span><span class="st">"</span>)</span>
+<span id="cb85-31"><a href="#cb85-31" aria-hidden="true" tabindex="-1"></a>    <span class="fu">cat</span>(<span class="st">"- **p_load_sensitivity**: How much velocity drops when load increases</span><span class="sc">\n</span><span class="st">"</span>)</span>
+<span id="cb85-32"><a href="#cb85-32" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb85-33"><a href="#cb85-33" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<p><strong>Key Observation-Level Features (for individual rep anomaly detection):</strong></p>
+<ul>
+<li><code>velocity_z_global</code></li>
+<li><code>velocity_z_within_participant</code></li>
+<li><code>velocity_z_within_set</code></li>
+<li><code>set_position_normalized</code></li>
+<li><code>velocity_residual_from_rir</code></li>
+<li><code>standardized_residual_rir</code></li>
+</ul>
+<p><strong>Key Participant-Level Features (for participant profiling):</strong></p>
+<ul>
+<li><code>p_mean_velocity</code></li>
+<li><code>p_velocity_cv</code></li>
+<li><code>p_rir_slope</code></li>
+<li><code>p_rir_r2</code></li>
+<li><code>p_load_sensitivity</code></li>
+<li><code>p_mean_reps_per_set</code></li>
+</ul>
+<p><strong>Feature Interpretation:</strong></p>
+<ul>
+<li><strong>velocity_z_global</strong>: How unusual is this velocity compared to all observations?</li>
+<li><strong>velocity_z_within_participant</strong>: How unusual is this velocity for this specific participant?</li>
+<li><strong>velocity_residual_from_rir</strong>: Deviation from expected velocity given the RIR</li>
+<li><strong>p_velocity_cv</strong>: Coefficient of variation (consistency) across all observations</li>
+<li><strong>p_rir_slope</strong>: How strongly velocity increases with RIR (steeper = more fatigable)</li>
+<li><strong>p_load_sensitivity</strong>: How much velocity drops when load increases</li>
+</ul>
+</section>
+<section id="detection-method-comparison" class="level4">
+<h4 class="anchored" data-anchor-id="detection-method-comparison">5.10.5 Detection Method Comparison</h4>
+<p>We compare Isolation Forest with Mahalanobis distance for participant-level anomaly detection:</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Show code</summary>
+<div class="sourceCode cell-code" id="cb86"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb86-1"><a href="#cb86-1" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (<span class="sc">!</span><span class="fu">is.null</span>(lmm_results) <span class="sc">&amp;&amp;</span> <span class="sc">!</span><span class="fu">is.null</span>(lmm_results<span class="sc">$</span>advanced_validation)) {</span>
+<span id="cb86-2"><a href="#cb86-2" aria-hidden="true" tabindex="-1"></a>  av <span class="ot">&lt;-</span> lmm_results<span class="sc">$</span>advanced_validation</span>
+<span id="cb86-3"><a href="#cb86-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb86-4"><a href="#cb86-4" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (<span class="sc">!</span><span class="fu">is.null</span>(av<span class="sc">$</span>anomalies) <span class="sc">&amp;&amp;</span> <span class="sc">!</span><span class="fu">is.null</span>(av<span class="sc">$</span>anomalies<span class="sc">$</span>participant_method_comparison)) {</span>
+<span id="cb86-5"><a href="#cb86-5" aria-hidden="true" tabindex="-1"></a>    mc <span class="ot">&lt;-</span> av<span class="sc">$</span>anomalies<span class="sc">$</span>participant_method_comparison</span>
+<span id="cb86-6"><a href="#cb86-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb86-7"><a href="#cb86-7" aria-hidden="true" tabindex="-1"></a>    mc_display <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(</span>
+<span id="cb86-8"><a href="#cb86-8" aria-hidden="true" tabindex="-1"></a>      <span class="at">Method =</span> mc<span class="sc">$</span>method,</span>
+<span id="cb86-9"><a href="#cb86-9" aria-hidden="true" tabindex="-1"></a>      <span class="st">`</span><span class="at">N Flagged</span><span class="st">`</span> <span class="ot">=</span> mc<span class="sc">$</span>n_flagged,</span>
+<span id="cb86-10"><a href="#cb86-10" aria-hidden="true" tabindex="-1"></a>      <span class="at">Threshold =</span> <span class="fu">sprintf</span>(<span class="st">"%.4f"</span>, mc<span class="sc">$</span>threshold),</span>
+<span id="cb86-11"><a href="#cb86-11" aria-hidden="true" tabindex="-1"></a>      <span class="st">`</span><span class="at">Mean Score</span><span class="st">`</span> <span class="ot">=</span> <span class="fu">sprintf</span>(<span class="st">"%.4f"</span>, mc<span class="sc">$</span>score_mean),</span>
+<span id="cb86-12"><a href="#cb86-12" aria-hidden="true" tabindex="-1"></a>      <span class="st">`</span><span class="at">Score SD</span><span class="st">`</span> <span class="ot">=</span> <span class="fu">sprintf</span>(<span class="st">"%.4f"</span>, mc<span class="sc">$</span>score_sd),</span>
+<span id="cb86-13"><a href="#cb86-13" aria-hidden="true" tabindex="-1"></a>      <span class="at">check.names =</span> <span class="cn">FALSE</span></span>
+<span id="cb86-14"><a href="#cb86-14" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb86-15"><a href="#cb86-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb86-16"><a href="#cb86-16" aria-hidden="true" tabindex="-1"></a>    <span class="fu">format_table</span>(mc_display)</span>
+<span id="cb86-17"><a href="#cb86-17" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb86-18"><a href="#cb86-18" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div id="tbl-method-comparison" class="cell quarto-float anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-method-comparison-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;27: Comparison of participant anomaly detection methods
+</figcaption>
+<div aria-describedby="tbl-method-comparison-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="cell-output-display">
+<table class="do-not-create-environment cell table table-sm table-striped small">
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">isolation_forest</td>
+<td style="text-align: right;">4</td>
+<td style="text-align: left;">0.5113</td>
+<td style="text-align: left;">0.4811</td>
+<td style="text-align: left;">0.0624</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">mahalanobis</td>
+<td style="text-align: right;">9</td>
+<td style="text-align: left;">0.0821</td>
+<td style="text-align: left;">0.1134</td>
+<td style="text-align: left;">0.1209</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</figure>
+</div>
+</div>
+<details class="code-fold">
+<summary>Show code</summary>
+<div class="sourceCode cell-code" id="cb87"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb87-1"><a href="#cb87-1" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (<span class="sc">!</span><span class="fu">is.null</span>(lmm_results) <span class="sc">&amp;&amp;</span> <span class="sc">!</span><span class="fu">is.null</span>(lmm_results<span class="sc">$</span>advanced_validation)) {</span>
+<span id="cb87-2"><a href="#cb87-2" aria-hidden="true" tabindex="-1"></a>  av <span class="ot">&lt;-</span> lmm_results<span class="sc">$</span>advanced_validation</span>
+<span id="cb87-3"><a href="#cb87-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb87-4"><a href="#cb87-4" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (<span class="sc">!</span><span class="fu">is.null</span>(av<span class="sc">$</span>anomalies) <span class="sc">&amp;&amp;</span> <span class="sc">!</span><span class="fu">is.null</span>(av<span class="sc">$</span>anomalies<span class="sc">$</span>participant_method_comparison)) {</span>
+<span id="cb87-5"><a href="#cb87-5" aria-hidden="true" tabindex="-1"></a>    mc <span class="ot">&lt;-</span> av<span class="sc">$</span>anomalies<span class="sc">$</span>participant_method_comparison</span>
+<span id="cb87-6"><a href="#cb87-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb87-7"><a href="#cb87-7" aria-hidden="true" tabindex="-1"></a>    if_row <span class="ot">&lt;-</span> mc[mc<span class="sc">$</span>method <span class="sc">==</span> <span class="st">"isolation_forest"</span>, ]</span>
+<span id="cb87-8"><a href="#cb87-8" aria-hidden="true" tabindex="-1"></a>    mah_row <span class="ot">&lt;-</span> mc[mc<span class="sc">$</span>method <span class="sc">==</span> <span class="st">"mahalanobis"</span>, ]</span>
+<span id="cb87-9"><a href="#cb87-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb87-10"><a href="#cb87-10" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> (<span class="fu">nrow</span>(if_row) <span class="sc">&gt;</span> <span class="dv">0</span> <span class="sc">&amp;&amp;</span> <span class="fu">nrow</span>(mah_row) <span class="sc">&gt;</span> <span class="dv">0</span>) {</span>
+<span id="cb87-11"><a href="#cb87-11" aria-hidden="true" tabindex="-1"></a>      <span class="fu">cat</span>(<span class="fu">sprintf</span>(</span>
+<span id="cb87-12"><a href="#cb87-12" aria-hidden="true" tabindex="-1"></a>        <span class="st">"**Interpretation:** Isolation Forest flagged %d participants while Mahalanobis distance flagged %d. "</span>,</span>
+<span id="cb87-13"><a href="#cb87-13" aria-hidden="true" tabindex="-1"></a>        if_row<span class="sc">$</span>n_flagged, mah_row<span class="sc">$</span>n_flagged</span>
+<span id="cb87-14"><a href="#cb87-14" aria-hidden="true" tabindex="-1"></a>      ))</span>
+<span id="cb87-15"><a href="#cb87-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb87-16"><a href="#cb87-16" aria-hidden="true" tabindex="-1"></a>      <span class="cf">if</span> (if_row<span class="sc">$</span>n_flagged <span class="sc">==</span> mah_row<span class="sc">$</span>n_flagged) {</span>
+<span id="cb87-17"><a href="#cb87-17" aria-hidden="true" tabindex="-1"></a>        <span class="fu">cat</span>(<span class="st">"Agreement between methods increases confidence in the identified anomalies.</span><span class="sc">\n</span><span class="st">"</span>)</span>
+<span id="cb87-18"><a href="#cb87-18" aria-hidden="true" tabindex="-1"></a>      } <span class="cf">else</span> {</span>
+<span id="cb87-19"><a href="#cb87-19" aria-hidden="true" tabindex="-1"></a>        <span class="fu">cat</span>(<span class="st">"Differences between methods reflect their complementary detection approaches---Isolation Forest captures non-linear patterns while Mahalanobis assumes multivariate normality.</span><span class="sc">\n</span><span class="st">"</span>)</span>
+<span id="cb87-20"><a href="#cb87-20" aria-hidden="true" tabindex="-1"></a>      }</span>
+<span id="cb87-21"><a href="#cb87-21" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb87-22"><a href="#cb87-22" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb87-23"><a href="#cb87-23" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<p><strong>Interpretation:</strong> Isolation Forest flagged 4 participants while Mahalanobis distance flagged 9. Differences between methods reflect their complementary detection approaches—Isolation Forest captures non-linear patterns while Mahalanobis assumes multivariate normality.</p>
+</section>
+</section>
+<section id="sec-calibration" class="level3">
+<h3 class="anchored" data-anchor-id="sec-calibration">5.11 Model Calibration</h3>
+<p>Model calibration assesses whether predictions match reality. A well-calibrated model should have predictions that, on average, equal observed values.</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Show code</summary>
+<div class="sourceCode cell-code" id="cb88"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb88-1"><a href="#cb88-1" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (<span class="sc">!</span><span class="fu">is.null</span>(lmm_results) <span class="sc">&amp;&amp;</span> <span class="sc">!</span><span class="fu">is.null</span>(lmm_results<span class="sc">$</span>advanced_validation)) {</span>
+<span id="cb88-2"><a href="#cb88-2" aria-hidden="true" tabindex="-1"></a>  av <span class="ot">&lt;-</span> lmm_results<span class="sc">$</span>advanced_validation</span>
+<span id="cb88-3"><a href="#cb88-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb88-4"><a href="#cb88-4" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (<span class="sc">!</span><span class="fu">is.null</span>(av<span class="sc">$</span>calibration)) {</span>
+<span id="cb88-5"><a href="#cb88-5" aria-hidden="true" tabindex="-1"></a>    cal <span class="ot">&lt;-</span> av<span class="sc">$</span>calibration</span>
+<span id="cb88-6"><a href="#cb88-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb88-7"><a href="#cb88-7" aria-hidden="true" tabindex="-1"></a>    cal_df <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(</span>
+<span id="cb88-8"><a href="#cb88-8" aria-hidden="true" tabindex="-1"></a>      <span class="at">Metric =</span> <span class="fu">c</span>(</span>
+<span id="cb88-9"><a href="#cb88-9" aria-hidden="true" tabindex="-1"></a>        <span class="st">"Calibration Slope"</span>,</span>
+<span id="cb88-10"><a href="#cb88-10" aria-hidden="true" tabindex="-1"></a>        <span class="st">"Calibration Intercept"</span>,</span>
+<span id="cb88-11"><a href="#cb88-11" aria-hidden="true" tabindex="-1"></a>        <span class="st">"R-squared"</span>,</span>
+<span id="cb88-12"><a href="#cb88-12" aria-hidden="true" tabindex="-1"></a>        <span class="st">"Mean Bias"</span>,</span>
+<span id="cb88-13"><a href="#cb88-13" aria-hidden="true" tabindex="-1"></a>        <span class="st">"Assessment"</span></span>
+<span id="cb88-14"><a href="#cb88-14" aria-hidden="true" tabindex="-1"></a>      ),</span>
+<span id="cb88-15"><a href="#cb88-15" aria-hidden="true" tabindex="-1"></a>      <span class="at">Value =</span> <span class="fu">c</span>(</span>
+<span id="cb88-16"><a href="#cb88-16" aria-hidden="true" tabindex="-1"></a>        <span class="fu">sprintf</span>(<span class="st">"%.3f"</span>, cal<span class="sc">$</span>slope),</span>
+<span id="cb88-17"><a href="#cb88-17" aria-hidden="true" tabindex="-1"></a>        <span class="fu">sprintf</span>(<span class="st">"%.4f"</span>, cal<span class="sc">$</span>intercept),</span>
+<span id="cb88-18"><a href="#cb88-18" aria-hidden="true" tabindex="-1"></a>        <span class="fu">sprintf</span>(<span class="st">"%.3f"</span>, cal<span class="sc">$</span>r_squared),</span>
+<span id="cb88-19"><a href="#cb88-19" aria-hidden="true" tabindex="-1"></a>        <span class="fu">sprintf</span>(<span class="st">"%.4e m/s"</span>, cal<span class="sc">$</span>mean_bias),</span>
+<span id="cb88-20"><a href="#cb88-20" aria-hidden="true" tabindex="-1"></a>        cal<span class="sc">$</span>interpretation</span>
+<span id="cb88-21"><a href="#cb88-21" aria-hidden="true" tabindex="-1"></a>      )</span>
+<span id="cb88-22"><a href="#cb88-22" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb88-23"><a href="#cb88-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb88-24"><a href="#cb88-24" aria-hidden="true" tabindex="-1"></a>    <span class="fu">format_table</span>(cal_df, <span class="at">col.names =</span> <span class="fu">c</span>(<span class="st">"Metric"</span>, <span class="st">"Value"</span>))</span>
+<span id="cb88-25"><a href="#cb88-25" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb88-26"><a href="#cb88-26" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div id="tbl-calibration" class="cell quarto-float anchored">
 <figure class="quarto-float quarto-float-tbl figure">
 <figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-calibration-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Table&nbsp;23: Model calibration metrics
+Table&nbsp;28: Model calibration metrics
 </figcaption>
 <div aria-describedby="tbl-calibration-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <div class="cell-output-display">
@@ -5022,66 +5607,66 @@ Table&nbsp;23: Model calibration metrics
 <div class="cell">
 <details class="code-fold">
 <summary>Show code</summary>
-<div class="sourceCode cell-code" id="cb77"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb77-1"><a href="#cb77-1" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (<span class="sc">!</span><span class="fu">is.null</span>(lmm_results) <span class="sc">&amp;&amp;</span> <span class="sc">!</span><span class="fu">is.null</span>(lmm_results<span class="sc">$</span>advanced_validation)) {</span>
-<span id="cb77-2"><a href="#cb77-2" aria-hidden="true" tabindex="-1"></a>  av <span class="ot">&lt;-</span> lmm_results<span class="sc">$</span>advanced_validation</span>
-<span id="cb77-3"><a href="#cb77-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb77-4"><a href="#cb77-4" aria-hidden="true" tabindex="-1"></a>  summary_rows <span class="ot">&lt;-</span> <span class="fu">list</span>()</span>
-<span id="cb77-5"><a href="#cb77-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb77-6"><a href="#cb77-6" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Coefficient stability</span></span>
-<span id="cb77-7"><a href="#cb77-7" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (<span class="sc">!</span><span class="fu">is.null</span>(av<span class="sc">$</span>coefficient_stability)) {</span>
-<span id="cb77-8"><a href="#cb77-8" aria-hidden="true" tabindex="-1"></a>    summary_rows[[<span class="dv">1</span>]] <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(</span>
-<span id="cb77-9"><a href="#cb77-9" aria-hidden="true" tabindex="-1"></a>      <span class="at">Check =</span> <span class="st">"Coefficient Stability (LOO-CV)"</span>,</span>
-<span id="cb77-10"><a href="#cb77-10" aria-hidden="true" tabindex="-1"></a>      <span class="at">Result =</span> <span class="fu">sprintf</span>(<span class="st">"CV = %.1f%%"</span>, av<span class="sc">$</span>coefficient_stability<span class="sc">$</span>cv_percent),</span>
-<span id="cb77-11"><a href="#cb77-11" aria-hidden="true" tabindex="-1"></a>      <span class="at">Status =</span> <span class="cf">if</span> (av<span class="sc">$</span>coefficient_stability<span class="sc">$</span>is_stable) <span class="st">"✓ Stable"</span> <span class="cf">else</span> <span class="st">"⚠ Variable"</span></span>
-<span id="cb77-12"><a href="#cb77-12" aria-hidden="true" tabindex="-1"></a>    )</span>
-<span id="cb77-13"><a href="#cb77-13" aria-hidden="true" tabindex="-1"></a>  }</span>
-<span id="cb77-14"><a href="#cb77-14" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb77-15"><a href="#cb77-15" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Model selection stability</span></span>
-<span id="cb77-16"><a href="#cb77-16" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (<span class="sc">!</span><span class="fu">is.null</span>(av<span class="sc">$</span>model_selection_stability)) {</span>
-<span id="cb77-17"><a href="#cb77-17" aria-hidden="true" tabindex="-1"></a>    summary_rows[[<span class="dv">2</span>]] <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(</span>
-<span id="cb77-18"><a href="#cb77-18" aria-hidden="true" tabindex="-1"></a>      <span class="at">Check =</span> <span class="st">"Model Selection Stability"</span>,</span>
-<span id="cb77-19"><a href="#cb77-19" aria-hidden="true" tabindex="-1"></a>      <span class="at">Result =</span> <span class="fu">sprintf</span>(<span class="st">"%.0f%% agreement"</span>, av<span class="sc">$</span>model_selection_stability<span class="sc">$</span>stability_percent),</span>
-<span id="cb77-20"><a href="#cb77-20" aria-hidden="true" tabindex="-1"></a>      <span class="at">Status =</span> <span class="cf">if</span> (av<span class="sc">$</span>model_selection_stability<span class="sc">$</span>stability_percent <span class="sc">&gt;=</span> <span class="dv">90</span>) <span class="st">"✓ Excellent"</span> <span class="cf">else</span> <span class="st">"⚠ Variable"</span></span>
-<span id="cb77-21"><a href="#cb77-21" aria-hidden="true" tabindex="-1"></a>    )</span>
-<span id="cb77-22"><a href="#cb77-22" aria-hidden="true" tabindex="-1"></a>  }</span>
-<span id="cb77-23"><a href="#cb77-23" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb77-24"><a href="#cb77-24" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Prediction error</span></span>
-<span id="cb77-25"><a href="#cb77-25" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (<span class="sc">!</span><span class="fu">is.null</span>(av<span class="sc">$</span>prediction_error_by_participant)) {</span>
-<span id="cb77-26"><a href="#cb77-26" aria-hidden="true" tabindex="-1"></a>    summary_rows[[<span class="dv">3</span>]] <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(</span>
-<span id="cb77-27"><a href="#cb77-27" aria-hidden="true" tabindex="-1"></a>      <span class="at">Check =</span> <span class="st">"Out-of-Sample Error"</span>,</span>
-<span id="cb77-28"><a href="#cb77-28" aria-hidden="true" tabindex="-1"></a>      <span class="at">Result =</span> <span class="fu">sprintf</span>(<span class="st">"RMSE = %.3f, MAE = %.3f"</span>,</span>
-<span id="cb77-29"><a href="#cb77-29" aria-hidden="true" tabindex="-1"></a>                       av<span class="sc">$</span>prediction_error_by_participant<span class="sc">$</span>overall_rmse,</span>
-<span id="cb77-30"><a href="#cb77-30" aria-hidden="true" tabindex="-1"></a>                       av<span class="sc">$</span>prediction_error_by_participant<span class="sc">$</span>overall_mae),</span>
-<span id="cb77-31"><a href="#cb77-31" aria-hidden="true" tabindex="-1"></a>      <span class="at">Status =</span> <span class="st">"✓ Acceptable"</span></span>
-<span id="cb77-32"><a href="#cb77-32" aria-hidden="true" tabindex="-1"></a>    )</span>
-<span id="cb77-33"><a href="#cb77-33" aria-hidden="true" tabindex="-1"></a>  }</span>
-<span id="cb77-34"><a href="#cb77-34" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb77-35"><a href="#cb77-35" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Anomaly detection</span></span>
-<span id="cb77-36"><a href="#cb77-36" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (<span class="sc">!</span><span class="fu">is.null</span>(av<span class="sc">$</span>anomalies) <span class="sc">&amp;&amp;</span> <span class="sc">!</span><span class="fu">is.null</span>(av<span class="sc">$</span>anomalies<span class="sc">$</span>raw_data)) {</span>
-<span id="cb77-37"><a href="#cb77-37" aria-hidden="true" tabindex="-1"></a>    summary_rows[[<span class="dv">4</span>]] <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(</span>
-<span id="cb77-38"><a href="#cb77-38" aria-hidden="true" tabindex="-1"></a>      <span class="at">Check =</span> <span class="st">"Anomaly Detection (IF)"</span>,</span>
-<span id="cb77-39"><a href="#cb77-39" aria-hidden="true" tabindex="-1"></a>      <span class="at">Result =</span> <span class="fu">sprintf</span>(<span class="st">"%.1f%% flagged"</span>, av<span class="sc">$</span>anomalies<span class="sc">$</span>raw_data<span class="sc">$</span>anomaly_rate <span class="sc">*</span> <span class="dv">100</span>),</span>
-<span id="cb77-40"><a href="#cb77-40" aria-hidden="true" tabindex="-1"></a>      <span class="at">Status =</span> <span class="cf">if</span> (av<span class="sc">$</span>anomalies<span class="sc">$</span>raw_data<span class="sc">$</span>anomaly_rate <span class="sc">&lt;</span> <span class="fl">0.10</span>) <span class="st">"✓ Normal"</span> <span class="cf">else</span> <span class="st">"⚠ Review"</span></span>
-<span id="cb77-41"><a href="#cb77-41" aria-hidden="true" tabindex="-1"></a>    )</span>
-<span id="cb77-42"><a href="#cb77-42" aria-hidden="true" tabindex="-1"></a>  }</span>
-<span id="cb77-43"><a href="#cb77-43" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb77-44"><a href="#cb77-44" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Calibration</span></span>
-<span id="cb77-45"><a href="#cb77-45" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (<span class="sc">!</span><span class="fu">is.null</span>(av<span class="sc">$</span>calibration)) {</span>
-<span id="cb77-46"><a href="#cb77-46" aria-hidden="true" tabindex="-1"></a>    summary_rows[[<span class="dv">5</span>]] <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(</span>
-<span id="cb77-47"><a href="#cb77-47" aria-hidden="true" tabindex="-1"></a>      <span class="at">Check =</span> <span class="st">"Model Calibration"</span>,</span>
-<span id="cb77-48"><a href="#cb77-48" aria-hidden="true" tabindex="-1"></a>      <span class="at">Result =</span> <span class="fu">sprintf</span>(<span class="st">"Slope = %.3f, R² = %.3f"</span>, av<span class="sc">$</span>calibration<span class="sc">$</span>slope, av<span class="sc">$</span>calibration<span class="sc">$</span>r_squared),</span>
-<span id="cb77-49"><a href="#cb77-49" aria-hidden="true" tabindex="-1"></a>      <span class="at">Status =</span> <span class="cf">if</span> (av<span class="sc">$</span>calibration<span class="sc">$</span>slope <span class="sc">&gt;</span> <span class="fl">0.9</span> <span class="sc">&amp;&amp;</span> av<span class="sc">$</span>calibration<span class="sc">$</span>slope <span class="sc">&lt;</span> <span class="fl">1.1</span>) <span class="st">"✓ Excellent"</span> <span class="cf">else</span> <span class="st">"⚠ Review"</span></span>
-<span id="cb77-50"><a href="#cb77-50" aria-hidden="true" tabindex="-1"></a>    )</span>
-<span id="cb77-51"><a href="#cb77-51" aria-hidden="true" tabindex="-1"></a>  }</span>
-<span id="cb77-52"><a href="#cb77-52" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb77-53"><a href="#cb77-53" aria-hidden="true" tabindex="-1"></a>  summary_df <span class="ot">&lt;-</span> <span class="fu">do.call</span>(rbind, summary_rows)</span>
-<span id="cb77-54"><a href="#cb77-54" aria-hidden="true" tabindex="-1"></a>  <span class="fu">format_table</span>(summary_df, <span class="at">col.names =</span> <span class="fu">c</span>(<span class="st">"Validation Check"</span>, <span class="st">"Result"</span>, <span class="st">"Status"</span>))</span>
-<span id="cb77-55"><a href="#cb77-55" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb89"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb89-1"><a href="#cb89-1" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (<span class="sc">!</span><span class="fu">is.null</span>(lmm_results) <span class="sc">&amp;&amp;</span> <span class="sc">!</span><span class="fu">is.null</span>(lmm_results<span class="sc">$</span>advanced_validation)) {</span>
+<span id="cb89-2"><a href="#cb89-2" aria-hidden="true" tabindex="-1"></a>  av <span class="ot">&lt;-</span> lmm_results<span class="sc">$</span>advanced_validation</span>
+<span id="cb89-3"><a href="#cb89-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb89-4"><a href="#cb89-4" aria-hidden="true" tabindex="-1"></a>  summary_rows <span class="ot">&lt;-</span> <span class="fu">list</span>()</span>
+<span id="cb89-5"><a href="#cb89-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb89-6"><a href="#cb89-6" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Coefficient stability</span></span>
+<span id="cb89-7"><a href="#cb89-7" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (<span class="sc">!</span><span class="fu">is.null</span>(av<span class="sc">$</span>coefficient_stability)) {</span>
+<span id="cb89-8"><a href="#cb89-8" aria-hidden="true" tabindex="-1"></a>    summary_rows[[<span class="dv">1</span>]] <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(</span>
+<span id="cb89-9"><a href="#cb89-9" aria-hidden="true" tabindex="-1"></a>      <span class="at">Check =</span> <span class="st">"Coefficient Stability (LOO-CV)"</span>,</span>
+<span id="cb89-10"><a href="#cb89-10" aria-hidden="true" tabindex="-1"></a>      <span class="at">Result =</span> <span class="fu">sprintf</span>(<span class="st">"CV = %.1f%%"</span>, av<span class="sc">$</span>coefficient_stability<span class="sc">$</span>cv_percent),</span>
+<span id="cb89-11"><a href="#cb89-11" aria-hidden="true" tabindex="-1"></a>      <span class="at">Status =</span> <span class="cf">if</span> (av<span class="sc">$</span>coefficient_stability<span class="sc">$</span>is_stable) <span class="st">"✓ Stable"</span> <span class="cf">else</span> <span class="st">"⚠ Variable"</span></span>
+<span id="cb89-12"><a href="#cb89-12" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb89-13"><a href="#cb89-13" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb89-14"><a href="#cb89-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb89-15"><a href="#cb89-15" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Model selection stability</span></span>
+<span id="cb89-16"><a href="#cb89-16" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (<span class="sc">!</span><span class="fu">is.null</span>(av<span class="sc">$</span>model_selection_stability)) {</span>
+<span id="cb89-17"><a href="#cb89-17" aria-hidden="true" tabindex="-1"></a>    summary_rows[[<span class="dv">2</span>]] <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(</span>
+<span id="cb89-18"><a href="#cb89-18" aria-hidden="true" tabindex="-1"></a>      <span class="at">Check =</span> <span class="st">"Model Selection Stability"</span>,</span>
+<span id="cb89-19"><a href="#cb89-19" aria-hidden="true" tabindex="-1"></a>      <span class="at">Result =</span> <span class="fu">sprintf</span>(<span class="st">"%.0f%% agreement"</span>, av<span class="sc">$</span>model_selection_stability<span class="sc">$</span>stability_percent),</span>
+<span id="cb89-20"><a href="#cb89-20" aria-hidden="true" tabindex="-1"></a>      <span class="at">Status =</span> <span class="cf">if</span> (av<span class="sc">$</span>model_selection_stability<span class="sc">$</span>stability_percent <span class="sc">&gt;=</span> <span class="dv">90</span>) <span class="st">"✓ Excellent"</span> <span class="cf">else</span> <span class="st">"⚠ Variable"</span></span>
+<span id="cb89-21"><a href="#cb89-21" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb89-22"><a href="#cb89-22" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb89-23"><a href="#cb89-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb89-24"><a href="#cb89-24" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Prediction error</span></span>
+<span id="cb89-25"><a href="#cb89-25" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (<span class="sc">!</span><span class="fu">is.null</span>(av<span class="sc">$</span>prediction_error_by_participant)) {</span>
+<span id="cb89-26"><a href="#cb89-26" aria-hidden="true" tabindex="-1"></a>    summary_rows[[<span class="dv">3</span>]] <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(</span>
+<span id="cb89-27"><a href="#cb89-27" aria-hidden="true" tabindex="-1"></a>      <span class="at">Check =</span> <span class="st">"Out-of-Sample Error"</span>,</span>
+<span id="cb89-28"><a href="#cb89-28" aria-hidden="true" tabindex="-1"></a>      <span class="at">Result =</span> <span class="fu">sprintf</span>(<span class="st">"RMSE = %.3f, MAE = %.3f"</span>,</span>
+<span id="cb89-29"><a href="#cb89-29" aria-hidden="true" tabindex="-1"></a>                       av<span class="sc">$</span>prediction_error_by_participant<span class="sc">$</span>overall_rmse,</span>
+<span id="cb89-30"><a href="#cb89-30" aria-hidden="true" tabindex="-1"></a>                       av<span class="sc">$</span>prediction_error_by_participant<span class="sc">$</span>overall_mae),</span>
+<span id="cb89-31"><a href="#cb89-31" aria-hidden="true" tabindex="-1"></a>      <span class="at">Status =</span> <span class="st">"✓ Acceptable"</span></span>
+<span id="cb89-32"><a href="#cb89-32" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb89-33"><a href="#cb89-33" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb89-34"><a href="#cb89-34" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb89-35"><a href="#cb89-35" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Anomaly detection</span></span>
+<span id="cb89-36"><a href="#cb89-36" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (<span class="sc">!</span><span class="fu">is.null</span>(av<span class="sc">$</span>anomalies) <span class="sc">&amp;&amp;</span> <span class="sc">!</span><span class="fu">is.null</span>(av<span class="sc">$</span>anomalies<span class="sc">$</span>raw_data)) {</span>
+<span id="cb89-37"><a href="#cb89-37" aria-hidden="true" tabindex="-1"></a>    summary_rows[[<span class="dv">4</span>]] <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(</span>
+<span id="cb89-38"><a href="#cb89-38" aria-hidden="true" tabindex="-1"></a>      <span class="at">Check =</span> <span class="st">"Anomaly Detection (IF)"</span>,</span>
+<span id="cb89-39"><a href="#cb89-39" aria-hidden="true" tabindex="-1"></a>      <span class="at">Result =</span> <span class="fu">sprintf</span>(<span class="st">"%.1f%% flagged"</span>, av<span class="sc">$</span>anomalies<span class="sc">$</span>raw_data<span class="sc">$</span>anomaly_rate <span class="sc">*</span> <span class="dv">100</span>),</span>
+<span id="cb89-40"><a href="#cb89-40" aria-hidden="true" tabindex="-1"></a>      <span class="at">Status =</span> <span class="cf">if</span> (av<span class="sc">$</span>anomalies<span class="sc">$</span>raw_data<span class="sc">$</span>anomaly_rate <span class="sc">&lt;</span> <span class="fl">0.10</span>) <span class="st">"✓ Normal"</span> <span class="cf">else</span> <span class="st">"⚠ Review"</span></span>
+<span id="cb89-41"><a href="#cb89-41" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb89-42"><a href="#cb89-42" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb89-43"><a href="#cb89-43" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb89-44"><a href="#cb89-44" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Calibration</span></span>
+<span id="cb89-45"><a href="#cb89-45" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (<span class="sc">!</span><span class="fu">is.null</span>(av<span class="sc">$</span>calibration)) {</span>
+<span id="cb89-46"><a href="#cb89-46" aria-hidden="true" tabindex="-1"></a>    summary_rows[[<span class="dv">5</span>]] <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(</span>
+<span id="cb89-47"><a href="#cb89-47" aria-hidden="true" tabindex="-1"></a>      <span class="at">Check =</span> <span class="st">"Model Calibration"</span>,</span>
+<span id="cb89-48"><a href="#cb89-48" aria-hidden="true" tabindex="-1"></a>      <span class="at">Result =</span> <span class="fu">sprintf</span>(<span class="st">"Slope = %.3f, R² = %.3f"</span>, av<span class="sc">$</span>calibration<span class="sc">$</span>slope, av<span class="sc">$</span>calibration<span class="sc">$</span>r_squared),</span>
+<span id="cb89-49"><a href="#cb89-49" aria-hidden="true" tabindex="-1"></a>      <span class="at">Status =</span> <span class="cf">if</span> (av<span class="sc">$</span>calibration<span class="sc">$</span>slope <span class="sc">&gt;</span> <span class="fl">0.9</span> <span class="sc">&amp;&amp;</span> av<span class="sc">$</span>calibration<span class="sc">$</span>slope <span class="sc">&lt;</span> <span class="fl">1.1</span>) <span class="st">"✓ Excellent"</span> <span class="cf">else</span> <span class="st">"⚠ Review"</span></span>
+<span id="cb89-50"><a href="#cb89-50" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb89-51"><a href="#cb89-51" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb89-52"><a href="#cb89-52" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb89-53"><a href="#cb89-53" aria-hidden="true" tabindex="-1"></a>  summary_df <span class="ot">&lt;-</span> <span class="fu">do.call</span>(rbind, summary_rows)</span>
+<span id="cb89-54"><a href="#cb89-54" aria-hidden="true" tabindex="-1"></a>  <span class="fu">format_table</span>(summary_df, <span class="at">col.names =</span> <span class="fu">c</span>(<span class="st">"Validation Check"</span>, <span class="st">"Result"</span>, <span class="st">"Status"</span>))</span>
+<span id="cb89-55"><a href="#cb89-55" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div id="tbl-advanced-validation-summary" class="cell quarto-float anchored">
 <figure class="quarto-float quarto-float-tbl figure">
 <figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-advanced-validation-summary-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Table&nbsp;24: Summary of advanced validation checks
+Table&nbsp;29: Summary of advanced validation checks
 </figcaption>
 <div aria-describedby="tbl-advanced-validation-summary-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <div class="cell-output-display">
@@ -5165,21 +5750,21 @@ Table&nbsp;24: Summary of advanced validation checks
 <div class="cell">
 <details class="code-fold">
 <summary>Show code</summary>
-<div class="sourceCode cell-code" id="cb78"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb78-1"><a href="#cb78-1" aria-hidden="true" tabindex="-1"></a>targets <span class="ot">&lt;-</span> <span class="fu">aggregate</span>(mean_velocity <span class="sc">~</span> rir <span class="sc">+</span> load_percentage, <span class="at">data =</span> data, <span class="at">FUN =</span> mean)</span>
-<span id="cb78-2"><a href="#cb78-2" aria-hidden="true" tabindex="-1"></a>targets <span class="ot">&lt;-</span> <span class="fu">reshape</span>(targets, <span class="at">idvar =</span> <span class="st">"rir"</span>, <span class="at">timevar =</span> <span class="st">"load_percentage"</span>,</span>
-<span id="cb78-3"><a href="#cb78-3" aria-hidden="true" tabindex="-1"></a>                   <span class="at">direction =</span> <span class="st">"wide"</span>, <span class="at">v.names =</span> <span class="st">"mean_velocity"</span>)</span>
-<span id="cb78-4"><a href="#cb78-4" aria-hidden="true" tabindex="-1"></a><span class="fu">names</span>(targets) <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"RIR"</span>, <span class="st">"80% 1RM"</span>, <span class="st">"90% 1RM"</span>)</span>
-<span id="cb78-5"><a href="#cb78-5" aria-hidden="true" tabindex="-1"></a>targets <span class="ot">&lt;-</span> targets[<span class="fu">order</span>(<span class="sc">-</span>targets<span class="sc">$</span>RIR), ]</span>
-<span id="cb78-6"><a href="#cb78-6" aria-hidden="true" tabindex="-1"></a>targets<span class="sc">$</span><span class="st">`</span><span class="at">80% 1RM</span><span class="st">`</span> <span class="ot">&lt;-</span> <span class="fu">round</span>(targets<span class="sc">$</span><span class="st">`</span><span class="at">80% 1RM</span><span class="st">`</span>, <span class="dv">3</span>)</span>
-<span id="cb78-7"><a href="#cb78-7" aria-hidden="true" tabindex="-1"></a>targets<span class="sc">$</span><span class="st">`</span><span class="at">90% 1RM</span><span class="st">`</span> <span class="ot">&lt;-</span> <span class="fu">round</span>(targets<span class="sc">$</span><span class="st">`</span><span class="at">90% 1RM</span><span class="st">`</span>, <span class="dv">3</span>)</span>
-<span id="cb78-8"><a href="#cb78-8" aria-hidden="true" tabindex="-1"></a><span class="fu">rownames</span>(targets) <span class="ot">&lt;-</span> <span class="cn">NULL</span></span>
-<span id="cb78-9"><a href="#cb78-9" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb78-10"><a href="#cb78-10" aria-hidden="true" tabindex="-1"></a><span class="fu">format_table</span>(targets, <span class="at">col.names =</span> <span class="fu">c</span>(<span class="st">"RIR"</span>, <span class="st">"80% 1RM (m/s)"</span>, <span class="st">"90% 1RM (m/s)"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb90"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb90-1"><a href="#cb90-1" aria-hidden="true" tabindex="-1"></a>targets <span class="ot">&lt;-</span> <span class="fu">aggregate</span>(mean_velocity <span class="sc">~</span> rir <span class="sc">+</span> load_percentage, <span class="at">data =</span> data, <span class="at">FUN =</span> mean)</span>
+<span id="cb90-2"><a href="#cb90-2" aria-hidden="true" tabindex="-1"></a>targets <span class="ot">&lt;-</span> <span class="fu">reshape</span>(targets, <span class="at">idvar =</span> <span class="st">"rir"</span>, <span class="at">timevar =</span> <span class="st">"load_percentage"</span>,</span>
+<span id="cb90-3"><a href="#cb90-3" aria-hidden="true" tabindex="-1"></a>                   <span class="at">direction =</span> <span class="st">"wide"</span>, <span class="at">v.names =</span> <span class="st">"mean_velocity"</span>)</span>
+<span id="cb90-4"><a href="#cb90-4" aria-hidden="true" tabindex="-1"></a><span class="fu">names</span>(targets) <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"RIR"</span>, <span class="st">"80% 1RM"</span>, <span class="st">"90% 1RM"</span>)</span>
+<span id="cb90-5"><a href="#cb90-5" aria-hidden="true" tabindex="-1"></a>targets <span class="ot">&lt;-</span> targets[<span class="fu">order</span>(<span class="sc">-</span>targets<span class="sc">$</span>RIR), ]</span>
+<span id="cb90-6"><a href="#cb90-6" aria-hidden="true" tabindex="-1"></a>targets<span class="sc">$</span><span class="st">`</span><span class="at">80% 1RM</span><span class="st">`</span> <span class="ot">&lt;-</span> <span class="fu">round</span>(targets<span class="sc">$</span><span class="st">`</span><span class="at">80% 1RM</span><span class="st">`</span>, <span class="dv">3</span>)</span>
+<span id="cb90-7"><a href="#cb90-7" aria-hidden="true" tabindex="-1"></a>targets<span class="sc">$</span><span class="st">`</span><span class="at">90% 1RM</span><span class="st">`</span> <span class="ot">&lt;-</span> <span class="fu">round</span>(targets<span class="sc">$</span><span class="st">`</span><span class="at">90% 1RM</span><span class="st">`</span>, <span class="dv">3</span>)</span>
+<span id="cb90-8"><a href="#cb90-8" aria-hidden="true" tabindex="-1"></a><span class="fu">rownames</span>(targets) <span class="ot">&lt;-</span> <span class="cn">NULL</span></span>
+<span id="cb90-9"><a href="#cb90-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb90-10"><a href="#cb90-10" aria-hidden="true" tabindex="-1"></a><span class="fu">format_table</span>(targets, <span class="at">col.names =</span> <span class="fu">c</span>(<span class="st">"RIR"</span>, <span class="st">"80% 1RM (m/s)"</span>, <span class="st">"90% 1RM (m/s)"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div id="tbl-reference" class="cell quarto-float anchored">
 <figure class="quarto-float quarto-float-tbl figure">
 <figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-reference-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Table&nbsp;25: Population-Average Velocity Thresholds (Use for Initial Reference Only)
+Table&nbsp;30: Population-Average Velocity Thresholds (Use for Initial Reference Only)
 </figcaption>
 <div aria-describedby="tbl-reference-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <div class="cell-output-display">
