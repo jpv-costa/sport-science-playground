@@ -27,6 +27,8 @@
 # - Bland-Altman: Uses validated 1.96 SD for 95% limits of agreement
 # - Q-Q plots: Standard approach for normality assessment
 # - Bootstrap: Proper percentile method for CI visualization
+# - Spread-Location plot: For homoscedasticity assessment (GLM best practice)
+# - Residual histogram: Primary normality diagnostic (Practitioner's Guide to GLMs)
 #
 # TESTABILITY:
 # - All calculations extracted to pure private methods
@@ -536,6 +538,143 @@ DiagnosticPlotter <- R6Class(
           y = "Empirical Coverage"
         ) +
         private$.get_base_theme()
+    },
+
+    #' @description Create Spread-Location plot for homoscedasticity
+
+    #'
+    #' The Spread-Location (SL) plot is a key diagnostic from the GLM framework.
+    #' It plots sqrt(|standardized residuals|) vs fitted values. A flat loess
+    #' line indicates homoscedasticity; a non-flat line indicates the variance
+    #' of residuals changes with fitted values.
+    #'
+    #' @param residuals Vector of model residuals
+    #' @param fitted Vector of fitted values
+    #' @param title Plot title
+    #' @return ggplot object
+    plot_spread_location = function(residuals, fitted,
+                                    title = "Spread-Location Plot") {
+      stopifnot(
+        "residuals must be numeric" = is.numeric(residuals),
+        "fitted must be numeric" = is.numeric(fitted),
+        "residuals and fitted must have same length" =
+          length(residuals) == length(fitted)
+      )
+
+      # Standardize residuals
+      std_residuals <- residuals / sd(residuals)
+      sqrt_abs_resid <- sqrt(abs(std_residuals))
+
+      sl_data <- data.frame(
+        fitted = fitted,
+        sqrt_abs_std_resid = sqrt_abs_resid
+      )
+
+      ggplot(sl_data, aes(x = .data$fitted, y = .data$sqrt_abs_std_resid)) +
+        geom_point(color = private$.colors$primary, alpha = 0.5) +
+        geom_smooth(
+          method = "loess",
+          formula = y ~ x,
+          color = private$.colors$secondary,
+          se = TRUE,
+          fill = private$.colors$secondary,
+          alpha = 0.2,
+          linewidth = 1.5
+        ) +
+        labs(
+          title = title,
+          subtitle = "Flat line indicates homoscedasticity (constant variance)",
+          x = "Fitted Values",
+          y = expression(sqrt("|Standardized Residuals|"))
+        ) +
+        private$.get_base_theme()
+    },
+
+    #' @description Create residual histogram for normality assessment
+    #'
+    #' The histogram is the primary tool for assessing normality of residuals
+    #' per the GLM best practices. A symmetric, bell-shaped distribution
+    #' indicates normality; severe asymmetry indicates a violation.
+    #'
+    #' @param residuals Vector of model residuals
+    #' @param bins Number of histogram bins (default: 30)
+    #' @param title Plot title
+    #' @return ggplot object
+    plot_residual_histogram = function(residuals,
+                                       bins = 30,
+                                       title = "Histogram of Residuals") {
+      stopifnot(
+        "residuals must be numeric" = is.numeric(residuals),
+        "Need at least 10 residuals" = length(residuals) >= 10
+      )
+
+      resid_data <- data.frame(residuals = residuals)
+
+      ggplot(resid_data, aes(x = .data$residuals)) +
+        geom_histogram(
+          aes(y = after_stat(density)),
+          bins = bins,
+          fill = private$.colors$primary,
+          alpha = 0.7,
+          color = "white"
+        ) +
+        geom_density(
+          color = private$.colors$secondary,
+          linewidth = 1.2
+        ) +
+        geom_vline(
+          xintercept = 0,
+          linetype = "dashed",
+          color = private$.colors$gray,
+          linewidth = 1
+        ) +
+        labs(
+          title = title,
+          subtitle = "Symmetric bell shape indicates normality; asymmetry indicates violation",
+          x = "Residuals",
+          y = "Density"
+        ) +
+        private$.get_base_theme()
+    },
+
+    #' @description Create complete GLM diagnostic panel
+    #'
+    #' Combines all four key GLM diagnostics from the Practitioner's Guide:
+    #' 1. Residual histogram (normality)
+    #' 2. Q-Q plot (normality)
+    #' 3. Residuals vs Fitted (linearity/patterns)
+    #' 4. Spread-Location plot (homoscedasticity)
+    #'
+    #' @param residuals Vector of model residuals
+    #' @param fitted Vector of fitted values
+    #' @return Combined ggplot object (2x2 panel)
+    plot_glm_diagnostics = function(residuals, fitted) {
+      stopifnot(
+        "residuals must be numeric" = is.numeric(residuals),
+        "fitted must be numeric" = is.numeric(fitted),
+        "residuals and fitted must have same length" =
+          length(residuals) == length(fitted)
+      )
+
+      p1 <- self$plot_residual_histogram(residuals, title = "1. Normality: Histogram")
+      p2 <- private$.create_qq_plot(data.frame(residuals = residuals))
+      p2 <- p2 + labs(title = "2. Normality: Q-Q Plot")
+      p3 <- private$.create_residual_plot(
+        data.frame(residuals = residuals, fitted = fitted)
+      )
+      p3 <- p3 + labs(title = "3. Linearity: Residuals vs Fitted")
+      p4 <- self$plot_spread_location(residuals, fitted,
+                                      title = "4. Homoscedasticity: Spread-Location")
+
+      (p1 + p2) / (p3 + p4) +
+        patchwork::plot_annotation(
+          title = "GLM Model Diagnostics",
+          subtitle = "Four key checks from the Practitioner's Guide to GLMs",
+          theme = theme(
+            plot.title = element_text(face = "bold", size = 18),
+            plot.subtitle = element_text(color = private$.colors$gray, size = 12)
+          )
+        )
     },
 
     #' @description Create exercise comparison plot (e.g., deadlift vs squat)

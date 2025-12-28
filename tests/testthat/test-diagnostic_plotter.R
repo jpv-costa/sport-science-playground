@@ -528,3 +528,110 @@ describe("Scientific Validity", {
     })
   })
 })
+
+# =============================================================================
+# GLM DIAGNOSTIC PLOT TESTS (Practitioner's Guide to GLMs)
+# =============================================================================
+
+describe("GLM Diagnostic Plots", {
+
+  describe("plot_spread_location", {
+
+    it("returns ggplot object", {
+      residuals <- rnorm(100)
+      fitted <- rnorm(100, mean = 0.3)
+      plotter <- DiagnosticPlotter$new()
+
+      result <- plotter$plot_spread_location(residuals, fitted)
+
+      expect_s3_class(result, "ggplot")
+    })
+
+    it("rejects mismatched lengths", {
+      plotter <- DiagnosticPlotter$new()
+
+      expect_error(
+        plotter$plot_spread_location(rnorm(10), rnorm(20)),
+        "residuals and fitted must have same length"
+      )
+    })
+
+    it("rejects non-numeric residuals", {
+      plotter <- DiagnosticPlotter$new()
+
+      expect_error(
+        plotter$plot_spread_location(c("a", "b", "c"), c(1, 2, 3)),
+        "residuals must be numeric"
+      )
+    })
+  })
+
+  describe("plot_residual_histogram", {
+
+    it("returns ggplot object", {
+      residuals <- rnorm(100)
+      plotter <- DiagnosticPlotter$new()
+
+      result <- plotter$plot_residual_histogram(residuals)
+
+      expect_s3_class(result, "ggplot")
+    })
+
+    it("accepts custom bins parameter", {
+      residuals <- rnorm(100)
+      plotter <- DiagnosticPlotter$new()
+
+      result <- plotter$plot_residual_histogram(residuals, bins = 50)
+
+      expect_s3_class(result, "ggplot")
+    })
+
+    it("rejects too few residuals", {
+      plotter <- DiagnosticPlotter$new()
+
+      expect_error(
+        plotter$plot_residual_histogram(rnorm(5)),
+        "Need at least 10 residuals"
+      )
+    })
+  })
+
+  describe("plot_glm_diagnostics", {
+
+    it("returns patchwork object with 4 panels", {
+      residuals <- rnorm(100)
+      fitted <- rnorm(100, mean = 0.3)
+      plotter <- DiagnosticPlotter$new()
+
+      result <- plotter$plot_glm_diagnostics(residuals, fitted)
+
+      expect_s3_class(result, "patchwork")
+    })
+
+    it("rejects mismatched lengths", {
+      plotter <- DiagnosticPlotter$new()
+
+      expect_error(
+        plotter$plot_glm_diagnostics(rnorm(10), rnorm(20)),
+        "residuals and fitted must have same length"
+      )
+    })
+
+    it("works with realistic model residuals", {
+      # Simulate residuals from a well-fitting model
+      set.seed(42)
+      n <- 200
+      x <- runif(n, 0, 7)
+      y <- 0.2 + 0.04 * x + rnorm(n, 0, 0.02)
+      model <- lm(y ~ x)
+
+      plotter <- DiagnosticPlotter$new()
+      result <- plotter$plot_glm_diagnostics(
+        residuals = residuals(model),
+        fitted = fitted(model)
+      )
+
+      expect_s3_class(result, "patchwork")
+    })
+  })
+})
