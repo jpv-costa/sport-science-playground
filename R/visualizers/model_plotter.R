@@ -39,7 +39,8 @@ box::use(
     after_stat, coord_flip
   ],
   dplyr[mutate, arrange, .data],
-  stats[predict]
+  stats[predict],
+  patchwork[wrap_plots, plot_annotation]
 )
 
 #' Color Palette for Model Visualizations
@@ -159,8 +160,8 @@ ModelPlotter <- R6Class(
       )
 
       # Combine with patchwork
-      p1 + p2 +
-        patchwork::plot_annotation(
+      wrap_plots(p1, p2, ncol = 2) +
+        plot_annotation(
           title = title,
           theme = theme(plot.title = element_text(face = "bold", size = 16))
         )

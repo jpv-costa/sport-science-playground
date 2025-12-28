@@ -1,0 +1,392 @@
+---
+title: "Statistical Methods Guide"
+subtitle: "Understanding the Analyses in Plain Language"
+author:
+  - name: "João Costa"
+    affiliation: "Sport Science Research"
+date: today
+format:
+  html:
+    toc: true
+    toc-depth: 3
+    code-fold: true
+    code-summary: "Show code"
+    number-sections: true
+---
+
+## Quick Start: Which Section Do I Need?
+
+| I want to understand... | Go to section... |
+|------------------------|------------------|
+| Why we used mixed models | [Section 1](#why-mixed-models) |
+| How to read the plots | [Section 2](#reading-the-plots) |
+| What the numbers mean | [Section 3](#interpreting-the-numbers) |
+| Model validation | [Section 4](#model-validation) |
+| How to apply this | [Section 5](#practical-application) |
+
+::: {.callout-tip}
+## For the Impatient Reader
+
+If you just want the key takeaways:
+
+1. **Mixed models** account for repeated measurements from the same athletes
+2. **Individual calibration** is ~2x more accurate than population averages
+3. **Recalibrate every 2-4 weeks** due to moderate day-to-day reliability
+4. **Use velocity tables** as a guide, not gospel
+:::
+
+## Why Mixed Models? {#why-mixed-models}
+
+### The Problem: Non-Independent Data
+
+When the same athlete provides multiple measurements, those measurements are **correlated**---they share that athlete's unique characteristics (strength, technique, fatigue resistance).
+
+**The Analogy**: Imagine asking 10 friends to rate a movie. Each friend rates the movie 5 times. You now have 50 ratings, but they're not 50 independent opinions---they're 10 opinions, each expressed 5 times.
+
+**Why This Matters**:
+
+| If you ignore clustering... | What happens... |
+|----------------------------|-----------------|
+| Standard errors are too small | You're overconfident |
+| P-values are too small | More false positives |
+| Confidence intervals are too narrow | Misleading precision |
+
+### The Solution: Random Effects
+
+Mixed models include **random effects** that account for individual differences:
+
+::: {.panel-tabset}
+
+### Plain Language
+
+- **Random intercepts**: Each athlete has their own baseline velocity (some are naturally faster lifters)
+- **Random slopes**: Each athlete has their own RIR-velocity relationship (some slow down more as they fatigue)
+
+### Mathematical Details
+
+::: {.callout-note collapse="true"}
+## The Model Formula
+
+The basic mixed model is:
+
+$$
+y_{ij} = \beta_0 + \beta_1 x_{ij} + u_{0j} + u_{1j} x_{ij} + \varepsilon_{ij}
+$$
+
+Where:
+
+- $y_{ij}$ = velocity for observation $i$ from athlete $j$
+- $\beta_0, \beta_1$ = fixed effects (population average intercept and slope)
+- $u_{0j}$ = random intercept for athlete $j$ (deviation from average baseline)
+- $u_{1j}$ = random slope for athlete $j$ (deviation from average RIR effect)
+- $\varepsilon_{ij}$ = residual error
+:::
+
+:::
+
+### Three Questions to Ask Before Using Mixed Models
+
+1. **Do individuals differ at baseline?**
+   - Look at individual means---is there substantial variation?
+   - If yes → include random intercepts
+
+2. **Do individuals differ in their response?**
+   - Look at individual slopes---do some show steeper/flatter relationships?
+   - If yes → include random slopes
+
+3. **Does the design support random slopes?**
+   - Need multiple observations per individual at different predictor values
+   - Rule of thumb: at least 5-10 observations per individual
+
+## Reading the Plots {#reading-the-plots}
+
+### Model Plot (Spaghetti Plot)
+
+The model plot shows individual athlete trajectories overlaid with the population average.
+
+**What to look for:**
+
+| Element | What it shows | Good sign | Warning sign |
+|---------|---------------|-----------|--------------|
+| **Gray lines** | Individual athlete fits | Parallel-ish lines | Lines crossing everywhere |
+| **Red line** | Population average | Central tendency | Far from most individuals |
+| **Points** | Actual data | Clustered around lines | Scattered randomly |
+| **Line spread** | Individual variability | Moderate spread | Extreme spread |
+
+### Caterpillar Plot
+
+The caterpillar plot shows each athlete's deviation from the population average.
+
+**How to read it:**
+
+1. **Zero line** = the population average
+2. **Points** = each athlete's estimated deviation
+3. **Error bars** = 95% confidence interval
+4. **Crossing zero** = not meaningfully different from average
+
+**Interpretation guide:**
+
+- Athletes whose intervals DON'T cross zero differ significantly from average
+- Wide intervals = more uncertainty (often fewer observations)
+- The spread of points shows the amount of individual variation
+
+### Q-Q Plot (Normality Check)
+
+**The basic idea**: If residuals are normally distributed, points fall on the diagonal line.
+
+| What you see | What it means | Concern level |
+|--------------|---------------|---------------|
+| Points on line | Normal distribution | None |
+| Slight curve at ends | Light tails | Low |
+| S-shape | Heavy tails | Moderate |
+| Systematic curve | Non-normality | Check robustness |
+
+**Key insight**: With large samples (n > 30), mixed models are robust to moderate non-normality.
+
+### Residual vs Fitted Plot
+
+**What to look for:**
+
+- **Good**: Random scatter around zero
+- **Bad**: Fan/funnel shape (heteroscedasticity)
+- **Bad**: Curve pattern (non-linearity)
+
+## Interpreting the Numbers {#interpreting-the-numbers}
+
+### Effect Sizes
+
+Effect sizes tell you **how big** an effect is, not just whether it exists.
+
+#### Cohen's d
+
+**Formula**: d = (Mean₁ - Mean₂) / SD
+
+**Interpretation guide:**
+
+| Cohen's d | Interpretation | Practical example |
+|-----------|----------------|-------------------|
+| 0.2 | Small | Barely noticeable |
+| 0.5 | Medium | Noticeable with attention |
+| 0.8 | Large | Obvious difference |
+| 1.0+ | Very large | Hard to miss |
+
+::: {.callout-warning}
+## Context Matters
+
+These benchmarks are guidelines, not rules. A "small" effect might be huge in some contexts (e.g., medication side effects) and trivial in others.
+:::
+
+#### R² (R-squared)
+
+For mixed models, we report two R² values:
+
+| Type | What it measures | In our study |
+|------|-----------------|--------------|
+| **R² marginal** | Variance explained by fixed effects alone | How much does RIR explain? |
+| **R² conditional** | Variance explained by fixed + random effects | How much do RIR + individual differences explain? |
+
+**The gap** between marginal and conditional R² shows how much individual differences matter. A large gap (>20%) suggests individual calibration is valuable.
+
+### Model Comparison
+
+#### AIC and BIC
+
+**Lower is better** for both metrics.
+
+| Metric | Penalizes | Use when |
+|--------|-----------|----------|
+| AIC | Model complexity less | Prediction is goal |
+| BIC | Model complexity more | Explanation is goal |
+
+**Rule of thumb**: Differences < 2 are negligible; differences > 10 are decisive.
+
+#### Bayes Factors
+
+Bayes factors answer: "How many times more likely is the data under Model A than Model B?"
+
+| Bayes Factor | Interpretation |
+|--------------|----------------|
+| > 100 | Decisive evidence |
+| 30-100 | Very strong evidence |
+| 10-30 | Strong evidence |
+| 3-10 | Moderate evidence |
+| 1-3 | Weak evidence |
+| ~1 | No evidence either way |
+| < 1 | Evidence for other model |
+
+::: {.callout-note}
+## BIC Approximation
+
+We approximate Bayes factors using BIC:
+
+$$BF \approx e^{(\Delta BIC / 2)}$$
+
+This works well for comparing nested models with reasonable sample sizes.
+:::
+
+### Confidence vs Prediction Intervals
+
+This distinction is crucial for practical application:
+
+| Interval | Question answered | Width | Use for |
+|----------|-------------------|-------|---------|
+| **Confidence Interval** | Where is the true mean? | Narrower | Estimating population parameters |
+| **Prediction Interval** | Where will a new observation fall? | Wider | Predicting individual performance |
+
+**Example**:
+- 95% CI for velocity at RIR 3: 0.42-0.44 m/s (where's the average?)
+- 95% PI for velocity at RIR 3: 0.32-0.54 m/s (what might THIS rep look like?)
+
+For practical training decisions, prediction intervals are more relevant.
+
+## Model Validation {#model-validation}
+
+### Cross-Validation
+
+**The idea**: Test how well the model predicts data it hasn't seen.
+
+#### Leave-One-Participant-Out CV
+
+1. Remove one athlete's data
+2. Fit model on remaining athletes
+3. Predict removed athlete's velocities
+4. Calculate prediction error
+5. Repeat for all athletes
+
+**Why it matters**: AIC/BIC tell you about model fit; CV tells you about prediction accuracy.
+
+#### K-Fold CV
+
+1. Divide athletes into K groups
+2. Train on K-1 groups, test on held-out group
+3. Rotate and repeat
+4. Average prediction errors
+
+### Influence Diagnostics
+
+**Goal**: Identify observations or athletes that unduly influence results.
+
+#### Cook's Distance
+
+**What it measures**: How much would the results change if we removed this point?
+
+**Threshold**: Cook's D > 4/n suggests influential points
+
+**What to do with influential points:**
+
+1. Check for data entry errors
+2. Investigate if they're genuine outliers
+3. Run sensitivity analysis with/without them
+4. Report both if results differ
+
+#### Participant-Level Influence
+
+For clustered data, also check if any individual athlete is driving your results. If removing one athlete dramatically changes conclusions, investigate why.
+
+### Calibration
+
+**A well-calibrated model**: predictions match reality.
+
+#### Calibration Plot
+
+- **X-axis**: Predicted values
+- **Y-axis**: Observed values
+- **Ideal**: Points fall on 45° line (predicted = observed)
+
+**Metrics**:
+
+- Calibration slope = 1 is ideal
+- Calibration intercept = 0 is ideal
+
+### The "Pit Stop" Philosophy
+
+Think of robustness checks like pit stops in a race---they're not emergency repairs, but planned checkpoints.
+
+| Pit Stop | What it checks | If standard & robust agree... |
+|----------|----------------|-------------------------------|
+| Cluster-robust SEs | Heteroscedasticity | Unequal variance isn't a problem |
+| Bootstrap CIs | Distributional assumptions | Non-normality isn't a problem |
+| Sensitivity analysis | Model specification | Specific choices don't matter |
+
+**Reporting**: "Standard and robust methods agree, confirming that conclusions don't depend on specific technical assumptions."
+
+## Practical Application {#practical-application}
+
+### Using Velocity Tables
+
+Velocity stop tables tell you when to end a set based on bar speed.
+
+**How to use them:**
+
+1. Find your target RIR in the left column
+2. Look up the corresponding velocity
+3. Stop the set when bar speed drops to that velocity
+
+**Important caveats:**
+
+- Tables are population averages---your individual relationship may differ
+- Day-to-day variability means some error is inevitable
+- Use as a guide alongside RPE, not as the sole decision tool
+
+### Individual vs Population Models
+
+| Approach | Accuracy | When to use |
+|----------|----------|-------------|
+| Population model | Lower (~2x error) | Quick estimates, new athletes |
+| Individual model | Higher | Trained athletes with historical data |
+
+**Recommendation for serious athletes**: Collect ~20 observations across different loads and RIR values, then build an individual model.
+
+### Calibration Frequency
+
+Based on day-to-day reliability (ICC ~0.5-0.7):
+
+| Athlete type | Recalibration frequency |
+|--------------|------------------------|
+| Recreational | Monthly or after breaks |
+| Competitive | Every 2-4 weeks |
+| Elite | Weekly during peaking phases |
+
+### Common Questions (FAQ)
+
+**Q: How accurate is VBT for deadlifts?**
+
+A: Population-level prediction error is ~1.3 reps (MAE). Individual calibration can reduce this to ~0.7 reps.
+
+**Q: Should I use individual calibration?**
+
+A: If you're a serious athlete tracking velocity regularly, yes. For casual use, population averages are fine.
+
+**Q: Why is deadlift more variable than squat/bench?**
+
+A: The deadlift's unique start position (no eccentric, starting from rest) and technical variations (grip position, back angle) introduce more variability.
+
+**Q: How many reps do I need for calibration?**
+
+A: Minimum 15-20 observations across 3+ RIR levels. More is better, especially for building individual models.
+
+**Q: Can I use these tables for sumo deadlift?**
+
+A: With caution. Our data is for conventional deadlift. Sumo may have different velocity profiles.
+
+## Summary: Key Takeaways
+
+::: {.callout-important}
+## The Bottom Line
+
+1. **Mixed models** properly handle repeated measures---don't use regular regression
+2. **Individual calibration** is twice as accurate as population averages
+3. **Recalibrate regularly** (every 2-4 weeks) due to day-to-day variability
+4. **Use velocity as one tool** among many (RPE, load, technique)
+5. **Check robustness**---if different methods agree, you can trust the results
+:::
+
+## References
+
+For those wanting to dive deeper:
+
+- Nakagawa & Schielzeth (2013): R² for mixed models
+- Koo & Li (2016): ICC interpretation guidelines
+- Jeffreys (1961): Bayes factor interpretation scale
+- Zuur et al. (2009): Mixed effects models in R
+- Gelman & Hill (2007): Data analysis using regression and multilevel models

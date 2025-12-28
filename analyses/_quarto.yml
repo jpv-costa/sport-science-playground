@@ -18,6 +18,8 @@ website:
             text: "3. General vs Individual Models"
       - href: deadlift_study.qmd
         text: "Deadlift Study (Thesis)"
+      - href: statistical_guide.qmd
+        text: "Statistical Guide"
 
 format:
   html:
