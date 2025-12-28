@@ -40,6 +40,24 @@ box::use(
     ConformalPredictor,
     ConformalPredictionResult,
     CoverageComparisonResult
+  ],
+  R/calculators/model_validator[
+    ModelValidator,
+    CrossValidationResult,
+    CoefficientStabilityResult,
+    ModelSelectionStabilityResult,
+    PredictionErrorByParticipantResult,
+    CalibrationResult,
+    IntervalComparisonResult
+  ],
+  R/calculators/anomaly_detector[
+    AnomalyDetector,
+    AnomalyResult,
+    ParticipantAnomalyResult
+  ],
+  R/calculators/influence_diagnostics[
+    InfluenceDiagnostics,
+    InfluenceDiagnosticsResult
   ]
 )
 
@@ -620,6 +638,221 @@ if (file.exists(study4_path)) {
 }
 
 # ==============================================================================
+# Section 10: Advanced Validation (LOO-CV Sensitivity + Anomaly Detection)
+# ==============================================================================
+
+cat("=== Section 10: Advanced Validation ===\n\n")
+
+# 10.1: Cross-Validation and Coefficient Stability
+cat("10.1 LOO-CV Cross-Validation and Coefficient Stability\n")
+cat("-" |> rep(70) |> paste(collapse = ""), "\n\n")
+
+validator <- ModelValidator$new()
+
+# LOO-CV for prediction error
+cat("Running Leave-One-Participant-Out Cross-Validation...\n")
+cv_result <- validator$leave_one_participant_out(
+  data = data,
+  model = best_model$model,
+  id_col = "id",
+  outcome_col = "mean_velocity"
+)
+
+cat(sprintf("  LOO-CV MAE: %.4f m/s (%.1f mm/s)\n",
+            cv_result$mean_error, cv_result$mean_error * 1000))
+cat(sprintf("  LOO-CV RMSE: %.4f m/s (%.1f mm/s)\n",
+            cv_result$rmse, cv_result$rmse * 1000))
+cat(sprintf("  SE of MAE: %.4f m/s\n\n", cv_result$se_error))
+
+# Coefficient Stability
+cat("Testing RIR coefficient stability across LOO folds...\n")
+coef_stability <- validator$loo_coefficient_stability(
+  data = data,
+  model = best_model$model,
+  focal_coef = "rir",
+  id_col = "id"
+)
+
+cat(sprintf("  Full model RIR estimate: %.5f m/s per RIR\n", coef_stability$full_model_estimate))
+cat(sprintf("  LOO mean estimate: %.5f m/s per RIR\n", coef_stability$mean_estimate))
+cat(sprintf("  Coefficient of Variation: %.2f%%\n", coef_stability$cv_percent))
+cat(sprintf("  Range: [%.5f, %.5f]\n", coef_stability$range[1], coef_stability$range[2]))
+cat(sprintf("  Stability: %s\n\n", if (coef_stability$is_stable) "STABLE" else "UNSTABLE"))
+
+cat("Most influential participants (by RIR coefficient deviation):\n")
+print(head(coef_stability$influential_participants, 5))
+cat("\n")
+
+# 10.2: Model Selection Stability
+cat("10.2 LOO-CV Model Selection Stability\n")
+cat("-" |> rep(70) |> paste(collapse = ""), "\n\n")
+
+# Compare base vs with_load vs best model
+models_to_compare <- list(
+  base = model_base$model,
+  with_load = model_with_load$model,
+  random_slope = model_random_slope$model
+)
+
+selection_stability <- validator$loo_model_selection_stability(
+  data = data,
+  models = models_to_compare,
+  criterion = "BIC",
+  id_col = "id"
+)
+
+cat(sprintf("  Full data winner: %s\n", selection_stability$full_data_winner))
+cat(sprintf("  Consensus model: %s\n", selection_stability$consensus_model))
+cat(sprintf("  Stability: %.1f%% of folds agree with full data\n\n",
+            selection_stability$stability_percent))
+
+cat("Vote counts across folds:\n")
+print(selection_stability$vote_counts)
+cat("\n")
+
+# 10.3: Prediction Error by Participant
+cat("10.3 Prediction Error by Participant (LOO-CV)\n")
+cat("-" |> rep(70) |> paste(collapse = ""), "\n\n")
+
+pred_error_result <- validator$loo_prediction_error_by_participant(
+  data = data,
+  model = best_model$model,
+  id_col = "id",
+  outcome_col = "mean_velocity"
+)
+
+cat(sprintf("  Overall RMSE: %.4f m/s (%.1f mm/s)\n",
+            pred_error_result$overall_rmse, pred_error_result$overall_rmse * 1000))
+cat(sprintf("  Overall MAE: %.4f m/s (%.1f mm/s)\n\n",
+            pred_error_result$overall_mae, pred_error_result$overall_mae * 1000))
+
+cat("Hardest to predict participants:\n")
+print(pred_error_result$get_hardest_to_predict(5))
+cat("\n")
+
+# 10.4: Anomaly Detection (Isolation Forest)
+cat("10.4 Anomaly Detection (Isolation Forest)\n")
+cat("-" |> rep(70) |> paste(collapse = ""), "\n\n")
+
+anomaly_detector <- AnomalyDetector$new(random_state = 42)
+
+# Stage 1: Raw data anomalies
+cat("Stage 1: Detecting anomalies in raw data (velocity, RIR, load)...\n")
+raw_anomalies <- anomaly_detector$detect_raw_data_anomalies(
+  data = data,
+  features = c("mean_velocity", "rir", "load_percentage"),
+  contamination = 0.05
+)
+
+cat(sprintf("  Threshold: %.4f\n", raw_anomalies$threshold))
+cat(sprintf("  Anomalies flagged: %d (%.1f%%)\n",
+            raw_anomalies$n_anomalies,
+            100 * raw_anomalies$n_anomalies / length(raw_anomalies$scores)))
+if (raw_anomalies$n_anomalies > 0) {
+  cat(sprintf("  Anomaly indices: %s\n",
+              paste(head(raw_anomalies$anomaly_indices, 10), collapse = ", ")))
+}
+cat("\n")
+
+# Stage 2: Random effects anomalies
+cat("Stage 2: Detecting anomalies in random effects (velocity-RIR patterns)...\n")
+re_anomalies <- anomaly_detector$detect_random_effects_anomalies(
+  model = best_model$model,
+  contamination = 0.1
+)
+
+cat(sprintf("  Threshold: %.4f\n", re_anomalies$threshold))
+cat(sprintf("  Anomalous participants: %d\n", sum(re_anomalies$is_anomaly)))
+if (sum(re_anomalies$is_anomaly) > 0) {
+  cat(sprintf("  Anomalous IDs: %s\n",
+              paste(re_anomalies$get_anomalous_ids(), collapse = ", ")))
+}
+cat("\n")
+
+# Stage 3: CV residual anomalies
+cat("Stage 3: Detecting anomalies in CV residuals (hard to predict)...\n")
+cv_anomalies <- anomaly_detector$detect_cv_residual_anomalies(
+  residuals = pred_error_result$residuals,
+  participant_ids = pred_error_result$residual_participant_ids,
+  contamination = 0.1
+)
+
+cat(sprintf("  Threshold: %.4f\n", cv_anomalies$threshold))
+cat(sprintf("  Anomalous participants: %d\n", sum(cv_anomalies$is_anomaly)))
+if (sum(cv_anomalies$is_anomaly) > 0) {
+  cat(sprintf("  Anomalous IDs: %s\n",
+              paste(cv_anomalies$get_anomalous_ids(), collapse = ", ")))
+}
+cat("\n")
+
+# 10.5: Influence Diagnostics
+cat("10.5 Influence Diagnostics (Cook's Distance)\n")
+cat("-" |> rep(70) |> paste(collapse = ""), "\n\n")
+
+influence_diag <- InfluenceDiagnostics$new()
+influence_result <- influence_diag$calculate_observation_influence(best_model$model)
+
+cat(sprintf("  Observations: %d\n", influence_result$n_observations))
+cat(sprintf("  Cook's D threshold: %.4f\n", influence_result$influential_threshold))
+cat(sprintf("  High influence observations: %d\n", influence_result$count_influential()))
+cat("\n")
+
+# Compare IF vs Cook's D
+cat("Comparing Isolation Forest vs Cook's Distance:\n")
+# Create influence flags for raw data (Cook's D > threshold)
+cooks_flags <- influence_result$cooks_d > influence_result$influential_threshold
+if_comparison <- anomaly_detector$compare_with_influence_diagnostics(
+  raw_anomalies,
+  cooks_flags
+)
+
+cat(sprintf("  Both methods flagged: %d observations\n", if_comparison$both_flagged))
+cat(sprintf("  Only Isolation Forest: %d observations\n", if_comparison$only_isolation_forest))
+cat(sprintf("  Only Cook's D: %d observations\n", if_comparison$only_cooks_distance))
+cat(sprintf("  Agreement rate: %.1f%%\n", if_comparison$agreement_rate * 100))
+cat(sprintf("  Interpretation: %s\n\n", if_comparison$interpretation))
+
+# 10.6: Model Calibration
+cat("10.6 Model Calibration Assessment\n")
+cat("-" |> rep(70) |> paste(collapse = ""), "\n\n")
+
+calibration <- validator$calculate_calibration(
+  model = best_model$model,
+  data = data,
+  outcome_col = "mean_velocity",
+  use_individual = TRUE
+)
+
+cat(sprintf("  Calibration slope: %.4f (ideal = 1)\n", calibration$slope))
+cat(sprintf("  Calibration intercept: %.4f (ideal = 0)\n", calibration$intercept))
+cat(sprintf("  R-squared: %.4f\n", calibration$r_squared))
+cat(sprintf("  Mean bias: %.4f m/s\n", calibration$mean_bias))
+cat(sprintf("  %s\n\n", calibration$interpret()))
+
+# 10.7: CI vs PI Comparison
+cat("10.7 Confidence vs Prediction Interval Comparison\n")
+cat("-" |> rep(70) |> paste(collapse = ""), "\n\n")
+
+interval_comparison <- validator$compare_ci_vs_pi(
+  model = best_model$model,
+  data = data,
+  outcome_col = "mean_velocity"
+)
+
+cat(sprintf("  Mean CI width: %.4f m/s\n", interval_comparison$ci_width))
+cat(sprintf("  Mean PI width: %.4f m/s\n", interval_comparison$pi_width))
+cat(sprintf("  PI/CI ratio: %.1fx wider\n",
+            interval_comparison$pi_width / interval_comparison$ci_width))
+cat(sprintf("  Empirical CI coverage: %.1f%% (target 95%%)\n",
+            interval_comparison$ci_coverage * 100))
+cat(sprintf("  Empirical PI coverage: %.1f%% (target 95%%)\n\n",
+            interval_comparison$pi_coverage * 100))
+
+cat("Summary:\n")
+cat("  CI is for estimating the MEAN velocity (narrow, research use)\n")
+cat("  PI is for predicting a NEW observation (wider, practical use)\n\n")
+
+# ==============================================================================
 # Save Results
 # ==============================================================================
 
@@ -678,7 +911,59 @@ output <- list(
   sensitivity = sensitivity,
 
   # Study 4 comparison (Section 9)
-  study4_comparison = study4_comparison
+  study4_comparison = study4_comparison,
+
+  # Advanced Validation (Section 10)
+  advanced_validation = list(
+    # Cross-validation
+    loo_cv = cv_result$to_list(),
+
+    # Coefficient stability
+    coefficient_stability = coef_stability$to_list(),
+
+    # Model selection stability
+    model_selection_stability = selection_stability$to_list(),
+
+    # Prediction error by participant
+    prediction_error_by_participant = pred_error_result$to_list(),
+
+    # Anomaly detection
+    anomalies = list(
+      raw_data = raw_anomalies$summarize(),
+      random_effects = re_anomalies$summarize(),
+      cv_residuals = cv_anomalies$summarize()
+    ),
+
+    # Influence diagnostics
+    influence = list(
+      n_observations = influence_result$n_observations,
+      cooks_d_threshold = influence_result$influential_threshold,
+      high_influence_count = influence_result$count_influential()
+    ),
+
+    # IF vs Cook's D comparison
+    if_vs_cooks_comparison = if_comparison,
+
+    # Calibration
+    calibration = calibration$to_list(),
+
+    # CI vs PI
+    ci_vs_pi = interval_comparison$to_list()
+  ),
+
+  # Keep full objects for report plots
+  advanced_validation_full = list(
+    cv_result = cv_result,
+    coef_stability = coef_stability,
+    selection_stability = selection_stability,
+    pred_error_result = pred_error_result,
+    raw_anomalies = raw_anomalies,
+    re_anomalies = re_anomalies,
+    cv_anomalies = cv_anomalies,
+    influence_result = influence_result,
+    calibration = calibration,
+    interval_comparison_full = interval_comparison
+  )
 )
 
 saveRDS(output, OUTPUT_PATH)

@@ -26,10 +26,11 @@
 
 box::use(
   R6[R6Class],
-  stats[predict, residuals, fitted, lm, coef, qt, var, sd, sigma, qnorm, formula],
+  stats[predict, residuals, fitted, lm, coef, qt, var, sd, sigma, qnorm, formula, BIC, AIC],
+  dplyr[.data],
   ggplot2[ggplot, aes, geom_point, geom_abline, geom_ribbon, geom_line,
-          geom_smooth, labs, theme_minimal, theme, element_text, scale_color_manual,
-          coord_fixed, annotate]
+          geom_smooth, geom_vline, labs, theme_minimal, theme, element_text,
+          element_blank, scale_color_manual, coord_fixed, annotate]
 )
 
 #' Cross-Validation Result
@@ -188,6 +189,265 @@ IntervalComparisonResult <- R6Class(
         ci_coverage = self$ci_coverage,
         pi_coverage = self$pi_coverage,
         ratio = self$pi_width / self$ci_width
+      )
+    }
+  )
+)
+
+#' Coefficient Stability Result
+#'
+#' Stores results from LOO-CV coefficient stability analysis.
+#'
+#' @export
+CoefficientStabilityResult <- R6Class(
+  classname = "CoefficientStabilityResult",
+  cloneable = FALSE,
+
+  public = list(
+    #' @field focal_coefficient Name of the coefficient being analyzed
+    focal_coefficient = NULL,
+    #' @field full_model_estimate Coefficient from full data
+    full_model_estimate = NULL,
+    #' @field fold_estimates Coefficient per LOO fold
+    fold_estimates = NULL,
+    #' @field excluded_participants Participant excluded in each fold
+    excluded_participants = NULL,
+    #' @field mean_estimate Mean across folds
+    mean_estimate = NULL,
+    #' @field cv_percent Coefficient of variation (%)
+    cv_percent = NULL,
+    #' @field range Min and max across folds
+    range = NULL,
+    #' @field influential_participants Participants that most change coefficient
+    influential_participants = NULL,
+    #' @field is_stable TRUE if CV < 10%
+    is_stable = NULL,
+
+    #' @description Create a new CoefficientStabilityResult
+    initialize = function(focal_coefficient, full_model_estimate, fold_estimates,
+                          excluded_participants) {
+      self$focal_coefficient <- focal_coefficient
+      self$full_model_estimate <- full_model_estimate
+      self$fold_estimates <- fold_estimates
+      self$excluded_participants <- excluded_participants
+
+      # Calculate derived metrics
+      self$mean_estimate <- mean(fold_estimates, na.rm = TRUE)
+      fold_sd <- sd(fold_estimates, na.rm = TRUE)
+      self$cv_percent <- (fold_sd / abs(self$mean_estimate)) * 100
+      self$range <- range(fold_estimates, na.rm = TRUE)
+      self$is_stable <- self$cv_percent < 10
+
+      # Find influential participants (those whose exclusion changes coefficient most)
+      deviations <- abs(fold_estimates - full_model_estimate)
+      top_indices <- order(deviations, decreasing = TRUE)[1:min(5, length(deviations))]
+      self$influential_participants <- data.frame(
+        participant = excluded_participants[top_indices],
+        estimate_when_excluded = fold_estimates[top_indices],
+        deviation = deviations[top_indices]
+      )
+    },
+
+    #' @description Interpret coefficient stability
+    interpret = function() {
+      stability_level <- if (self$cv_percent < 5) {
+        "highly stable"
+      } else if (self$cv_percent < 10) {
+        "stable"
+      } else if (self$cv_percent < 20) {
+        "moderately stable"
+      } else {
+        "unstable"
+      }
+
+      paste0(
+        "Coefficient '", self$focal_coefficient, "' is ", stability_level,
+        " (CV = ", round(self$cv_percent, 1), "%). ",
+        "Full model: ", round(self$full_model_estimate, 4),
+        ", LOO mean: ", round(self$mean_estimate, 4),
+        ", range: [", round(self$range[1], 4), ", ", round(self$range[2], 4), "]"
+      )
+    },
+
+    #' @description Convert to list for serialization
+    to_list = function() {
+      list(
+        focal_coefficient = self$focal_coefficient,
+        full_model_estimate = self$full_model_estimate,
+        mean_estimate = self$mean_estimate,
+        cv_percent = self$cv_percent,
+        range = self$range,
+        is_stable = self$is_stable,
+        influential_participants = self$influential_participants
+      )
+    }
+  )
+)
+
+#' Model Selection Stability Result
+#'
+#' Stores results from LOO-CV model selection stability analysis.
+#'
+#' @export
+ModelSelectionStabilityResult <- R6Class(
+  classname = "ModelSelectionStabilityResult",
+  cloneable = FALSE,
+
+  public = list(
+    #' @field full_data_winner Best model on full data
+    full_data_winner = NULL,
+    #' @field fold_winners Best model per fold
+    fold_winners = NULL,
+    #' @field excluded_participants Participant excluded in each fold
+    excluded_participants = NULL,
+    #' @field vote_counts How many folds each model won
+    vote_counts = NULL,
+    #' @field consensus_model Clear winner or "unclear"
+    consensus_model = NULL,
+    #' @field stability_percent Percent of folds agreeing with full data
+    stability_percent = NULL,
+    #' @field criterion Selection criterion used
+    criterion = NULL,
+
+    #' @description Create a new ModelSelectionStabilityResult
+    initialize = function(full_data_winner, fold_winners, excluded_participants,
+                          criterion = "BIC") {
+      self$full_data_winner <- full_data_winner
+      self$fold_winners <- fold_winners
+      self$excluded_participants <- excluded_participants
+      self$criterion <- criterion
+
+      # Count votes
+      self$vote_counts <- table(fold_winners)
+
+      # Determine consensus
+      max_votes <- max(self$vote_counts)
+      total_folds <- length(fold_winners)
+      majority_threshold <- total_folds * 0.6  # 60% majority
+
+      if (max_votes >= majority_threshold) {
+        self$consensus_model <- names(self$vote_counts)[which.max(self$vote_counts)]
+      } else {
+        self$consensus_model <- "unclear (no majority)"
+      }
+
+      # Calculate stability
+      self$stability_percent <- (sum(fold_winners == full_data_winner) / total_folds) * 100
+    },
+
+    #' @description Interpret model selection stability
+    interpret = function() {
+      stability_level <- if (self$stability_percent >= 90) {
+        "highly stable"
+      } else if (self$stability_percent >= 70) {
+        "stable"
+      } else if (self$stability_percent >= 50) {
+        "moderately stable"
+      } else {
+        "unstable"
+      }
+
+      paste0(
+        "Model selection is ", stability_level, ". ",
+        "Full data winner: ", self$full_data_winner, ". ",
+        "Consensus model: ", self$consensus_model, ". ",
+        round(self$stability_percent, 1), "% of folds agree with full data selection."
+      )
+    },
+
+    #' @description Convert to list for serialization
+    to_list = function() {
+      list(
+        full_data_winner = self$full_data_winner,
+        consensus_model = self$consensus_model,
+        stability_percent = self$stability_percent,
+        vote_counts = as.list(self$vote_counts),
+        criterion = self$criterion
+      )
+    }
+  )
+)
+
+#' Prediction Error by Participant Result
+#'
+#' Stores per-participant prediction error metrics from LOO-CV.
+#'
+#' @export
+PredictionErrorByParticipantResult <- R6Class(
+  classname = "PredictionErrorByParticipantResult",
+  cloneable = FALSE,
+
+  public = list(
+    #' @field participant_id Character vector of participant IDs
+    participant_id = NULL,
+    #' @field rmse Per-participant RMSE
+    rmse = NULL,
+    #' @field mae Per-participant MAE
+    mae = NULL,
+    #' @field bias Systematic over/under prediction
+    bias = NULL,
+    #' @field n_observations Number of observations per participant
+    n_observations = NULL,
+    #' @field overall_rmse Overall RMSE
+    overall_rmse = NULL,
+    #' @field overall_mae Overall MAE
+    overall_mae = NULL,
+    #' @field residuals All residuals (for anomaly detection)
+    residuals = NULL,
+    #' @field residual_participant_ids Participant ID for each residual
+    residual_participant_ids = NULL,
+
+    #' @description Create a new PredictionErrorByParticipantResult
+    initialize = function(participant_metrics, overall_rmse, overall_mae,
+                          residuals = NULL, residual_participant_ids = NULL) {
+      self$participant_id <- participant_metrics$participant_id
+      self$rmse <- participant_metrics$rmse
+      self$mae <- participant_metrics$mae
+      self$bias <- participant_metrics$bias
+      self$n_observations <- participant_metrics$n_observations
+      self$overall_rmse <- overall_rmse
+      self$overall_mae <- overall_mae
+      self$residuals <- residuals
+      self$residual_participant_ids <- residual_participant_ids
+    },
+
+    #' @description Get hardest to predict participants
+    #' @param n Number of participants to return
+    get_hardest_to_predict = function(n = 5) {
+      top_idx <- order(self$rmse, decreasing = TRUE)[1:min(n, length(self$rmse))]
+      data.frame(
+        participant_id = self$participant_id[top_idx],
+        rmse = self$rmse[top_idx],
+        mae = self$mae[top_idx],
+        n_observations = self$n_observations[top_idx]
+      )
+    },
+
+    #' @description Get participants with systematic bias
+    get_biased_participants = function(threshold = 0.02) {
+      biased_idx <- which(abs(self$bias) > threshold)
+      if (length(biased_idx) == 0) return(NULL)
+
+      data.frame(
+        participant_id = self$participant_id[biased_idx],
+        bias = self$bias[biased_idx],
+        direction = ifelse(self$bias[biased_idx] > 0, "over-predicted", "under-predicted")
+      )
+    },
+
+    #' @description Convert to list for serialization
+    to_list = function() {
+      list(
+        overall_rmse = self$overall_rmse,
+        overall_mae = self$overall_mae,
+        participant_metrics = data.frame(
+          participant_id = self$participant_id,
+          rmse = self$rmse,
+          mae = self$mae,
+          bias = self$bias,
+          n_observations = self$n_observations
+        ),
+        hardest_to_predict = self$get_hardest_to_predict()
       )
     }
   )
@@ -361,6 +621,266 @@ ModelValidator <- R6Class(
         se_error = sd(valid_errors) / sqrt(length(valid_errors)),
         rmse = mean(valid_rmse)
       )
+    },
+
+    # =========================================================================
+    # LOO-CV SENSITIVITY ANALYSIS
+    # =========================================================================
+
+    #' @description LOO-CV Coefficient Stability Analysis
+    #'
+    #' Tests whether the focal coefficient (e.g., RIR effect) is stable
+    #' when each participant is excluded. Answers: "Does my conclusion
+    #' depend on specific individuals?"
+    #'
+    #' @param data Data frame with observations
+    #' @param model Fitted lme4 model
+    #' @param focal_coef Name of coefficient to track (default "rir")
+    #' @param id_col Name of participant ID column
+    #' @return CoefficientStabilityResult object
+    loo_coefficient_stability = function(data, model, focal_coef = "rir",
+                                          id_col = "id") {
+      if (!requireNamespace("lme4", quietly = TRUE)) {
+        stop("Package 'lme4' required for loo_coefficient_stability()")
+      }
+
+      # Get full model coefficient
+      full_coefs <- lme4::fixef(model)
+      if (!focal_coef %in% names(full_coefs)) {
+        stop("Coefficient '", focal_coef, "' not found in model. ",
+             "Available: ", paste(names(full_coefs), collapse = ", "))
+      }
+      full_estimate <- full_coefs[focal_coef]
+
+      participants <- unique(data[[id_col]])
+      n_participants <- length(participants)
+
+      # Extract formula
+      formula_obj <- stats::formula(model)
+
+      fold_estimates <- numeric(n_participants)
+
+      for (i in seq_along(participants)) {
+        # Remove one participant
+        train_data <- data[data[[id_col]] != participants[i], ]
+
+        # Refit model
+        fold_model <- tryCatch({
+          lme4::lmer(formula_obj, data = train_data, REML = FALSE)
+        }, error = function(e) NULL)
+
+        if (is.null(fold_model)) {
+          fold_estimates[i] <- NA
+        } else {
+          fold_coefs <- lme4::fixef(fold_model)
+          fold_estimates[i] <- fold_coefs[focal_coef]
+        }
+      }
+
+      CoefficientStabilityResult$new(
+        focal_coefficient = focal_coef,
+        full_model_estimate = full_estimate,
+        fold_estimates = fold_estimates,
+        excluded_participants = as.character(participants)
+      )
+    },
+
+    #' @description LOO-CV Model Selection Stability
+    #'
+    #' Tests whether the best model (by BIC or AIC) changes when each
+    #' participant is excluded. Answers: "Is my model choice robust?"
+    #'
+    #' @param data Data frame with observations
+    #' @param models Named list of lmerMod objects to compare
+    #' @param criterion "BIC" or "AIC"
+    #' @param id_col Name of participant ID column
+    #' @return ModelSelectionStabilityResult object
+    loo_model_selection_stability = function(data, models, criterion = "BIC",
+                                              id_col = "id") {
+      if (!requireNamespace("lme4", quietly = TRUE)) {
+        stop("Package 'lme4' required for loo_model_selection_stability()")
+      }
+
+      stopifnot(
+        "models must be a named list" = is.list(models) && !is.null(names(models)),
+        "criterion must be 'BIC' or 'AIC'" = criterion %in% c("BIC", "AIC")
+      )
+
+      model_names <- names(models)
+      criterion_fn <- if (criterion == "BIC") stats::BIC else stats::AIC
+
+      # Get full data winner
+      full_criteria <- sapply(models, criterion_fn)
+      full_winner <- model_names[which.min(full_criteria)]
+
+      participants <- unique(data[[id_col]])
+      n_participants <- length(participants)
+
+      # Extract formulas
+      formulas <- lapply(models, stats::formula)
+
+      fold_winners <- character(n_participants)
+
+      for (i in seq_along(participants)) {
+        train_data <- data[data[[id_col]] != participants[i], ]
+
+        # Refit all models
+        fold_criteria <- sapply(seq_along(models), function(j) {
+          fold_model <- tryCatch({
+            lme4::lmer(formulas[[j]], data = train_data, REML = FALSE)
+          }, error = function(e) NULL)
+
+          if (is.null(fold_model)) return(Inf)
+          criterion_fn(fold_model)
+        })
+
+        fold_winners[i] <- model_names[which.min(fold_criteria)]
+      }
+
+      ModelSelectionStabilityResult$new(
+        full_data_winner = full_winner,
+        fold_winners = fold_winners,
+        excluded_participants = as.character(participants),
+        criterion = criterion
+      )
+    },
+
+    #' @description LOO-CV Prediction Error by Participant
+    #'
+    #' Calculates prediction error for each participant when their data
+    #' is held out. Identifies hard-to-predict individuals and provides
+    #' residuals for anomaly detection.
+    #'
+    #' @param data Data frame with observations
+    #' @param model Fitted lme4 model
+    #' @param id_col Name of participant ID column
+    #' @param outcome_col Name of outcome variable
+    #' @return PredictionErrorByParticipantResult object
+    loo_prediction_error_by_participant = function(data, model, id_col = "id",
+                                                    outcome_col = "mean_velocity") {
+      if (!requireNamespace("lme4", quietly = TRUE)) {
+        stop("Package 'lme4' required for loo_prediction_error_by_participant()")
+      }
+
+      participants <- unique(data[[id_col]])
+      n_participants <- length(participants)
+
+      formula_obj <- stats::formula(model)
+
+      # Store per-participant metrics
+      participant_metrics <- data.frame(
+        participant_id = character(n_participants),
+        rmse = numeric(n_participants),
+        mae = numeric(n_participants),
+        bias = numeric(n_participants),
+        n_observations = integer(n_participants),
+        stringsAsFactors = FALSE
+      )
+
+      # Store all residuals for anomaly detection
+      all_residuals <- numeric(0)
+      all_participant_ids <- character(0)
+
+      for (i in seq_along(participants)) {
+        test_data <- data[data[[id_col]] == participants[i], ]
+        train_data <- data[data[[id_col]] != participants[i], ]
+
+        # Refit model
+        fold_model <- tryCatch({
+          lme4::lmer(formula_obj, data = train_data, REML = FALSE)
+        }, error = function(e) NULL)
+
+        if (is.null(fold_model)) {
+          participant_metrics$participant_id[i] <- as.character(participants[i])
+          participant_metrics$rmse[i] <- NA
+          participant_metrics$mae[i] <- NA
+          participant_metrics$bias[i] <- NA
+          participant_metrics$n_observations[i] <- nrow(test_data)
+          next
+        }
+
+        # Predict (population average)
+        predictions <- predict(fold_model, newdata = test_data, re.form = NA,
+                               allow.new.levels = TRUE)
+        actual <- test_data[[outcome_col]]
+        errors <- actual - predictions
+
+        # Store metrics
+        participant_metrics$participant_id[i] <- as.character(participants[i])
+        participant_metrics$rmse[i] <- sqrt(mean(errors^2))
+        participant_metrics$mae[i] <- mean(abs(errors))
+        participant_metrics$bias[i] <- mean(errors)  # positive = under-predicted
+        participant_metrics$n_observations[i] <- nrow(test_data)
+
+        # Accumulate residuals
+        all_residuals <- c(all_residuals, errors)
+        all_participant_ids <- c(all_participant_ids,
+                                  rep(as.character(participants[i]), length(errors)))
+      }
+
+      # Calculate overall metrics
+      valid_rmse <- participant_metrics$rmse[!is.na(participant_metrics$rmse)]
+      valid_mae <- participant_metrics$mae[!is.na(participant_metrics$mae)]
+
+      PredictionErrorByParticipantResult$new(
+        participant_metrics = participant_metrics,
+        overall_rmse = sqrt(mean(all_residuals^2)),
+        overall_mae = mean(abs(all_residuals)),
+        residuals = all_residuals,
+        residual_participant_ids = all_participant_ids
+      )
+    },
+
+    #' @description Plot Coefficient Stability
+    #'
+    #' Visualizes how the focal coefficient changes across LOO folds.
+    #'
+    #' @param stability_result CoefficientStabilityResult object
+    #' @param title Plot title
+    #' @return ggplot object
+    plot_coefficient_stability = function(stability_result,
+                                           title = "Coefficient Stability Across LOO Folds") {
+      stopifnot(
+        "stability_result must be CoefficientStabilityResult" =
+          inherits(stability_result, "CoefficientStabilityResult")
+      )
+
+      df <- data.frame(
+        fold = seq_along(stability_result$fold_estimates),
+        estimate = stability_result$fold_estimates,
+        participant = stability_result$excluded_participants
+      )
+
+      df <- df[!is.na(df$estimate), ]
+      df <- df[order(df$estimate), ]
+      df$order <- seq_len(nrow(df))
+
+      ggplot(df, aes(x = .data$estimate, y = .data$order)) +
+        geom_vline(
+          xintercept = stability_result$full_model_estimate,
+          linetype = "solid",
+          color = "#E63946",
+          linewidth = 1
+        ) +
+        geom_point(color = "#2E86AB", size = 2) +
+        labs(
+          title = title,
+          subtitle = sprintf(
+            "%s | Full model = %.4f | CV = %.1f%% (%s)",
+            stability_result$focal_coefficient,
+            stability_result$full_model_estimate,
+            stability_result$cv_percent,
+            if (stability_result$is_stable) "stable" else "unstable"
+          ),
+          x = paste("Coefficient estimate when participant excluded"),
+          y = "Fold (ordered by estimate)"
+        ) +
+        theme_minimal() +
+        theme(
+          plot.title = element_text(face = "bold", size = 14),
+          axis.text.y = element_blank(),
+          axis.ticks.y = element_blank()
+        )
     },
 
     # =========================================================================
