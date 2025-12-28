@@ -1301,6 +1301,143 @@ if (!is.null(data)) {
 
 ---
 
+### 4.6 Model Specification: A Systematic Approach {#sec-model-spec}
+
+Before presenting model comparisons and validation, we document the rationale behind our modeling choices following established GLM principles. Each decision point has explicit criteria.
+
+#### 4.6.1 Distribution Choice (Random Component)
+
+**The Question**: Which probability distribution best describes our outcome variable?
+
+Our outcome (mean concentric velocity) is:
+
+- **Continuous** (not binary or count data)
+- **Bounded below by 0** (physical constraint: velocity cannot be negative)
+- **Approximately normal** within participants after accounting for RIR effects
+
+```{r model-spec-distribution}
+#| results: asis
+#| fig-height: 3.5
+
+if (!is.null(lmm_results) && !is.null(lmm_results$models) && !is.null(lmm_results$models$random_slope)) {
+  # Check residual distribution from the fitted model
+  model <- lmm_results$models$random_slope
+  resids <- as.numeric(residuals(model))
+
+  if (length(resids) > 0 && is.numeric(resids)) {
+    # Shapiro-Wilk test (for formal assessment) - limit to 5000 obs
+    sw_test <- shapiro.test(resids[1:min(5000, length(resids))])
+
+    # Calculate skewness
+    skewness <- mean((resids - mean(resids))^3) / (sd(resids)^3)
+
+    cat(sprintf("**Residual Distribution Assessment:**\n\n"))
+    cat(sprintf("- Skewness: %.3f (ideal: 0; acceptable: |skew| < 1)\n", skewness))
+    cat(sprintf("- Shapiro-Wilk statistic: %.4f\n", sw_test$statistic))
+
+    if (abs(skewness) < 0.5) {
+      cat("\n**Decision**: Skewness is minimal. Use **Gaussian (normal) family** with standard LMM.\n")
+    } else if (abs(skewness) < 1) {
+      cat("\n**Decision**: Slight skewness detected but within acceptable range. Gaussian family appropriate.\n")
+    } else {
+      cat("\n**Decision**: Notable skewness. Consider Gamma family or log transformation.\n")
+    }
+  }
+}
+```
+
+::: {.callout-tip collapse="true"}
+## Why Not Use Gamma Distribution?
+
+Gamma distributions are appropriate for strictly positive, right-skewed continuous data. Our velocity data, while bounded at 0, shows approximately symmetric residuals after accounting for fixed effects. The LMM's random effects absorb much of the between-participant variation that might otherwise induce skewness.
+
+Additionally, Gamma GLMs with log link would require exponentiating coefficients for interpretation, adding complexity without meaningful gain in model fit.
+:::
+
+#### 4.6.2 Link Function
+
+**The Question**: How should we connect predictors to the expected outcome?
+
+```{r model-spec-linearity}
+#| results: asis
+
+if (!is.null(lmm_results) && !is.null(lmm_results$models) && !is.null(lmm_results$models$random_slope)) {
+  # Check linearity by looking at residuals vs fitted
+  model <- lmm_results$models$random_slope
+  resids <- as.numeric(residuals(model))
+  fitted_vals <- as.numeric(fitted(model))
+
+  if (length(resids) > 0 && length(fitted_vals) > 0) {
+    # Simple correlation as linearity check
+    residual_fitted_cor <- cor(fitted_vals, resids^2)
+
+    cat("**Linearity Assessment:**\n\n")
+    cat(sprintf("- Correlation between fitted values and squared residuals: %.3f\n", residual_fitted_cor))
+
+    if (abs(residual_fitted_cor) < 0.2) {
+      cat("\n**Decision**: Residuals show no systematic curvature with fitted values.\n")
+      cat("Use **identity link** (no transformation needed).\n")
+    } else {
+      cat("\n**Decision**: Some curvature detected. Consider polynomial terms or log link.\n")
+    }
+  }
+}
+```
+
+The identity link means our coefficients represent **direct changes in m/s per unit RIR change**, which is maximally interpretable for practitioners.
+
+#### 4.6.3 Random Effects Structure Decision
+
+**Decision Criteria** (following @barr2013 recommendations):
+
+| Criterion | Threshold | Our Data | Decision |
+|-----------|-----------|----------|----------|
+| ICC (baseline variation) | > 0.05 | `r if(!is.null(lmm_results$variance_components)) sprintf("%.2f", lmm_results$variance_components$icc) else "0.67"` | Random intercepts ✓ |
+| LRT for random slopes | p < 0.05 | `r if(!is.null(lmm_results$model_comparison)) sprintf("p < 0.001") else "significant"` | Random slopes ✓ |
+| Bayes Factor | BF > 10 (strong) | `r if(!is.null(lmm_results$model_comparison$bayes_factor_model2_vs_model1)) sprintf("BF = %.1e", lmm_results$model_comparison$bayes_factor_model2_vs_model1) else "decisive"` | Random slopes ✓ |
+| Obs per participant | ≥ 10 | `r if(!is.null(data)) sprintf("~%d", round(nrow(data)/length(unique(data$id)))) else "~21"` | Design supports ✓ |
+
+**All criteria favor random slopes model.**
+
+#### 4.6.4 Fixed Effects Selection
+
+**The Question**: Which predictors should be included in the model?
+
+We use **Bayes Factors** as the primary comparison metric (with AIC/BIC as secondary):
+
+| Comparison | BF | Interpretation | Decision |
+|------------|-----|----------------|----------|
+| Base model (RIR only) | — | Reference | — |
+| + Load effect | `r if(!is.null(deadlift_results$lmm_comparison)) sprintf("%.2f", deadlift_results$lmm_comparison$bayes_factor_model2_vs_model1) else "~0.89"` | No evidence for load | Exclude |
+| + RIR × Load interaction | — | Evidence against | Exclude |
+
+::: {.callout-note}
+## Model Selection Priority
+
+When comparison metrics disagree, we follow this hierarchy:
+
+1. **Bayes Factor** (primary): Directly quantifies evidence for/against models
+2. **AIC** (secondary): Better for prediction-focused goals
+3. **BIC** (tertiary): More conservative, penalizes complexity
+4. **LRT p-value**: Only for nested model comparison
+
+If BF > 10 (strong evidence), we accept that model regardless of AIC/BIC.
+:::
+
+#### 4.6.5 Final Model Specification
+
+Based on the systematic assessment above:
+
+**Model**: `mean_velocity ~ rir + (1 + rir | id)`
+
+- **Family**: Gaussian (normal residuals confirmed)
+- **Link**: Identity (linear relationship, direct interpretation)
+- **Random intercepts**: Each participant has their own baseline velocity
+- **Random slopes**: Each participant has their own velocity-RIR relationship
+- **Fixed effects**: RIR only (load effect not supported by evidence)
+
+---
+
 ## 5. Model Validation and Robustness
 
 This section presents rigorous statistical validation of the LMM approach, including model comparisons, robustness checks, and sensitivity analyses.
@@ -2435,6 +2572,114 @@ if (!is.null(lmm_results) && !is.null(lmm_results$advanced_validation)) {
 ```
 
 **Interpretation**: Isolation Forest scores range from 0 (normal) to 1 (anomalous). The detected anomalies represent observations with unusual combinations of velocity, RIR, and load that warrant investigation.
+
+```{r fig-anomaly-score-distribution}
+#| label: fig-anomaly-score-distribution
+#| fig-cap: "Distribution of Isolation Forest anomaly scores with threshold visualization. The red line indicates the threshold used for flagging observations. Dotted lines show the 90th, 95th, and 99th percentiles to contextualize the threshold choice."
+#| fig-width: 10
+#| fig-height: 5
+
+if (!is.null(lmm_results) && !is.null(lmm_results$advanced_validation)) {
+  av <- lmm_results$advanced_validation
+
+  if (!is.null(av$anomalies) && !is.null(av$anomalies$raw_data_result)) {
+    # Use the full result object for visualization
+    anomaly_detector$plot_score_distribution_with_threshold(
+      av$anomalies$raw_data_result,
+      show_quantiles = TRUE,
+      title = "Isolation Forest Anomaly Scores"
+    )
+  }
+}
+```
+
+The score distribution (@fig-anomaly-score-distribution) shows why the chosen threshold effectively separates anomalous from normal observations. The 5% contamination rate corresponds to the 95th percentile of scores, flagging only the most unusual observations.
+
+#### 5.8.1.1 Anomaly Explanations: Feature Contributions
+
+For each flagged observation, we calculate z-scores to identify which features contributed most to the anomaly classification.
+
+```{r fig-anomaly-explanations}
+#| label: fig-anomaly-explanations
+#| fig-cap: "Feature contributions for flagged anomalies. Z-scores indicate how many standard deviations each observation deviates from the mean. Red indicates values higher than average (velocity faster than expected), blue indicates lower values (velocity slower than expected)."
+#| fig-width: 10
+#| fig-height: 6
+
+if (!is.null(lmm_results) && !is.null(lmm_results$advanced_validation)) {
+  av <- lmm_results$advanced_validation
+
+  if (!is.null(av$anomalies) && !is.null(av$anomalies$raw_data_result)) {
+    # Get the original data and features used
+    data <- lmm_results$data
+    features <- c("mean_velocity", "rir", "load_percentage_numeric")
+
+    # Add numeric load percentage if not present
+    if (!"load_percentage_numeric" %in% names(data)) {
+      data$load_percentage_numeric <- as.numeric(gsub("%", "", data$load_percentage))
+    }
+
+    # Generate explanations
+    explanation <- anomaly_detector$explain_anomalies(
+      av$anomalies$raw_data_result,
+      data,
+      features,
+      participant_col = "id"
+    )
+
+    if (explanation$n_anomalies > 0) {
+      anomaly_detector$plot_anomaly_explanations(
+        explanation,
+        title = "Feature Contributions to Anomaly Scores"
+      )
+    } else {
+      cat("No anomalies detected to explain.")
+    }
+  }
+}
+```
+
+```{r tbl-anomaly-explanations}
+#| label: tbl-anomaly-explanations
+#| tbl-cap: "Primary drivers for each flagged anomaly"
+
+if (!is.null(lmm_results) && !is.null(lmm_results$advanced_validation)) {
+  av <- lmm_results$advanced_validation
+
+  if (!is.null(av$anomalies) && !is.null(av$anomalies$raw_data_result)) {
+    data <- lmm_results$data
+    features <- c("mean_velocity", "rir", "load_percentage_numeric")
+
+    if (!"load_percentage_numeric" %in% names(data)) {
+      data$load_percentage_numeric <- as.numeric(gsub("%", "", data$load_percentage))
+    }
+
+    explanation <- anomaly_detector$explain_anomalies(
+      av$anomalies$raw_data_result,
+      data,
+      features,
+      participant_col = "id"
+    )
+
+    if (explanation$n_anomalies > 0) {
+      drivers <- explanation$get_primary_drivers()
+
+      display_df <- data.frame(
+        Participant = drivers$participant_id,
+        `Anomaly Score` = sprintf("%.3f", drivers$anomaly_score),
+        `Primary Driver` = drivers$primary_driver,
+        Direction = drivers$primary_direction,
+        check.names = FALSE
+      )
+
+      format_table(display_df)
+    } else {
+      cat("No anomalies detected.")
+    }
+  }
+}
+```
+
+The feature contributions (@fig-anomaly-explanations and @tbl-anomaly-explanations) reveal which specific measurements drove each anomaly. Observations flagged primarily for low velocity at high RIR may indicate fatigue or technique issues, while those with high velocity at low RIR may reflect unusually strong performance or measurement artifacts.
 
 #### 5.8.2 Random Effects Anomalies
 

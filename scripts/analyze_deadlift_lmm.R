@@ -78,7 +78,8 @@ OUTPUT_PATH <- "data/processed/deadlift_lmm_results.rds"
 cat("=== Loading Data ===\n\n")
 
 loader <- DeadliftRirDataLoader$new(DATA_PATH)
-data <- loader$load()
+# Load with pseudoanonymization (P01-P19 instead of real names)
+data <- loader$load(anonymize = TRUE)
 summary_stats <- loader$summarize(data)
 
 cat("Data Summary:\n")
@@ -931,7 +932,11 @@ output <- list(
     anomalies = list(
       raw_data = raw_anomalies$summarize(),
       random_effects = re_anomalies$summarize(),
-      cv_residuals = cv_anomalies$summarize()
+      cv_residuals = cv_anomalies$summarize(),
+      # Full result objects for visualizations
+      raw_data_result = raw_anomalies,
+      random_effects_result = re_anomalies,
+      cv_residuals_result = cv_anomalies
     ),
 
     # Influence diagnostics

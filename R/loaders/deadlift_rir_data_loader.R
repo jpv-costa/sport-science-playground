@@ -49,7 +49,8 @@
 # =============================================================================
 
 box::use(
-  R6[R6Class]
+  R6[R6Class],
+  ../utils/anonymizer[Anonymizer]
 )
 
 #' Deadlift RIR-Velocity Data Loader
@@ -71,8 +72,10 @@ DeadliftRirDataLoader <- R6Class(
     },
 
     #' @description Load and preprocess all participant data
+    #' @param anonymize Logical. If TRUE, replace participant names with
+    #'   pseudonyms (P01-P19) for data privacy. Default: FALSE.
     #' @return Data frame with cleaned and combined data in long format
-    load = function() {
+    load = function(anonymize = FALSE) {
       if (!requireNamespace("readxl", quietly = TRUE)) {
         stop("Package 'readxl' is required to load Excel data")
       }
@@ -86,6 +89,12 @@ DeadliftRirDataLoader <- R6Class(
 
       # Add reps_to_failure (total reps per set)
       combined <- private$.add_reps_to_failure(combined)
+
+      # Anonymize participant IDs if requested
+      if (anonymize) {
+        anon <- Anonymizer$new()
+        combined <- anon$anonymize_data(combined, id_col = "id", set_id_col = "set_id")
+      }
 
       combined
     },

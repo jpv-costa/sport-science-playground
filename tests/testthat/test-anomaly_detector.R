@@ -2,8 +2,9 @@
 # Tests for AnomalyDetector using Isolation Forest
 
 box::use(
-  testthat[describe, it, expect_true, expect_s3_class, expect_type,
-           expect_length, expect_gt, expect_equal, expect_lt, skip_if_not_installed]
+  testthat[describe, it, expect_true, expect_false, expect_s3_class, expect_type,
+           expect_length, expect_gt, expect_equal, expect_lt, expect_null,
+           expect_match, skip_if_not_installed]
 )
 
 # Set box path relative to project root
@@ -13,6 +14,7 @@ options(box.path = c("../../R", getOption("box.path")))
 box::use(
   calculators/anomaly_detector[
     AnomalyDetector, AnomalyResult, ParticipantAnomalyResult,
+    FeatureContributionResult,
     detect_raw_anomalies, detect_re_anomalies
   ]
 )
@@ -391,5 +393,323 @@ describe("Convenience functions", {
 
     result <- detect_re_anomalies(model)
     expect_s3_class(result, "ParticipantAnomalyResult")
+  })
+})
+
+# =============================================================================
+# FEATURE CONTRIBUTION RESULT TESTS
+# =============================================================================
+
+describe("FeatureContributionResult", {
+
+  it("stores feature contributions", {
+    contributions <- data.frame(
+      observation_index = c(96, 97, 98),
+      participant_id = c("P10", "P11", "P12"),
+      anomaly_score = c(0.85, 0.90, 0.95),
+      primary_driver = c("x", "y", "z"),
+      primary_z = c(2.5, -2.8, 3.1),
+      primary_direction = c("HIGH", "LOW", "HIGH"),
+      explanation_text = c("P10 flagged: x HIGH", "P11 flagged: y LOW", "P12 flagged: z HIGH"),
+      x_z = c(2.5, 0.3, 0.1),
+      y_z = c(0.1, -2.8, -0.5),
+      z_z = c(0.2, 0.4, 3.1),
+      stringsAsFactors = FALSE
+    )
+
+    result <- FeatureContributionResult$new(contributions, c("x", "y", "z"))
+
+    expect_s3_class(result, "FeatureContributionResult")
+    expect_equal(result$n_anomalies, 3)
+    expect_equal(result$feature_names, c("x", "y", "z"))
+  })
+
+  it("gets primary drivers", {
+    contributions <- data.frame(
+      observation_index = c(96, 97),
+      participant_id = c("P10", "P11"),
+      anomaly_score = c(0.85, 0.90),
+      primary_driver = c("x", "y"),
+      primary_z = c(2.5, -2.8),
+      primary_direction = c("HIGH", "LOW"),
+      explanation_text = c("P10 flagged: x HIGH", "P11 flagged: y LOW"),
+      x_z = c(2.5, 0.3),
+      y_z = c(0.1, -2.8),
+      stringsAsFactors = FALSE
+    )
+
+    result <- FeatureContributionResult$new(contributions, c("x", "y"))
+    drivers <- result$get_primary_drivers()
+
+    expect_true("primary_driver" %in% names(drivers))
+    expect_true("explanation_text" %in% names(drivers))
+    expect_equal(nrow(drivers), 2)
+  })
+
+  it("summarizes feature contributions", {
+    contributions <- data.frame(
+      observation_index = c(96, 97, 98),
+      participant_id = c("P10", "P11", "P12"),
+      anomaly_score = c(0.85, 0.90, 0.95),
+      primary_driver = c("x", "x", "y"),
+      primary_z = c(2.5, 2.8, -3.1),
+      primary_direction = c("HIGH", "HIGH", "LOW"),
+      explanation_text = c("P10: x HIGH", "P11: x HIGH", "P12: y LOW"),
+      x_z = c(2.5, 2.8, 0.1),
+      y_z = c(0.1, -0.5, -3.1),
+      stringsAsFactors = FALSE
+    )
+
+    result <- FeatureContributionResult$new(contributions, c("x", "y"))
+    summary <- result$summarize()
+
+    expect_type(summary, "list")
+    expect_equal(summary$n_anomalies, 3)
+    expect_equal(summary$most_common_driver, "x")
+  })
+
+  it("handles empty contributions", {
+    result <- FeatureContributionResult$new(data.frame(), c("x", "y"))
+
+    expect_equal(result$n_anomalies, 0)
+  })
+})
+
+# =============================================================================
+# EXPLAIN ANOMALIES TESTS
+# =============================================================================
+
+describe("explain_anomalies", {
+  skip_if_not_installed("isotree")
+
+  it("explains flagged anomalies with z-scores", {
+    data <- create_test_data_with_outliers(n_normal = 95, n_outliers = 5)
+    data$id <- paste0("P", seq_len(nrow(data)))
+    detector <- AnomalyDetector$new(random_state = 42)
+
+    anomaly_result <- detector$detect_raw_data_anomalies(
+      data, c("x", "y", "z"), contamination = 0.05
+    )
+
+    explanation <- detector$explain_anomalies(
+      anomaly_result, data, c("x", "y", "z"), participant_col = "id"
+    )
+
+    expect_s3_class(explanation, "FeatureContributionResult")
+    expect_gt(explanation$n_anomalies, 0)
+    expect_true("x" %in% explanation$feature_names)
+    expect_true("primary_driver" %in% names(explanation$contributions))
+    expect_true("explanation_text" %in% names(explanation$contributions))
+  })
+
+  it("calculates z-scores for each feature", {
+    data <- create_test_data_with_outliers(n_normal = 95, n_outliers = 5)
+    data$id <- paste0("P", seq_len(nrow(data)))
+    detector <- AnomalyDetector$new(random_state = 42)
+
+    anomaly_result <- detector$detect_raw_data_anomalies(
+      data, c("x", "y", "z"), contamination = 0.05
+    )
+
+    explanation <- detector$explain_anomalies(
+      anomaly_result, data, c("x", "y", "z")
+    )
+
+    # Check z-score columns exist
+    expect_true("x_z" %in% names(explanation$contributions))
+    expect_true("y_z" %in% names(explanation$contributions))
+    expect_true("z_z" %in% names(explanation$contributions))
+
+    # Outliers should have high z-scores (shifted by 5 std from mean 0)
+    if (nrow(explanation$contributions) > 0) {
+      max_z <- max(abs(explanation$contributions$x_z))
+      expect_gt(max_z, 1)  # At least 1 std away
+    }
+  })
+
+  it("identifies primary driver correctly", {
+    data <- create_test_data_with_outliers(n_normal = 95, n_outliers = 5)
+    data$id <- paste0("P", seq_len(nrow(data)))
+    detector <- AnomalyDetector$new(random_state = 42)
+
+    anomaly_result <- detector$detect_raw_data_anomalies(
+      data, c("x", "y", "z"), contamination = 0.05
+    )
+
+    explanation <- detector$explain_anomalies(
+      anomaly_result, data, c("x", "y", "z")
+    )
+
+    if (nrow(explanation$contributions) > 0) {
+      # Primary driver should be one of the features
+      expect_true(all(explanation$contributions$primary_driver %in% c("x", "y", "z")))
+
+      # Direction should be HIGH or LOW
+      expect_true(all(explanation$contributions$primary_direction %in% c("HIGH", "LOW")))
+    }
+  })
+
+  it("returns empty result when no anomalies", {
+    set.seed(42)
+    # Normal data with very low contamination rate
+    data <- data.frame(
+      x = rnorm(100, 0, 1),
+      y = rnorm(100, 0, 1),
+      id = paste0("P", 1:100)
+    )
+    detector <- AnomalyDetector$new(random_state = 42)
+
+    # Create result with no anomalies
+    scores <- rep(0.3, 100)
+    anomaly_result <- AnomalyResult$new(scores, threshold = 0.9, contamination_rate = 0.01)
+
+    explanation <- detector$explain_anomalies(
+      anomaly_result, data, c("x", "y")
+    )
+
+    expect_s3_class(explanation, "FeatureContributionResult")
+    expect_equal(explanation$n_anomalies, 0)
+  })
+
+  it("generates human-readable explanation text", {
+    data <- create_test_data_with_outliers(n_normal = 95, n_outliers = 5)
+    data$id <- paste0("P", seq_len(nrow(data)))
+    detector <- AnomalyDetector$new(random_state = 42)
+
+    anomaly_result <- detector$detect_raw_data_anomalies(
+      data, c("x", "y", "z"), contamination = 0.05
+    )
+
+    explanation <- detector$explain_anomalies(
+      anomaly_result, data, c("x", "y", "z"), participant_col = "id"
+    )
+
+    if (nrow(explanation$contributions) > 0) {
+      # Check explanation text contains participant ID and direction
+      first_explanation <- explanation$contributions$explanation_text[1]
+      expect_match(first_explanation, "P[0-9]+ flagged:")
+      expect_match(first_explanation, "(HIGH|LOW)")
+    }
+  })
+})
+
+# =============================================================================
+# PLOT ANOMALY EXPLANATIONS TESTS
+# =============================================================================
+
+describe("plot_anomaly_explanations", {
+  skip_if_not_installed("isotree")
+  skip_if_not_installed("ggplot2")
+
+  it("creates heatmap of feature contributions", {
+    data <- create_test_data_with_outliers(n_normal = 95, n_outliers = 5)
+    data$id <- paste0("P", seq_len(nrow(data)))
+    detector <- AnomalyDetector$new(random_state = 42)
+
+    anomaly_result <- detector$detect_raw_data_anomalies(
+      data, c("x", "y", "z"), contamination = 0.05
+    )
+
+    explanation <- detector$explain_anomalies(
+      anomaly_result, data, c("x", "y", "z")
+    )
+
+    plot <- detector$plot_anomaly_explanations(explanation)
+
+    expect_s3_class(plot, "ggplot")
+  })
+
+  it("returns NULL when no anomalies", {
+    # Create empty explanation
+    explanation <- FeatureContributionResult$new(data.frame(), c("x", "y"))
+
+    detector <- AnomalyDetector$new()
+    result <- detector$plot_anomaly_explanations(explanation)
+
+    expect_null(result)
+  })
+
+  it("validates input type", {
+    detector <- AnomalyDetector$new()
+
+    expect_error(
+      detector$plot_anomaly_explanations("not a result"),
+      "FeatureContributionResult"
+    )
+  })
+})
+
+# =============================================================================
+# PLOT SCORE DISTRIBUTION WITH THRESHOLD TESTS
+# =============================================================================
+
+describe("plot_score_distribution_with_threshold", {
+  skip_if_not_installed("isotree")
+  skip_if_not_installed("ggplot2")
+
+  it("creates score distribution plot", {
+    data <- create_test_data_with_outliers()
+    detector <- AnomalyDetector$new(random_state = 42)
+
+    result <- detector$detect_raw_data_anomalies(
+      data, c("x", "y", "z"), 0.05
+    )
+
+    plot <- detector$plot_score_distribution_with_threshold(result)
+
+    expect_s3_class(plot, "ggplot")
+  })
+
+  it("shows quantiles by default", {
+    data <- create_test_data_with_outliers()
+    detector <- AnomalyDetector$new(random_state = 42)
+
+    result <- detector$detect_raw_data_anomalies(
+      data, c("x", "y", "z"), 0.05
+    )
+
+    plot <- detector$plot_score_distribution_with_threshold(result, show_quantiles = TRUE)
+
+    expect_s3_class(plot, "ggplot")
+    # Check that caption is added when quantiles shown
+    expect_true(!is.null(plot$labels$caption))
+  })
+
+  it("hides quantiles when requested", {
+    data <- create_test_data_with_outliers()
+    detector <- AnomalyDetector$new(random_state = 42)
+
+    result <- detector$detect_raw_data_anomalies(
+      data, c("x", "y", "z"), 0.05
+    )
+
+    plot <- detector$plot_score_distribution_with_threshold(result, show_quantiles = FALSE)
+
+    expect_s3_class(plot, "ggplot")
+    # Caption should be NULL when quantiles hidden
+    expect_null(plot$labels$caption)
+  })
+
+  it("accepts custom title", {
+    data <- create_test_data_with_outliers()
+    detector <- AnomalyDetector$new(random_state = 42)
+
+    result <- detector$detect_raw_data_anomalies(
+      data, c("x", "y", "z"), 0.05
+    )
+
+    custom_title <- "Custom Score Distribution"
+    plot <- detector$plot_score_distribution_with_threshold(result, title = custom_title)
+
+    expect_equal(plot$labels$title, custom_title)
+  })
+
+  it("validates input type", {
+    detector <- AnomalyDetector$new()
+
+    expect_error(
+      detector$plot_score_distribution_with_threshold("not a result"),
+      "AnomalyResult"
+    )
   })
 })

@@ -189,6 +189,73 @@ describe("DeadliftRirDataLoader", {
     })
   })
 
+  describe("anonymization", {
+    it("anonymizes participant IDs when anonymize = TRUE", {
+      skip_if_not_installed("readxl")
+      test_file <- "../../deadlift-study/TESE - Análise estatística (Preliminar).xlsx"
+      skip_if_not(
+        file.exists(test_file),
+        "Test data file not available"
+      )
+
+      loader <- DeadliftRirDataLoader$new(test_file)
+
+      data <- loader$load(anonymize = TRUE)
+
+      # All IDs should be in P01-P19 format
+      expect_true(all(grepl("^P[0-9]{2}$", data$id)))
+    })
+
+    it("anonymizes set_id column when anonymize = TRUE", {
+      skip_if_not_installed("readxl")
+      test_file <- "../../deadlift-study/TESE - Análise estatística (Preliminar).xlsx"
+      skip_if_not(
+        file.exists(test_file),
+        "Test data file not available"
+      )
+
+      loader <- DeadliftRirDataLoader$new(test_file)
+
+      data <- loader$load(anonymize = TRUE)
+
+      # All set_ids should start with P01-P19 format
+      expect_true(all(grepl("^P[0-9]{2}_", data$set_id)))
+    })
+
+    it("keeps original names when anonymize = FALSE (default)", {
+      skip_if_not_installed("readxl")
+      test_file <- "../../deadlift-study/TESE - Análise estatística (Preliminar).xlsx"
+      skip_if_not(
+        file.exists(test_file),
+        "Test data file not available"
+      )
+
+      loader <- DeadliftRirDataLoader$new(test_file)
+
+      data <- loader$load(anonymize = FALSE)
+
+      # IDs should NOT be in P01-P19 format
+      expect_false(all(grepl("^P[0-9]{2}$", data$id)))
+    })
+
+    it("maintains same number of participants after anonymization", {
+      skip_if_not_installed("readxl")
+      test_file <- "../../deadlift-study/TESE - Análise estatística (Preliminar).xlsx"
+      skip_if_not(
+        file.exists(test_file),
+        "Test data file not available"
+      )
+
+      loader <- DeadliftRirDataLoader$new(test_file)
+
+      data_original <- loader$load(anonymize = FALSE)
+      data_anon <- loader$load(anonymize = TRUE)
+
+      expect_equal(length(unique(data_anon$id)), length(unique(data_original$id)))
+      expect_equal(nrow(data_anon), nrow(data_original))
+    })
+  })
+
   describe("data quality", {
     it("velocity values are in valid range", {
       skip_if_not_installed("readxl")

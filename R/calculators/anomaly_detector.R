@@ -34,11 +34,13 @@ box::use(
   isotree[isolation.forest, predict.isolation_forest],
   ggplot2[
     ggplot, aes, geom_histogram, geom_vline, geom_point, geom_segment,
-    geom_hline, labs, theme_minimal, theme, element_text, element_blank,
-    scale_fill_manual, scale_color_manual, after_stat, coord_flip
+    geom_hline, geom_bar, geom_text, geom_tile, labs, theme_minimal, theme,
+    element_text, element_blank, scale_fill_manual, scale_color_manual,
+    scale_fill_gradient2, after_stat, coord_flip, facet_wrap, position_dodge
   ],
-  dplyr[mutate, arrange, group_by, summarize, ungroup, n, .data],
-  stats[predict, setNames, quantile, sd]
+  dplyr[mutate, arrange, group_by, summarize, ungroup, n, .data, filter, bind_rows],
+  stats[predict, setNames, quantile, sd],
+  tidyr[pivot_longer]
 )
 
 #' Anomaly Result Value Object
@@ -156,6 +158,56 @@ ParticipantAnomalyResult <- R6Class(
         n_borderline = sum(self$interpretation == "borderline"),
         n_normal = sum(self$interpretation == "normal"),
         anomalous_ids = self$get_anomalous_ids()
+      )
+    }
+  )
+)
+
+#' Feature Contribution Result Value Object
+#'
+#' Stores feature-level explanations for why observations were flagged as anomalies.
+#' Uses z-scores to show which features contributed most to the anomaly score.
+#'
+#' @export
+FeatureContributionResult <- R6Class(
+  classname = "FeatureContributionResult",
+  cloneable = FALSE,
+
+  public = list(
+    #' @field contributions Data frame with per-observation feature contributions
+    contributions = NULL,
+    #' @field feature_names Character vector of feature names used
+    feature_names = NULL,
+    #' @field n_anomalies Number of anomalies explained
+    n_anomalies = NULL,
+
+    #' @description Create FeatureContributionResult
+    #' @param contributions Data frame with observation_index, anomaly_score,
+    #'   feature-specific z-scores, primary_driver, and explanation_text
+    #' @param feature_names Character vector of feature names
+    initialize = function(contributions, feature_names) {
+      self$contributions <- contributions
+      self$feature_names <- feature_names
+      self$n_anomalies <- nrow(contributions)
+    },
+
+    #' @description Get top contributors for each anomaly
+    #' @return Data frame with primary driver for each observation
+    get_primary_drivers = function() {
+      self$contributions[, c("observation_index", "participant_id",
+                             "anomaly_score", "primary_driver", "primary_direction",
+                             "explanation_text")]
+    },
+
+    #' @description Summary of feature contributions
+    #' @return Named list with summary statistics
+    summarize = function() {
+      driver_counts <- table(self$contributions$primary_driver)
+      list(
+        n_anomalies = self$n_anomalies,
+        features_used = self$feature_names,
+        primary_driver_counts = as.list(driver_counts),
+        most_common_driver = names(driver_counts)[which.max(driver_counts)]
       )
     }
   )
@@ -465,6 +517,241 @@ AnomalyDetector <- R6Class(
           plot.title = element_text(face = "bold"),
           axis.text.y = element_blank(),
           axis.ticks.y = element_blank(),
+          legend.position = "bottom"
+        )
+    },
+
+    #' @description Explain why observations were flagged as anomalies
+    #'
+    #' Calculates feature-level z-scores for each flagged observation
+    #' to show which features contributed most to the anomaly score.
+    #'
+    #' @param anomaly_result AnomalyResult object from detect_raw_data_anomalies
+    #' @param data Original data frame used for detection
+    #' @param features Character vector of features used in detection
+    #' @param participant_col Optional column name for participant ID
+    #' @return FeatureContributionResult object
+    explain_anomalies = function(anomaly_result, data, features, participant_col = "id") {
+      stopifnot(
+        "anomaly_result must be AnomalyResult" = inherits(anomaly_result, "AnomalyResult"),
+        "data must be a data frame" = is.data.frame(data),
+        "features must be character" = is.character(features),
+        "all features must exist in data" = all(features %in% names(data))
+      )
+
+      # Get indices of flagged anomalies
+      anomaly_indices <- anomaly_result$anomaly_indices
+
+      if (length(anomaly_indices) == 0) {
+        return(FeatureContributionResult$new(
+          contributions = data.frame(),
+          feature_names = features
+        ))
+      }
+
+      # Calculate global mean and SD for each feature
+      feature_means <- colMeans(data[, features, drop = FALSE], na.rm = TRUE)
+      feature_sds <- apply(data[, features, drop = FALSE], 2, sd, na.rm = TRUE)
+
+      # Build explanation for each anomaly
+      explanations <- lapply(anomaly_indices, function(idx) {
+        obs <- data[idx, features, drop = FALSE]
+        z_scores <- (as.numeric(obs) - feature_means) / feature_sds
+        names(z_scores) <- features
+
+        # Find primary driver (highest absolute z-score)
+        abs_z <- abs(z_scores)
+        primary_idx <- which.max(abs_z)
+        primary_driver <- features[primary_idx]
+        primary_z <- z_scores[primary_idx]
+        primary_direction <- ifelse(primary_z > 0, "HIGH", "LOW")
+
+        # Build explanation text
+        participant_id <- if (participant_col %in% names(data)) {
+          as.character(data[idx, participant_col])
+        } else {
+          sprintf("Obs %d", idx)
+        }
+
+        explanation_parts <- vapply(seq_along(features), function(i) {
+          z <- z_scores[i]
+          direction <- ifelse(z > 0, "HIGH", "LOW")
+          magnitude <- ifelse(abs(z) > 2, "VERY ", ifelse(abs(z) > 1, "", "slightly "))
+          sprintf("%s %s%s (z=%.1f)", features[i], magnitude, direction, z)
+        }, character(1))
+
+        explanation_text <- sprintf("%s flagged: %s", participant_id,
+                                    paste(explanation_parts, collapse = ", "))
+
+        # Build result row
+        result <- data.frame(
+          observation_index = idx,
+          participant_id = participant_id,
+          anomaly_score = anomaly_result$scores[idx],
+          primary_driver = primary_driver,
+          primary_z = primary_z,
+          primary_direction = primary_direction,
+          explanation_text = explanation_text,
+          stringsAsFactors = FALSE
+        )
+
+        # Add individual feature z-scores
+        for (feat in features) {
+          result[[paste0(feat, "_z")]] <- z_scores[feat]
+        }
+
+        result
+      })
+
+      contributions <- bind_rows(explanations)
+      FeatureContributionResult$new(contributions, features)
+    },
+
+    #' @description Plot anomaly explanations as heatmap
+    #'
+    #' Shows z-scores for each feature and flagged observation.
+    #'
+    #' @param explanation_result FeatureContributionResult object
+    #' @param title Plot title
+    #' @return ggplot object
+    plot_anomaly_explanations = function(explanation_result, title = "Anomaly Feature Contributions") {
+      stopifnot(
+        "explanation_result must be FeatureContributionResult" =
+          inherits(explanation_result, "FeatureContributionResult")
+      )
+
+      if (explanation_result$n_anomalies == 0) {
+        message("No anomalies to plot")
+        return(NULL)
+      }
+
+      contributions <- explanation_result$contributions
+      features <- explanation_result$feature_names
+
+      # Create unique observation labels (handles multiple obs per participant)
+      contributions$obs_label <- paste0(
+        contributions$participant_id, " (#", contributions$observation_index, ")"
+      )
+
+      # Order by anomaly score (highest first)
+      contributions <- contributions[order(contributions$anomaly_score, decreasing = TRUE), ]
+
+      # Prepare data for heatmap with unique labels
+      z_cols <- paste0(features, "_z")
+      plot_data <- contributions[, c("obs_label", "anomaly_score", z_cols)]
+
+      # Pivot to long format
+      plot_long <- plot_data |>
+        pivot_longer(
+          cols = all_of(z_cols),
+          names_to = "feature",
+          values_to = "z_score"
+        ) |>
+        mutate(
+          feature = gsub("_z$", "", .data$feature),
+          label = sprintf("%.1f", .data$z_score)
+        )
+
+      # Set factor levels in order of anomaly score
+      label_order <- unique(contributions$obs_label)
+      plot_long$obs_label <- factor(plot_long$obs_label, levels = label_order)
+
+      ggplot(plot_long, aes(x = .data$feature, y = .data$obs_label, fill = .data$z_score)) +
+        geom_tile(color = "white", linewidth = 0.5) +
+        geom_text(aes(label = .data$label), size = 3, color = "black") +
+        scale_fill_gradient2(
+          low = "#2166AC",      # Blue for low z-scores
+          mid = "white",        # White for z = 0
+          high = "#B2182B",     # Red for high z-scores
+          midpoint = 0,
+          limits = c(-3, 3),
+          oob = scales::squish,
+          name = "Z-Score"
+        ) +
+        labs(
+          title = title,
+          subtitle = sprintf("%d anomalies explained | Red = HIGH, Blue = LOW",
+                             explanation_result$n_anomalies),
+          x = "Feature",
+          y = "Observation (ordered by anomaly score)"
+        ) +
+        theme_minimal(base_size = 12) +
+        theme(
+          plot.title = element_text(face = "bold"),
+          axis.text.x = element_text(angle = 45, hjust = 1),
+          panel.grid = element_blank()
+        )
+    },
+
+    #' @description Plot all anomaly scores with threshold visualization
+    #'
+    #' Shows the full distribution of scores with threshold line,
+    #' helping explain why the threshold was chosen.
+    #'
+    #' @param anomaly_result AnomalyResult object
+    #' @param show_quantiles Show quantile lines (default TRUE)
+    #' @param title Plot title
+    #' @return ggplot object
+    plot_score_distribution_with_threshold = function(anomaly_result,
+                                                       show_quantiles = TRUE,
+                                                       title = "Anomaly Score Distribution with Threshold") {
+      stopifnot(
+        "anomaly_result must be AnomalyResult" = inherits(anomaly_result, "AnomalyResult")
+      )
+
+      df <- data.frame(
+        score = anomaly_result$scores,
+        is_anomaly = factor(
+          ifelse(anomaly_result$is_anomaly, "Anomaly", "Normal"),
+          levels = c("Normal", "Anomaly")
+        ),
+        index = seq_along(anomaly_result$scores)
+      )
+
+      # Order by score
+      df <- df[order(df$score), ]
+      df$rank <- seq_len(nrow(df))
+
+      # Calculate quantiles for reference
+      q90 <- quantile(anomaly_result$scores, 0.90)
+      q95 <- quantile(anomaly_result$scores, 0.95)
+      q99 <- quantile(anomaly_result$scores, 0.99)
+
+      p <- ggplot(df, aes(x = .data$rank, y = .data$score, color = .data$is_anomaly)) +
+        geom_point(size = 2, alpha = 0.7) +
+        geom_hline(
+          yintercept = anomaly_result$threshold,
+          linetype = "solid",
+          color = "#E63946",
+          linewidth = 1
+        ) +
+        scale_color_manual(values = c("Normal" = "#2E86AB", "Anomaly" = "#E63946"))
+
+      if (show_quantiles) {
+        p <- p +
+          geom_hline(yintercept = q90, linetype = "dotted", color = "gray60") +
+          geom_hline(yintercept = q95, linetype = "dashed", color = "gray40") +
+          geom_hline(yintercept = q99, linetype = "dotdash", color = "gray20")
+      }
+
+      p +
+        labs(
+          title = title,
+          subtitle = sprintf(
+            "Threshold = %.3f (%.0f%% contamination) | %d of %d flagged",
+            anomaly_result$threshold,
+            anomaly_result$contamination_rate * 100,
+            anomaly_result$n_anomalies,
+            length(anomaly_result$scores)
+          ),
+          x = "Observation (ranked by score)",
+          y = "Anomaly Score",
+          color = "Classification",
+          caption = if (show_quantiles) "Dotted = 90th, Dashed = 95th, Dot-dash = 99th percentile" else NULL
+        ) +
+        theme_minimal(base_size = 12) +
+        theme(
+          plot.title = element_text(face = "bold"),
           legend.position = "bottom"
         )
     }
