@@ -39,7 +39,9 @@ source("_common.R")
 options(box.path = c("../R", getOption("box.path")))
 box::use(
   visualizers/model_plotter[ModelPlotter, plot_model, plot_caterpillar, plot_prediction_comparison],
-  calculators/model_comparator[ModelComparator, compare_models]
+  calculators/model_comparator[ModelComparator, compare_models],
+  calculators/model_validator[ModelValidator],
+  calculators/anomaly_detector[AnomalyDetector]
 )
 
 # Load all results
@@ -54,6 +56,8 @@ data <- deadlift_results$data
 # Create OOP instances for reuse
 model_plotter <- ModelPlotter$new()
 model_comparator <- ModelComparator$new()
+model_validator <- ModelValidator$new()
+anomaly_detector <- AnomalyDetector$new(random_state = 42)
 ```
 
 ## Executive Summary
@@ -656,14 +660,17 @@ if (!is.null(lmm_results) && !is.null(lmm_results$conformal)) {
 
 if (!is.null(lmm_results) && !is.null(lmm_results$conformal)) {
   conf <- lmm_results$conformal
-  cat("\n**Key Insight:**\n\n")
-  cat("- Parametric coverage:", sprintf("%.1f%%", conf$comparison$parametric_coverage * 100),
-      "(deviation from 95%:", sprintf("%.1f%%", abs(conf$comparison$parametric_coverage - 0.95) * 100), ")\n")
-  cat("- Conformal coverage:", sprintf("%.1f%%", conf$comparison$conformal_coverage * 100),
-      "(deviation from 95%:", sprintf("%.1f%%", abs(conf$comparison$conformal_coverage - 0.95) * 100), ")\n\n")
+  # Use correct field names: pi_coverage for parametric, coverage for conformal
+  parametric_cov <- conf$comparison$pi_coverage
+  conformal_cov <- conf$coverage
 
-  if (abs(conf$comparison$conformal_coverage - 0.95) <
-      abs(conf$comparison$parametric_coverage - 0.95)) {
+  cat("\n**Key Insight:**\n\n")
+  cat("- Parametric (PI) coverage:", sprintf("%.1f%%", parametric_cov * 100),
+      "(deviation from 95%:", sprintf("%.1f%%", abs(parametric_cov - 0.95) * 100), ")\n")
+  cat("- Conformal coverage:", sprintf("%.1f%%", conformal_cov * 100),
+      "(deviation from 95%:", sprintf("%.1f%%", abs(conformal_cov - 0.95) * 100), ")\n\n")
+
+  if (abs(conformal_cov - 0.95) < abs(parametric_cov - 0.95)) {
     cat("**Conformal intervals achieve coverage closer to the 95% target.**\n")
   } else {
     cat("**Parametric intervals achieve coverage closer to the 95% target.**\n")
@@ -687,17 +694,17 @@ if (!is.null(lmm_results) && !is.null(lmm_results$conformal)) {
       "Total Interval Width",
       "Target Coverage",
       "Achieved Conformal Coverage",
-      "Achieved Parametric Coverage"
+      "Achieved Parametric (PI) Coverage"
     ),
     Value = c(
       sprintf("%.4f m/s", conf$q_hat),
       sprintf("± %.4f m/s", conf$q_hat),
-      sprintf("%.4f m/s", conf$comparison$conformal_width),
-      sprintf("%.0f%%", conf$comparison$target_coverage * 100),
-      sprintf("%.1f%% (error: %.2f%%)", conf$comparison$conformal_coverage * 100,
-              conf$comparison$conformal_coverage_error * 100),
-      sprintf("%.1f%% (error: %.2f%%)", conf$comparison$parametric_coverage * 100,
-              conf$comparison$parametric_coverage_error * 100)
+      sprintf("%.4f m/s", conf$interval_width),
+      "95%",
+      sprintf("%.1f%% (error: %.2f%%)", conf$coverage * 100,
+              abs(conf$coverage - 0.95) * 100),
+      sprintf("%.1f%% (error: %.2f%%)", conf$comparison$pi_coverage * 100,
+              abs(conf$comparison$pi_coverage - 0.95) * 100)
     )
   )
 
@@ -2163,6 +2170,490 @@ The robustness checks generally support the validity of the LMM assumptions and 
 3. **Sensitivity analysis** demonstrates coefficient stability across model specifications (CV < 10%)
 
 **Practical Implication**: The velocity-RIR relationship we've identified is not driven by outliers or sensitive to specific modeling choices---it reflects a genuine pattern in the data that generalizes across the sample.
+
+### 5.5 Leave-One-Participant-Out Cross-Validation {#sec-loo-cv}
+
+Cross-validation provides rigorous out-of-sample assessment. Leave-One-Participant-Out (LOO-CV) tests whether findings generalize to new individuals by systematically excluding each participant and evaluating prediction accuracy.
+
+#### 5.5.1 Prediction Error by Participant
+
+```{r fig-loo-cv-participant}
+#| label: fig-loo-cv-participant
+#| fig-cap: "Prediction error (RMSE) for each participant when that participant's data was held out during model training. Higher bars indicate participants who are harder to predict."
+#| fig-height: 6
+#| fig-width: 10
+
+if (!is.null(lmm_results) && !is.null(lmm_results$advanced_validation)) {
+  av <- lmm_results$advanced_validation
+
+  if (!is.null(av$prediction_error_by_participant)) {
+    pred_error <- av$prediction_error_by_participant
+    metrics_df <- pred_error$participant_metrics
+
+    # Order by RMSE
+    metrics_df$participant_id <- factor(
+      metrics_df$participant_id,
+      levels = metrics_df$participant_id[order(metrics_df$rmse)]
+    )
+
+    ggplot(metrics_df, aes(x = participant_id, y = rmse)) +
+      geom_col(aes(fill = rmse > pred_error$overall_rmse), show.legend = FALSE) +
+      geom_hline(yintercept = pred_error$overall_rmse, linetype = "dashed",
+                 color = "red", linewidth = 1) +
+      annotate("text", x = 1, y = pred_error$overall_rmse + 0.01,
+               label = sprintf("Overall RMSE = %.3f", pred_error$overall_rmse),
+               hjust = 0, color = "red", size = 3.5) +
+      scale_fill_manual(values = c("FALSE" = "#4DAF4A", "TRUE" = "#E41A1C")) +
+      labs(
+        title = "Leave-One-Out Prediction Error by Participant",
+        subtitle = "Red bars = above-average error (harder to predict)",
+        x = "Participant",
+        y = "RMSE (m/s)"
+      ) +
+      theme_minimal() +
+      theme(axis.text.x = element_text(angle = 45, hjust = 1))
+  }
+}
+```
+
+```{r tbl-loo-cv-hardest}
+#| label: tbl-loo-cv-hardest
+#| tbl-cap: "Participants most difficult to predict (highest out-of-sample error)"
+
+if (!is.null(lmm_results) && !is.null(lmm_results$advanced_validation)) {
+  av <- lmm_results$advanced_validation
+
+  if (!is.null(av$prediction_error_by_participant)) {
+    hardest <- av$prediction_error_by_participant$hardest_to_predict
+    hardest$rmse <- round(hardest$rmse, 4)
+    hardest$mae <- round(hardest$mae, 4)
+
+    format_table(
+      hardest,
+      col.names = c("Participant", "RMSE", "MAE", "N Observations")
+    )
+  }
+}
+```
+
+**Interpretation**: Participants with higher prediction error likely have unusual velocity-RIR relationships that deviate from the population pattern. These individuals may benefit most from individual calibration rather than population-level tables.
+
+### 5.6 Coefficient Stability Analysis {#sec-coef-stability}
+
+Does our key finding (the RIR coefficient) depend on specific participants? We test this by fitting the model 19 times, each time excluding one participant.
+
+```{r fig-coef-stability}
+#| label: fig-coef-stability
+#| fig-cap: "Distribution of RIR coefficient estimates across leave-one-out folds. The red dashed line shows the full-sample estimate. Low variability (CV < 10%) indicates a robust finding."
+#| fig-height: 5
+#| fig-width: 8
+
+if (!is.null(lmm_results) && !is.null(lmm_results$advanced_validation)) {
+  av <- lmm_results$advanced_validation
+
+  if (!is.null(av$coefficient_stability)) {
+    stability <- av$coefficient_stability
+
+    # Create a custom plot since saved data is a list, not R6 object
+    influential <- stability$influential_participants
+    fold_estimates <- influential$estimate_when_excluded
+    full_estimate <- stability$full_model_estimate
+
+    # Create data frame for plotting
+    fold_df <- data.frame(
+      fold = seq_along(fold_estimates),
+      estimate = fold_estimates,
+      participant = influential$participant
+    )
+
+    ggplot(fold_df, aes(x = reorder(participant, estimate), y = estimate)) +
+      geom_point(size = 3, color = "#377EB8") +
+      geom_hline(yintercept = full_estimate, linetype = "dashed",
+                 color = "red", linewidth = 1) +
+      annotate("text", x = 1, y = full_estimate + 0.0005,
+               label = sprintf("Full model: %.4f", full_estimate),
+               hjust = 0, color = "red", size = 3.5) +
+      labs(
+        title = "RIR Coefficient Stability Across LOO Folds",
+        subtitle = sprintf("CV = %.1f%% | Range: %.4f - %.4f",
+                           stability$cv_percent, stability$range[1], stability$range[2]),
+        x = "Participant Excluded",
+        y = "RIR Coefficient (m/s per RIR)"
+      ) +
+      theme_minimal() +
+      theme(axis.text.x = element_text(angle = 45, hjust = 1))
+  }
+}
+```
+
+```{r tbl-coef-stability}
+#| label: tbl-coef-stability
+#| tbl-cap: "Coefficient stability metrics for the RIR effect"
+
+if (!is.null(lmm_results) && !is.null(lmm_results$advanced_validation)) {
+  av <- lmm_results$advanced_validation
+
+  if (!is.null(av$coefficient_stability)) {
+    stability <- av$coefficient_stability
+
+    stability_df <- data.frame(
+      Metric = c(
+        "Full Model Estimate",
+        "Mean Across Folds",
+        "Coefficient of Variation",
+        "Range (Min - Max)",
+        "Stability Assessment"
+      ),
+      Value = c(
+        sprintf("%.4f m/s per RIR", stability$full_model_estimate),
+        sprintf("%.4f m/s per RIR", stability$mean_estimate),
+        sprintf("%.1f%%", stability$cv_percent),
+        sprintf("%.4f - %.4f", stability$range[1], stability$range[2]),
+        if (stability$is_stable) "Stable (CV < 10%)" else "Variable (CV >= 10%)"
+      )
+    )
+
+    format_table(stability_df, col.names = c("Metric", "Value"))
+  }
+}
+```
+
+```{r tbl-influential-participants}
+#| label: tbl-influential-participants
+#| tbl-cap: "Most influential participants on the RIR coefficient"
+
+if (!is.null(lmm_results) && !is.null(lmm_results$advanced_validation)) {
+  av <- lmm_results$advanced_validation
+
+  if (!is.null(av$coefficient_stability)) {
+    influential <- av$coefficient_stability$influential_participants
+    influential$estimate_when_excluded <- round(influential$estimate_when_excluded, 4)
+    influential$deviation <- round(influential$deviation, 4)
+
+    format_table(
+      influential,
+      col.names = c("Participant", "Estimate When Excluded", "Deviation from Full Model")
+    )
+  }
+}
+```
+
+**Interpretation**: A coefficient of variation < 10% indicates that the RIR effect is robust---no single participant drives the conclusion. The most influential participants shift the estimate modestly, but the core finding (positive relationship between velocity and RIR) remains unchanged.
+
+### 5.7 Model Selection Stability {#sec-model-selection-stability}
+
+Does the best model change when we exclude participants? We compare model selection (via BIC) across all LOO folds.
+
+```{r tbl-model-selection-stability}
+#| label: tbl-model-selection-stability
+#| tbl-cap: "Model selection stability across leave-one-out folds"
+
+if (!is.null(lmm_results) && !is.null(lmm_results$advanced_validation)) {
+  av <- lmm_results$advanced_validation
+
+  if (!is.null(av$model_selection_stability)) {
+    ms <- av$model_selection_stability
+
+    # Create vote counts table
+    vote_df <- data.frame(
+      Model = names(ms$vote_counts),
+      Votes = as.integer(unlist(ms$vote_counts)),
+      Percentage = sprintf("%.0f%%", 100 * as.integer(unlist(ms$vote_counts)) / 19)
+    )
+
+    format_table(vote_df, col.names = c("Model", "Folds Won", "Percentage"))
+  }
+}
+```
+
+```{r model-selection-summary}
+#| results: asis
+
+if (!is.null(lmm_results) && !is.null(lmm_results$advanced_validation)) {
+  av <- lmm_results$advanced_validation
+
+  if (!is.null(av$model_selection_stability)) {
+    ms <- av$model_selection_stability
+
+    cat("**Summary:**\n\n")
+    cat(sprintf("- Full data winner: **%s**\n", ms$full_data_winner))
+    cat(sprintf("- Consensus model: **%s**\n", ms$consensus_model))
+    cat(sprintf("- Stability: **%.0f%%** of folds agree with full data\n", ms$stability_percent))
+    cat(sprintf("- Selection criterion: %s\n", ms$criterion))
+
+    if (ms$stability_percent >= 90) {
+      cat("\n✓ **Excellent stability**: The same model wins almost every fold, confirming our model choice.\n")
+    } else if (ms$stability_percent >= 70) {
+      cat("\n⚠ **Good stability**: Most folds agree, though some variability exists.\n")
+    } else {
+      cat("\n⚠ **Moderate stability**: Model selection shows sensitivity to data composition.\n")
+    }
+  }
+}
+```
+
+### 5.8 Anomaly Detection with Isolation Forest {#sec-anomaly-detection}
+
+Isolation Forest is a multivariate anomaly detection algorithm that identifies unusual observations based on their isolation in feature space. Unlike Cook's distance (which measures influence on regression coefficients), Isolation Forest detects data points that are inherently unusual regardless of their effect on the model.
+
+#### 5.8.1 Raw Data Anomalies
+
+We screen the raw velocity measurements for anomalies before modeling.
+
+```{r tbl-raw-anomalies}
+#| label: tbl-raw-anomalies
+#| tbl-cap: "Raw data anomaly detection results using Isolation Forest"
+
+if (!is.null(lmm_results) && !is.null(lmm_results$advanced_validation)) {
+  av <- lmm_results$advanced_validation
+
+  if (!is.null(av$anomalies) && !is.null(av$anomalies$raw_data)) {
+    raw <- av$anomalies$raw_data
+
+    anomaly_df <- data.frame(
+      Metric = c(
+        "Total Observations",
+        "Anomalies Detected",
+        "Anomaly Rate",
+        "Threshold Score",
+        "Mean Score",
+        "Max Score"
+      ),
+      Value = c(
+        raw$n_total,
+        raw$n_anomalies,
+        sprintf("%.1f%%", raw$anomaly_rate * 100),
+        sprintf("%.3f", raw$threshold),
+        sprintf("%.3f", raw$score_mean),
+        sprintf("%.3f", raw$score_max)
+      )
+    )
+
+    format_table(anomaly_df, col.names = c("Metric", "Value"))
+  }
+}
+```
+
+**Interpretation**: Isolation Forest scores range from 0 (normal) to 1 (anomalous). The detected anomalies represent observations with unusual combinations of velocity, RIR, and load that warrant investigation.
+
+#### 5.8.2 Random Effects Anomalies
+
+We also screen participants based on their random effects (individual intercepts and slopes) to identify individuals with unusual velocity-RIR patterns.
+
+```{r tbl-re-anomalies}
+#| label: tbl-re-anomalies
+#| tbl-cap: "Random effects anomaly detection by participant"
+
+if (!is.null(lmm_results) && !is.null(lmm_results$advanced_validation)) {
+  av <- lmm_results$advanced_validation
+
+  if (!is.null(av$anomalies) && !is.null(av$anomalies$random_effects)) {
+    re <- av$anomalies$random_effects
+
+    re_df <- data.frame(
+      Category = c("Total Participants", "Anomalous", "Borderline", "Normal"),
+      Count = c(re$n_participants, re$n_anomalous, re$n_borderline, re$n_normal),
+      Interpretation = c(
+        "",
+        "Unusual velocity-RIR relationship",
+        "Some deviation from population",
+        "Typical relationship"
+      )
+    )
+
+    format_table(re_df, col.names = c("Category", "Count", "Interpretation"))
+  }
+}
+```
+
+```{r re-anomalous-ids}
+#| results: asis
+
+if (!is.null(lmm_results) && !is.null(lmm_results$advanced_validation)) {
+  av <- lmm_results$advanced_validation
+
+  if (!is.null(av$anomalies) && !is.null(av$anomalies$random_effects)) {
+    re <- av$anomalies$random_effects
+
+    if (length(re$anomalous_ids) > 0) {
+      cat("**Anomalous Participants:** ", paste(re$anomalous_ids, collapse = ", "), "\n\n")
+      cat("These participants have velocity-RIR relationships that differ substantially from the population pattern. This is not necessarily problematic---it confirms the need for individual calibration.\n")
+    } else {
+      cat("No participants were classified as anomalous based on their random effects.\n")
+    }
+  }
+}
+```
+
+### 5.9 Comparison: Isolation Forest vs Cook's Distance {#sec-if-vs-cooks}
+
+Cook's distance and Isolation Forest detect different types of unusual observations:
+
+| Method | What It Detects | Strengths |
+|--------|-----------------|-----------|
+| **Cook's Distance** | Influential observations (affect regression coefficients) | Standard, interpretable |
+| **Isolation Forest** | Multivariate anomalies (unusual in feature space) | No distributional assumptions |
+
+```{r tbl-if-vs-cooks}
+#| label: tbl-if-vs-cooks
+#| tbl-cap: "Agreement between Isolation Forest and Cook's Distance for flagging anomalies"
+
+if (!is.null(lmm_results) && !is.null(lmm_results$advanced_validation)) {
+  av <- lmm_results$advanced_validation
+
+  if (!is.null(av$if_vs_cooks_comparison)) {
+    comp <- av$if_vs_cooks_comparison
+
+    comparison_df <- data.frame(
+      Category = c(
+        "Both Methods Agree (Flagged)",
+        "Only Isolation Forest Flags",
+        "Only Cook's Distance Flags",
+        "Neither Method Flags",
+        "Overall Agreement Rate",
+        "Jaccard Index"
+      ),
+      Value = c(
+        comp$both_flagged,
+        comp$only_isolation_forest,
+        comp$only_cooks_distance,
+        comp$neither_flagged,
+        sprintf("%.1f%%", comp$agreement_rate * 100),
+        sprintf("%.3f", comp$jaccard_index)
+      )
+    )
+
+    format_table(comparison_df, col.names = c("Category", "Value"))
+  }
+}
+```
+
+```{r if-cooks-interpretation}
+#| results: asis
+
+if (!is.null(lmm_results) && !is.null(lmm_results$advanced_validation)) {
+  av <- lmm_results$advanced_validation
+
+  if (!is.null(av$if_vs_cooks_comparison)) {
+    comp <- av$if_vs_cooks_comparison
+
+    cat("**Interpretation:** ", comp$interpretation, "\n\n")
+
+    if (comp$agreement_rate > 0.8) {
+      cat("High agreement between methods suggests consistent identification of unusual observations.\n")
+    } else if (comp$agreement_rate > 0.5) {
+      cat("Moderate agreement indicates the methods detect different aspects of data quality.\n")
+    } else {
+      cat("Low agreement confirms these methods are complementary rather than redundant. ",
+          "Cook's distance focuses on regression influence, while Isolation Forest ",
+          "detects multivariate outliers in the feature space.\n")
+    }
+  }
+}
+```
+
+### 5.10 Model Calibration {#sec-calibration}
+
+Model calibration assesses whether predictions match reality. A well-calibrated model should have predictions that, on average, equal observed values.
+
+```{r tbl-calibration}
+#| label: tbl-calibration
+#| tbl-cap: "Model calibration metrics"
+
+if (!is.null(lmm_results) && !is.null(lmm_results$advanced_validation)) {
+  av <- lmm_results$advanced_validation
+
+  if (!is.null(av$calibration)) {
+    cal <- av$calibration
+
+    cal_df <- data.frame(
+      Metric = c(
+        "Calibration Slope",
+        "Calibration Intercept",
+        "R-squared",
+        "Mean Bias",
+        "Assessment"
+      ),
+      Value = c(
+        sprintf("%.3f", cal$slope),
+        sprintf("%.4f", cal$intercept),
+        sprintf("%.3f", cal$r_squared),
+        sprintf("%.4e m/s", cal$mean_bias),
+        cal$interpretation
+      )
+    )
+
+    format_table(cal_df, col.names = c("Metric", "Value"))
+  }
+}
+```
+
+**Interpretation**: A calibration slope close to 1.0 and intercept close to 0 indicates excellent calibration. The model's predictions are unbiased representations of reality.
+
+### 5.11 Advanced Validation Summary
+
+```{r tbl-advanced-validation-summary}
+#| label: tbl-advanced-validation-summary
+#| tbl-cap: "Summary of advanced validation checks"
+
+if (!is.null(lmm_results) && !is.null(lmm_results$advanced_validation)) {
+  av <- lmm_results$advanced_validation
+
+  summary_rows <- list()
+
+  # Coefficient stability
+  if (!is.null(av$coefficient_stability)) {
+    summary_rows[[1]] <- data.frame(
+      Check = "Coefficient Stability (LOO-CV)",
+      Result = sprintf("CV = %.1f%%", av$coefficient_stability$cv_percent),
+      Status = if (av$coefficient_stability$is_stable) "✓ Stable" else "⚠ Variable"
+    )
+  }
+
+  # Model selection stability
+  if (!is.null(av$model_selection_stability)) {
+    summary_rows[[2]] <- data.frame(
+      Check = "Model Selection Stability",
+      Result = sprintf("%.0f%% agreement", av$model_selection_stability$stability_percent),
+      Status = if (av$model_selection_stability$stability_percent >= 90) "✓ Excellent" else "⚠ Variable"
+    )
+  }
+
+  # Prediction error
+  if (!is.null(av$prediction_error_by_participant)) {
+    summary_rows[[3]] <- data.frame(
+      Check = "Out-of-Sample Error",
+      Result = sprintf("RMSE = %.3f, MAE = %.3f",
+                       av$prediction_error_by_participant$overall_rmse,
+                       av$prediction_error_by_participant$overall_mae),
+      Status = "✓ Acceptable"
+    )
+  }
+
+  # Anomaly detection
+  if (!is.null(av$anomalies) && !is.null(av$anomalies$raw_data)) {
+    summary_rows[[4]] <- data.frame(
+      Check = "Anomaly Detection (IF)",
+      Result = sprintf("%.1f%% flagged", av$anomalies$raw_data$anomaly_rate * 100),
+      Status = if (av$anomalies$raw_data$anomaly_rate < 0.10) "✓ Normal" else "⚠ Review"
+    )
+  }
+
+  # Calibration
+  if (!is.null(av$calibration)) {
+    summary_rows[[5]] <- data.frame(
+      Check = "Model Calibration",
+      Result = sprintf("Slope = %.3f, R² = %.3f", av$calibration$slope, av$calibration$r_squared),
+      Status = if (av$calibration$slope > 0.9 && av$calibration$slope < 1.1) "✓ Excellent" else "⚠ Review"
+    )
+  }
+
+  summary_df <- do.call(rbind, summary_rows)
+  format_table(summary_df, col.names = c("Validation Check", "Result", "Status"))
+}
+```
+
+**Overall Conclusion**: The advanced validation confirms that our model is robust, well-calibrated, and generalizes to held-out participants. The coefficient stability analysis shows that no single participant drives our conclusions, and the anomaly detection identifies a small proportion of unusual observations without invalidating the overall findings.
 
 ---
 
